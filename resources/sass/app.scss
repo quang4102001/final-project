@@ -1,0 +1,21 @@
+.input-status {
+    &:checked {
+        ~ .icon-status-check {
+            display: block;
+        }
+
+        ~ .icon-status-xmark {
+            display: none;
+        }
+    }
+
+    &:not(:checked) {
+        ~ .icon-status-check {
+            display: none;
+        }
+
+        ~ .icon-status-xmark {
+            display: block;
+        }
+    }
+}
