@@ -38,7 +38,7 @@ class AjaxController extends Controller
                     'status' => $request->input('status'),
                 ]);
             });
-            return response()->json(['success'=> 'Update status successfully']);
+            return response()->json(['success' => 'Update status successfully']);
         } catch (\Exception $e) {
             Log::error($e);
             return response()->json(['error' => 'Update status failed!']);

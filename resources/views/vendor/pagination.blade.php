@@ -16,16 +16,21 @@
         @foreach ($products->links()->elements as $element)
             {{-- "Three Dots" Separator --}}
             @if (is_string($element))
-                <li class="page-item mx-2 disabled" aria-disabled="true"><span class="page-link">{{ $element }}</span></li>
+                <li class="page-item mx-2 disabled" aria-disabled="true"><span
+                        class="page-link">{{ $element }}</span></li>
             @endif
 
             {{-- Array Of Links --}}
             @if (is_array($element))
                 @foreach ($element as $page => $url)
                     @if ($page == $products->currentPage())
-                        <li class="page-item mx-2 active" aria-current="page"><span class="page-link">{{ $page }}</span></li>
+                        <li class="page-item mx-2 active" aria-current="page">
+                            <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                        </li>
                     @else
-                        <li class="page-item mx-2"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
+                        <li class="page-item mx-2">
+                            <a class="page-link" href="{{ $url }}">{{ $page }}</a>
+                        </li>
                     @endif
                 @endforeach
             @endif

@@ -1,145 +1,120 @@
 @extends('users.layout')
 
 @section('users')
-    @if (session()->has('success'))
-        <script>
-            Toastify({
-                text: "{{ session('success') }}",
-                duration: 3000,
-                close: true,
-                gravity: "top",
-                position: "right",
-            }).showToast();
-        </script>
-        @php
-            session()->forget('success');
-        @endphp
-    @endif
-    <div id="grid-selector">
-        <div id="grid-menu">
-            View:
-            <ul>
-                <li class="largeGrid"><a href=""></a></li>
-                <li class="smallGrid"><a class="active" href=""></a></li>
-            </ul>
+    <div class="row row-cols-5 gx-0">
+        <div class="col">
+            @include('users.sidebar.sidebar')
+        </div>
+        <div class="flex-1 relative">
+            <div id="grid-selector">
+                <div id="grid-menu">
+                    View:
+                    <ul>
+                        <li class="largeGrid"><a href=""></a></li>
+                        <li class="smallGrid"><a class="active" href=""></a></li>
+                    </ul>
+                </div>
+
+                Showing 1–9 of 48 results
+            </div>
+            {{-- data product --}}
+            <div id="grid" class="relative w-100 row row-cols-4 g-5 left-[7.5px] p-5">
+                @include('users.data')
+            </div>
+            <div class="flex justify-center mb-5">
+                @include('vendor.pagination')
+            </div>
+            <footer class="credit text-center">Author: shipra - Distributed By:
+                <a title="Awesome web design code &amp; scripts" href="https://www.codehim.com?source=demo-page"
+                    target="_blank">CodeHim</a>
+            </footer>
         </div>
 
-        Showing 1–9 of 48 results
     </div>
+    @include('users.handleCart')
+    <script>
+        const showSelectColorBox = (productCard) => {
+            const selectColorBox = productCard.find('.color-box')
 
-    <div id="grid" class="relative w-100 row row-cols-4 g-5 left-[7.5px] p-5">
-        @forelse ($products as $product)
-            <div class="product col relative flex justify-center">
-                <div class="info-large">
-                    <h4>{{ $product->name }}</h4>
-                    <div class="sku">
-                        PRODUCT SKU: <strong>{{ $product->sku }}</strong>
-                    </div>
+            selectColorBox.show()
+            selectColorBox.find('.btn-add-small').click(function() {
+                let colorId = $(this).parent().find('.input-color:checked').val()
+                let colorName = $(this).parent().find('.input-color:checked').data('color')
+                const color = {
+                    id: colorId,
+                    name: colorName
+                }
 
-                    <div class="price-big">
-                        <span class="mr-3">${{ $product->price }}</span>${{ $product->discounted_price }}
-                    </div>
+                if (colorId) {
+                    addCartInterface(productCard, 2, color);
+                    selectColorBox.hide()
+                }
+            })
+            selectColorBox.find('.btn-cancel-small').click(function() {
+                selectColorBox.hide()
+            })
+        }
 
-                    <h3>COLORS</h3>
-                    <div class="colors-large">
-                        <ul>
-                            @forelse ($product->colors as $color)
-                                <li><a href="" class="bg-[{{ $color->name }}]"><span></span></a></li>
-                            @empty
-                                No color.
-                            @endforelse
-                        </ul>
-                    </div>
+        $(".add_to_cart").click(function() {
+            const productCard = $(this).parent().parent().parent();
+            showSelectColorBox(productCard)
+        });
 
-                    <h3>SIZE</h3>
-                    <div class="sizes-large">
-                        @forelse ($product->sizes as $size)
-                            <span>{{ $size->name }}</span>
-                        @empty
-                            No size.
-                        @endforelse
-                    </div>
+        $(".add-cart-large").each(function(i, e) {
+            $(e).click(function() {
+                const productCard = $(this).parent().parent();
+                showSelectColorBox(productCard)
+            });
+        });
+    </script>
+    {{-- <script>
+        $(window).on('hashchange', function() {
+            var page = getParameterByName('page');
+            if (page && !isNaN(page) && page > 0) {
+                getData(page);
+            }
+        });
 
-                    <button class="add-cart-large">Add To Cart</button>
+        $(document).ready(function() {
+            $(document).on('click', '.pagination a', function(event) {
+                event.preventDefault();
+                $('li').removeClass('active');
+                $(this).parent('li').addClass('active');
+                var page = getParameterByName('page', $(this).attr('href'));
+                getData(page);
+            });
+        });
 
-                </div>
-                <div class="make3D">
-                    <div class="product-front">
-                        <div class="shadow"></div>
-                        @if (count($product->images) > 0)
-                            <img src="{{ $product->images[0]->path }}" alt="{{ $product->images[0]->id }}" />
-                        @else
-                            <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/1.jpg" alt="" />
-                        @endif
-                        <div class="image_overlay"></div>
-                        <div class="add_to_cart">Add to cart</div>
-                        <div class="view_gallery">View gallery</div>
-                        <div class="stats">
-                            <div class="stats-container">
-                                <span class="product_price">${{ $product->discounted_price }}</span>
-                                <span class="product_id hidden">${{ $product->id }}</span>
-                                <span class="product_name">FLUTED HEM DRESS</span>
-                                <p>Summer dress</p>
+        function getData(page) {
+            $.ajax({
+                    url: '?page=' + page,
+                    type: "get",
+                    datatype: "html",
+                })
+                .done(function(res) {
+                    $("#grid").empty().html(res);
+                    updateUrl(page);
+                })
+                .fail(function(jqXHR, ajaxOptions, thrownError) {
+                    alert('Không có phản hồi từ máy chủ');
+                });
+        }
 
-                                <div class="product-options">
-                                    <strong>SIZES</strong>
-                                    <span>
-                                        @forelse ($product->sizes as $size)
-                                            {{ $size->name }}
-                                        @empty
-                                            No size.
-                                        @endforelse
-                                    </span>
-                                    <strong>COLORS</strong>
-                                    <div class="colors">
-                                        @forelse ($product->colors as $color)
-                                            <div class="bg-[{{ $color->name }}]"><span></span></div>
-                                        @empty
-                                            No color.
-                                        @endforelse
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        function updateUrl(page) {
+            var url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.pushState({
+                path: url
+            }, "", url + '?page=' + page);
+        }
 
-                    <div class="product-back">
-                        <div class="shadow"></div>
-                        <div class="carousel">
-                            <ul class="carousel-container">
-                                @forelse ($product->images as $image)
-                                    <li><img src="{{ $image->path }}" alt="{{ $image->id }}" />
-                                    </li>
-                                @empty
-                                    <li>
-                                        <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/1.jpg"
-                                            alt="" />
-                                    </li>
-                                @endforelse
-                            </ul>
-                            <div class="arrows-perspective">
-                                <div class="carouselPrev">
-                                    <div class="y"></div>
-                                    <div class="x"></div>
-                                </div>
-                                <div class="carouselNext">
-                                    <div class="y"></div>
-                                    <div class="x"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flip-back">
-                            <div class="cy"></div>
-                            <div class="cx"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @empty
-            No product.
-        @endforelse
-    </div>
-    <div class="flex justify-center mb-5">
-        @include('vendor.pagination')
-    </div>
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+    </script> --}}
 @endsection

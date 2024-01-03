@@ -5,8 +5,8 @@
         @include('admin.sidebar.index')
 
         <div class="main ml-[250px] bg-[#ecf0f5] text-[1.6rem]">
-            <header class="bg-[#343a40] h-[56px]"></header>
-            <main class="px-4 pb-[50px]">
+            @include('admin.header.header')
+            <main class="px-4 pb-[50px] mt-[56px]">
                 @yield('admin')
             </main>
             <div class="main-footer border-top">

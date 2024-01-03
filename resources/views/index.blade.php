@@ -63,6 +63,34 @@
 </head>
 
 <body>
+    @if (session()->has('success'))
+        <script>
+            Toastify({
+                text: "{{ session('success') }}",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+            }).showToast();
+        </script>
+        @php
+            session()->forget('success');
+        @endphp
+    @endif
+    @if (session()->has('error'))
+        <script>
+            Toastify({
+                text: "{{ session('error') }}",
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "right",
+            }).showToast();
+        </script>
+        @php
+            session()->forget('error');
+        @endphp
+    @endif
 
     @yield('body')
     @vite(['resources/js/app.js'])

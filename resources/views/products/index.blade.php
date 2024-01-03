@@ -1,17 +1,6 @@
 @extends('admin.layout')
 
 @section('admin')
-    @if (session()->has('success'))
-        <script>
-            Toastify({
-                text: "{{ session('success') }}",
-                duration: 3000, // Thời gian hiển thị toast (ms)
-                close: true, // Hiển thị nút đóng toast
-                gravity: "top", // Vị trí hiển thị (top, bottom, left, right)
-                position: "right", // Vị trí chiều ngang (left, center, right)
-            }).showToast();
-        </script>
-    @endif
 
     <header class="p-[1.5rem] flex justify-between">
         <div class="">
@@ -41,6 +30,8 @@
         </div>
         <form id="searchFormProduct" class="mt-4" action="{{ route('product.index') }}" method="get">
             @csrf
+
+            <input type="hidden" name="pagination" value="{{ request()->pagination ? request()->pagination : 50 }}">
 
             <div class="fw-bold">
                 <div class="row">
@@ -159,6 +150,22 @@
     </div>
     {{-- table --}}
     <div class="p-20 bg-white rounded-lg">
+        <div class='flex mb-3 justify-end'>
+            <strong class="mr-3">Number products:</strong>
+            <select id="quantitySelect" class="border-2">
+                <option value="10" {{ request()->pagination == 10 ? 'selected' : '' }}>10</option>
+                <option value="20" {{ request()->pagination == 20 ? 'selected' : '' }}>20</option>
+                <option value="30" {{ request()->pagination == 30 ? 'selected' : '' }}>30</option>
+                <option value="40" {{ request()->pagination == 40 ? 'selected' : '' }}>40</option>
+                <option value="50" {{ request()->pagination == 50 ? 'selected' : '' }}
+                    {{ !request()->pagination ? 'selected' : '' }}>50</option>
+                <option value="60" {{ request()->pagination == 60 ? 'selected' : '' }}>60</option>
+                <option value="70" {{ request()->pagination == 70 ? 'selected' : '' }}>70</option>
+                <option value="80" {{ request()->pagination == 80 ? 'selected' : '' }}>80</option>
+                <option value="90" {{ request()->pagination == 90 ? 'selected' : '' }}>90</option>
+                <option value="100" {{ request()->pagination == 100 ? 'selected' : '' }}>100</option>
+            </select>
+        </div>
         <table class="table table-striped table-bordered table-hover text-center">
             <tr class="fw-bold leading-[2]">
                 <th class="text-inherit"><input type="checkbox" id="checkAll" class="w-[1.6rem] h-[1.6rem]" /></th>
@@ -173,7 +180,7 @@
                 <tr class="table-light" id="{{ $product->id }}">
                     <td class="p-4"><input type="checkbox" class="checkBox w-[1.6rem] h-[1.6rem]"
                             value="{{ $product->id }}" /></td>
-                    <td class="p-4">{{ $product->name }}</td>
+                    <td class="p-4"><a href="{{ route('product.productDetail', ['id' => $product->id]) }}">{{ $product->name }}</a></td>
                     <td class="p-4">{{ $product->sku }}</td>
                     <td class="p-4">{{ $product->price }}</td>
                     <td class="p-4">{{ $product->category }}</td>
@@ -205,6 +212,9 @@
                 </tr>
             @endforelse
         </table>
+        <div class="flex justify-center mb-5">
+            @include('vendor.pagination')
+        </div>
     </div>
 
     @vite(['resources/js/productsIndex.js'])
@@ -336,6 +346,36 @@
                     $('#searchIconOpen').show()
                     $('#searchIconClose').hide()
                 }
+            })
+        })
+
+        $(document).ready(function() {
+            $('#quantitySelect').change(function() {
+                const pagination = $(this).find('option:selected').val()
+                // Lấy URL hiện tại
+                var currentUrl = window.location.href;
+
+                // Kiểm tra xem có tham số truy vấn trong URL không
+                var queryIndex = currentUrl.indexOf('?');
+                var queryString = queryIndex !== -1 ? currentUrl.substring(queryIndex + 1) : '';
+
+                // Chuyển tham số truy vấn thành một đối tượng
+                var params = {};
+                queryString.split('&').forEach(function(pair) {
+                    pair = pair.split('=');
+                    params[pair[0]] = pair[1];
+                });
+
+                // Thêm hoặc cập nhật giá trị 'pagination' trong đối tượng tham số truy vấn
+                params['pagination'] = pagination;
+
+                // Xây dựng URL mới với tham số truy vấn cập nhật
+                var newUrl = currentUrl.split('?')[0] + '?' + Object.keys(params).map(function(key) {
+                    return key + '=' + params[key];
+                }).join('&');
+
+                // Chuyển hướng đến URL mới
+                window.location.href = newUrl;
             })
         })
     </script>

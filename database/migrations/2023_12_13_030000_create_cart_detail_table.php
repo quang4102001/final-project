@@ -14,12 +14,14 @@ return new class extends Migration {
             $table->id();
             $table->uuid('cart_id');
             $table->uuid('product_id');
-            $table->integer('pty');
+            $table->uuid('color_id');
+            $table->integer('qty');
             $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('cart_id')->references('id')->on('carts')->onDelete('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
+            $table->foreign('color_id')->references('id')->on('colors')->onDelete('cascade');
         });
     }
 
@@ -28,6 +30,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('carts');
+        Schema::dropIfExists('cart_detail');
     }
 };

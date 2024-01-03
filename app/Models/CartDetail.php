@@ -7,22 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webpatser\Uuid\Uuid;
 
-class UserCart extends Model
+class CartDetail extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'cart_detail';
 
     protected $fillable = [
         'cart_id',
         'product_id',
+        'color_id',
         'qty',
     ];
 
-    protected static function boot()
+    public function product()
     {
-        parent::boot();
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 
-        static::creating(function ($model) {
-            $model->id = Uuid::generate()->string;
-        });
+    public function colors(){
+        return $this->belongsTo(Color::class, 'color_id', 'id');
     }
 }
+

@@ -7,12 +7,11 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Models\User;
-use DrewM\MailChimp\MailChimp;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -29,7 +28,7 @@ class AuthController extends Controller
         if (Auth::guard('admin')->attempt(['username' => $credentials['username'], 'password' => $credentials['password'],], $request->has('remember'))) {
             $user = Auth::guard('admin')->user();
             if ($user->role === 'admin') {
-                return redirect()->route('home')->with('success', 'Admin login successfully!');
+                return redirect()->route('admin.index')->with('success', 'Admin login successfully!');
             }
         }
 
@@ -61,10 +60,10 @@ class AuthController extends Controller
                     'password' => Hash::make($request->input('password')),
                     'email' => $request->input('email'),
                     'role' => 'user',
+                    'remember_token' => Str::random(64),
                 ]);
 
                 $user->save();
-
                 Auth::login($user);
             });
 
@@ -78,10 +77,12 @@ class AuthController extends Controller
 
     public function logout()
     {
-        if (Auth('admin')) {
-            Auth('admin')->logout();
+        if (auth('admin')->check()) {
+            Auth::guard('admin')->logout();
+            return redirect()->route("home")->with("success", "Logout successfully!");
         }
         Auth::logout();
+        Cookie::queue(Cookie::forget('cart'));
         return redirect()->route("home")->with("success", "Logout successfully!");
     }
 
@@ -121,7 +122,7 @@ class AuthController extends Controller
         return view('resetPassword', ['token' => $token]);
     }
 
-    public function handleResetPassword(ResetPasswordRequest $request,string $token)
+    public function handleResetPassword(ResetPasswordRequest $request, string $token)
     {
         try {
             $updatePassword = DB::table('reset_password')

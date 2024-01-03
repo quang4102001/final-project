@@ -1,16 +1,16 @@
 <div id="header" class="border-bottom d-flex justify-content-between align-items-center h-[96px] pl-[45px]">
     <ul class="d-flex">
-        <li><a class="text-uppercase fw-bold mr-[30px] tracking-[1px]" href="">Home</a></li>
-        <li><a class="text-uppercase fw-bold mr-[30px] tracking-[1px]" href="">BRANDS</a></li>
-        <li><a class="text-uppercase fw-bold mr-[30px] tracking-[1px]" href="">DESIGNERS</a></li>
-        <li><a class="text-uppercase fw-bold mr-[30px] tracking-[1px]" href="">CONTACT</a></li>
+        <li><a class="text-uppercase fw-bold mr-[30px] tracking-[1px]" href="{{ route('home') }}">Home</a></li>
+        <li><a class="text-uppercase fw-bold mr-[30px] tracking-[1px]" href="{{ route('home') }}">BRANDS</a></li>
+        <li><a class="text-uppercase fw-bold mr-[30px] tracking-[1px]" href="{{ route('home') }}">DESIGNERS</a></li>
+        <li><a class="text-uppercase fw-bold mr-[30px] tracking-[1px]" href="{{ route('home') }}">CONTACT</a></li>
     </ul>
     <ul class="d-flex h-100">
         <li class="w-[100px] border-start d-flex justify-content-center align-items-center">
             <img class="icon" src="{{ asset('images/icons/heart.svg') }}" alt="heart-icon">
         </li>
         <li class="min-w-[100px] border-start d-flex justify-content-center align-items-center">
-            @if (auth('admin')->check() || auth()->check())
+            @if (auth()->check())
                 <div class="cursor-pointer header-icon-user relative">
                     <span class="material-symbols-outlined text-[3.5rem]">
                         person
@@ -19,17 +19,8 @@
                     <ul
                         class="header-user-box absolute w-max rounded-lg shadow-md bg-white right-[1rem] top-[70%] z-10">
                         <li class="py-2 px-3 cursor-default rounded-t-lg border-1 text-center">
-                            <strong>{{ auth('admin')->user()->name ?? auth()->user()->name }}</strong>
+                            <strong>{{auth()->user()->name }}</strong>
                         </li>
-                        @if (auth('admin')->check())
-                            <li class="py-2 px-3 hover:bg-[#eee]"><a class='bg-transparent flex items-center'
-                                    href='{{ route('admin.index') }}'>
-                                    <span class="material-symbols-outlined mr-3">
-                                        database
-                                    </span>
-                                    Dashboard
-                                </a></li>
-                        @endif
                         <li class="py-2 px-3 hover:bg-[#eee]">Personal information</li>
                         <li class="py-2 px-3 hover:bg-[#eee] rounded-b-lg">
                             <a class='bg-transparent flex items-center' href='{{ route('auth.logout') }}'>
@@ -54,6 +45,7 @@
 <script>
     $(document).ready(function() {
         $('.header-user-box').hide()
+        let hideTimer = 0;
         $('.header-icon-user').hover(
             function() {
                 // Mouse enters

@@ -15,6 +15,8 @@ class User extends Authenticatable implements CanResetPassword
     use SoftDeletes;
     use Notifiable;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $guarded = [];
 
     protected $guard = 'web';
@@ -27,10 +29,5 @@ class User extends Authenticatable implements CanResetPassword
         }
 
         parent::__construct($attributes);
-    }
-
-    public function isAdmin()
-    {
-        return $this->hasRole('admin');
     }
 }

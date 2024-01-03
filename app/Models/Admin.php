@@ -13,6 +13,8 @@ class Admin extends Authenticatable implements CanResetPassword
 {
     use HasFactory, SoftDeletes, Notifiable;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $guarded = [];
 
     protected $guard = 'admin';
@@ -26,9 +28,5 @@ class Admin extends Authenticatable implements CanResetPassword
         }
 
         parent::__construct($attributes);
-    }
-
-    public function isAdmin() {
-        return $this->hasRole('admin');
     }
 }

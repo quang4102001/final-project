@@ -31,4 +31,8 @@ class Color extends Model
     public function products() {
         return $this->belongsToMany(Product::class,'product_color');
     }
+
+    public function cartDetail() {
+        return $this->hasMany(CartDetail::class);
+    }
 }

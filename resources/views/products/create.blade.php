@@ -1,20 +1,7 @@
 @extends('admin.layout')
 
 @section('admin')
-    @if (session()->has('error'))
-        <script>
-            Toastify({
-                text: "{{ session('error') }}",
-                duration: 3000, // Thời gian hiển thị toast (ms)
-                close: true, // Hiển thị nút đóng toast
-                gravity: "top", // Vị trí hiển thị (top, bottom, left, right)
-                position: "right", // Vị trí chiều ngang (left, center, right)
-                style: {
-                    background: "linear-gradient(to right, #dc3545, #dc8890)",
-                },
-            }).showToast();
-        </script>
-    @endif
+
     <form method="post" action="{{ route('product.store') }}">
         @csrf
 

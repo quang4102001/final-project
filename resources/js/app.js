@@ -1,85 +1,4 @@
 import "./bootstrap";
-var cartUser = !!Cookies.get("cart") ? JSON.parse(Cookies.get("cart")) : [];
-const setCookieCart = (cart) => {
-    const value = JSON.stringify(cart);
-    Cookies.set("cart", value, { expires: 7 });
-};
-
-//make cartItem
-const makeCartItem = (name, img, price, id) => {
-    return `<div class="cart-item mt-4 relative">
-                <div class="d-flex">
-                    <div class="bg-[url('${img}')] w-[50px] h-[50px] bg-cover">
-                    </div>
-                    <div class="flex-1 ml-5 pr-[45px]">
-                        <p class="cart-item-title">${name}</p>
-                        <p class="cart-item-title text-[#5ff7d2] fw-bold">${price}</p>
-                    </div>
-                </div>
-                <div class="cart-item-border mr-[45px] border-bottom mt-3"></div>
-                <i data-id="${id}" class="fa-solid fa-xmark cart-item-close hidden cursor-pointer absolute right-[18px] top-[20px] text-[2rem] text-[#ccc]"></i>
-            </div>`;
-};
-
-//load card
-if (cartUser.length === 0) {
-    $("#cart-no-item").show();
-    $("#checkout").hide();
-} else {
-    $("#cart-no-item").hide();
-    $("#checkout").show();
-    cartUser.forEach((item, index) => {
-        const cartItem = makeCartItem(item.name, item.img, item.price, item.id);
-        for (let i = 0; i < item.qty; i++) {
-            $("#cart-list").append(cartItem);
-        }
-    });
-}
-//
-
-//add to card
-const addToCart = (id, name, img, price) => {
-    const existsProduct = cartUser.find((item) => item.id === id);
-    if (existsProduct) {
-        existsProduct.qty += 1;
-        setCookieCart(cartUser);
-    } else {
-        cartUser.push({
-            id: id,
-            name: name,
-            qty: 1,
-            img: img,
-            price: price,
-        });
-        setCookieCart(cartUser);
-    }
-    Toastify({
-        text: "Thêm thành công",
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-    }).showToast();
-};
-
-//remove from cart
-const removeFromCart = (id) => {
-    cartUser = cartUser.map((item, index) => {
-        if (item.id === id) {
-            item.qty -= 1;
-        }
-        return item;
-    });
-    cartUser = cartUser.filter((item) => item.qty > 0 || !!item.qty);
-    setCookieCart(cartUser);
-    Toastify({
-        text: "Xóa thành công",
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-    }).showToast();
-};
 
 // users/index
 $(document).ready(function () {
@@ -89,7 +8,7 @@ $(document).ready(function () {
             .find(".cart-item-close")
             .click(function () {
                 let id = $(this).attr("data-id");
-                removeFromCart(id);
+                exceptFromCart(id);
                 $(this).parent().remove();
                 if ($(".cart-item").size() == 0) {
                     $("#cart-no-item").fadeIn(500);
@@ -97,72 +16,6 @@ $(document).ready(function () {
                 }
             });
     });
-
-    const addCartInterface = (productCard, type) => {
-        const position = productCard.offset();
-        //lấy data
-        const productImage = $(productCard).find("img").get(0).src;
-        const productId = $(productCard).find(".product_id").get(0).innerHTML;
-        const productName = $(productCard)
-            .find(".product_name")
-            .get(0).innerHTML;
-        const productPrice = $(productCard)
-            .find(".product_price")
-            .get(0).innerHTML;
-
-        // tạo chuyển động
-        $("body").append('<div class="floating-cart"></div>');
-        const cart = $(".floating-cart");
-        if (type == "1") {
-            $(
-                "<img src='" +
-                    productImage +
-                    "' class='floating-image-large' />"
-            ).appendTo(cart);
-        } else {
-            productCard.clone().appendTo(cart);
-        }
-        $(cart)
-            .css({ top: position.top + "px", left: position.left + "px" })
-            .fadeIn("slow")
-            .addClass("moveToCart");
-        setTimeout(function () {
-            $("body").addClass("MakeFloatingCart");
-        }, 800);
-
-        setTimeout(function () {
-            $("div.floating-cart").remove();
-            $("body").removeClass("MakeFloatingCart");
-            $("#cart-no-item").hide();
-            const cartItem = makeCartItem(
-                productName,
-                productImage,
-                productPrice,
-                productId
-            );
-            $("#cart-list").prepend(cartItem);
-            $("#checkout").fadeIn(500);
-
-            $("#cart-list .cart-item")
-                .first()
-                .find(".cart-item-close")
-                .click(function () {
-                    $(this)
-                        .parent()
-                        .fadeOut(300, function () {
-                            removeFromCart(productId);
-                            $(this).remove();
-                            if ($("#cart-list .cart-item").size() == 0) {
-                                $("#cart-no-item").fadeIn(500);
-                                $("#checkout").fadeOut(500);
-                            }
-                        });
-                });
-        }, 800);
-        // Thêm vào giỏ hàng
-        addToCart(productId, productName, productImage, productPrice);
-        //
-    };
 
     $(".largeGrid").click(function () {
         $(this).find("a").addClass("active");
@@ -339,13 +192,6 @@ $(document).ready(function () {
         makeCarousel(el);
     });
 
-    $(".add-cart-large").each(function (i, el) {
-        $(el).click(function () {
-            const productCard = $(this).parent().parent();
-            addCartInterface(productCard, 1);
-        });
-    });
-
     /* ----  Image Gallery Carousel   ---- */
     function makeCarousel(el) {
         var carousel = $(el).find(".carousel ul");
@@ -430,8 +276,242 @@ $(document).ready(function () {
             });
     });
 
-    $(".add_to_cart").click(function () {
-        const productCard = $(this).parent();
-        addCartInterface(productCard, 2);
-    });
+    // var cartUser = !!Cookies.get("cart") ? JSON.parse(Cookies.get("cart")) : [];
+    // const setCookieCart = (cart) => {
+    //     const value = JSON.stringify(cart);
+    //     Cookies.set("cart", value, { expires: 7 });
+    // };
+
+    
+    // //make cartItem
+    // const makeCartItem = (name, img, price, id) => {
+    //     return `<div class="cart-item mt-4 relative">
+    //             <div class="d-flex">
+    //                 <div class="bg-[url('${img}')] w-[50px] h-[50px] bg-cover">
+    //                 </div>
+    //                 <div class="flex-1 ml-5 pr-[45px]">
+    //                     <p class="cart-item-title">${name}</p>
+    //                     <p class="cart-item-title text-[#5ff7d2] fw-bold">$${price}</p>
+    //                 </div>
+    //             </div>
+    //             <div class="cart-item-border mr-[45px] border-bottom mt-3"></div>
+    //             <i data-id="${id}" class="fa-solid fa-xmark cart-item-close hidden cursor-pointer absolute right-[18px] top-[20px] text-[2rem] text-[#ccc]"></i>
+    //         </div>`;
+    // };
+    
+    // //make cartRow
+    // const makeCartRow = (id, name, img, price, qty) => {
+    //     return `<div class="card mb-3">
+    //     <div class="card-body">
+    //         <div class="d-flex justify-content-between">
+    //             <div class="d-flex flex-row align-items-center">
+    //                 <div>
+    //                     <img src="${img}"
+    //                         class="img-fluid rounded-3 w-[65px]" alt="Shopping item">
+    //                 </div>
+    //                 <div class="ms-3">
+    //                     <h5>${name}</h5>
+    //                     <p class="small mb-0">256GB, Navy Blue</p>
+    //                 </div>
+    //             </div>
+    //             <div class="d-flex flex-row align-items-center">
+    //                 <div class="mr-[40px]">
+    //                     <input data-id="${id}" type="number" class="cart-input border rounded-lg leading-[2] px-3 w-[80px]" value="${qty}"/>
+    //                 </div>
+    //                 <div>
+    //                     <h5 class="mb-0 w-[80px]">$${qty * price}</h5>
+    //                 </div>
+    //                 <a data-id="${id}" href="#!" class="text-[#dd4b39] cart-item-trash"><i
+    //                         class="fas fa-trash-alt"></i></a>
+    //             </div>
+    //         </div>
+    //     </div>
+    // </div>`;
+    // };
+
+    // const addCartInterface = (productCard, type) => {
+    //     const position = productCard.offset();
+    //     //lấy data
+    //     const productImage = $(productCard).find("img").get(0).src;
+    //     const productId = $(productCard).find(".product_id").get(0).innerHTML;
+    //     const productName = $(productCard)
+    //         .find(".product_name")
+    //         .get(0).innerHTML;
+    //     const productPrice = parseInt(
+    //         $(productCard).find(".product_price").get(0).innerHTML.substring(1)
+    //     );
+
+    //     // tạo chuyển động
+    //     $("body").append('<div class="floating-cart"></div>');
+    //     const cart = $(".floating-cart");
+    //     if (type == "1") {
+    //         $(
+    //             "<img src='" +
+    //                 productImage +
+    //                 "' class='floating-image-large' />"
+    //         ).appendTo(cart);
+    //     } else {
+    //         productCard.clone().appendTo(cart);
+    //     }
+    //     $(cart)
+    //         .css({ top: position.top + "px", left: position.left + "px" })
+    //         .fadeIn("slow")
+    //         .addClass("moveToCart");
+    //     setTimeout(function () {
+    //         $("body").addClass("MakeFloatingCart");
+    //     }, 800);
+
+    //     setTimeout(function () {
+    //         $("div.floating-cart").remove();
+    //         $("body").removeClass("MakeFloatingCart");
+    //         const cartItem = makeCartItem(
+    //             productName,
+    //             productImage,
+    //             productPrice,
+    //             productId
+    //         );
+    //         $("#cart-list").prepend(cartItem);
+    //         $("#cart-no-item").hide();
+    //         $("#checkout").fadeIn(500);
+
+    //         $("#cart-list .cart-item")
+    //             .first()
+    //             .find(".cart-item-close")
+    //             .click(function () {
+    //                 $(this)
+    //                     .parent()
+    //                     .fadeOut(300, function () {
+    //                         exceptFromCart(productId);
+    //                         $(this).remove();
+    //                         if ($("#cart-list .cart-item").size() == 0) {
+    //                             $("#cart-no-item").fadeIn(500);
+    //                             $("#checkout").fadeOut(500);
+    //                         }
+    //                     });
+    //             });
+    //     }, 800);
+    //     // Thêm vào giỏ hàng
+    //     addToCart(productId, productName, productImage, productPrice);
+    //     //
+    // };
+
+    // //add to card
+    // const addToCart = (id, name, img, price) => {
+    //     const existsProduct = cartUser.find((item) => item.id === id);
+    //     if (existsProduct) {
+    //         existsProduct.qty += 1;
+    //         setCookieCart(cartUser);
+    //     } else {
+    //         cartUser.push({
+    //             id: id,
+    //             name: name,
+    //             qty: 1,
+    //             img: img,
+    //             price: price,
+    //         });
+    //         setCookieCart(cartUser);
+    //     }
+    //     Toastify({
+    //         text: "Add product in cart.",
+    //         duration: 3000,
+    //         close: true,
+    //         gravity: "top",
+    //         position: "right",
+    //     }).showToast();
+    // };
+
+    // //except from cart
+    // const exceptFromCart = (id) => {
+    //     cartUser = cartUser.map((item, index) => {
+    //         if (item.id === id) {
+    //             item.qty -= 1;
+    //         }
+    //         return item;
+    //     });
+    //     cartUser = cartUser.filter((item) => item.qty > 0 || !!item.qty);
+    //     setCookieCart(cartUser);
+    //     Toastify({
+    //         text: "Deleted product from cart.",
+    //         duration: 3000,
+    //         close: true,
+    //         gravity: "top",
+    //         position: "right",
+    //     }).showToast();
+    // };
+
+    // //load card
+    // if (cartUser.length === 0) {
+    //     $("#cart-no-item").show();
+    //     $("#checkout").hide();
+    // } else {
+    //     $("#cart-no-item").hide();
+    //     $("#checkout").show();
+    //     cartUser.forEach((item, index) => {
+    //         const cartItem = makeCartItem(
+    //             item.name,
+    //             item.img,
+    //             item.price,
+    //             item.id
+    //         );
+    //         const cartRow = makeCartRow(
+    //             item.id,
+    //             item.name,
+    //             item.img,
+    //             item.price,
+    //             item.qty
+    //         );
+    //         $("#cart-page #cart-list").append(cartRow);
+    //         $("#cart-page .cart-input")
+    //             .last()
+    //             .change(function () {
+    //                 let id = $(this).attr("data-id");
+    //                 exceptFromCart(id);
+    //                 if ($(this).val() <= 0) {
+    //                     $(this)
+    //                         .parent()
+    //                         .parent()
+    //                         .parent()
+    //                         .parent()
+    //                         .parent()
+    //                         .remove();
+    //                 }
+    //             });
+    //         $("#cart-page .cart-item-trash")
+    //             .last()
+    //             .click(function () {
+    //                 let id = $(this).attr("data-id");
+    //                 removeFromCart(id);
+    //                 $(this).parent().parent().parent().parent().remove();
+    //             });
+    //         for (let i = 0; i < item.qty; i++) {
+    //             $("#sidebar #cart-list").append(cartItem);
+    //         }
+    //     });
+    // }
+    // //
+
+    // //remove from cart
+    // const removeFromCart = (id) => {
+    //     cartUser = cartUser.filter((item) => item.id !== id);
+    //     setCookieCart(cartUser);
+    //     Toastify({
+    //         text: "Deleted product from cart.",
+    //         duration: 3000,
+    //         close: true,
+    //         gravity: "top",
+    //         position: "right",
+    //     }).showToast();
+    // };
+
+    // $(".add_to_cart").click(function () {
+    //     const productCard = $(this).parent();
+    //     addCartInterface(productCard, 2);
+    // });
+
+    // $(".add-cart-large").each(function (i, el) {
+    //     $(el).click(function () {
+    //         const productCard = $(this).parent().parent();
+    //         addCartInterface(productCard, 1);
+    //     });
+    // });
 });

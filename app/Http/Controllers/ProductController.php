@@ -16,23 +16,28 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
+        $pagination = 50;
         $products = new Product();
-        if ($request->input('SearchProductName') != '') {
-            $products = $products->where('name', 'LIKE', '%'.$request->input('SearchProductName').'%');
+        if ($request->SearchProductName != '') {
+            $products = $products->where('name', 'LIKE', '%' . $request->SearchProductName . '%');
         }
-        if ($request->input('SearchCategoryId') != '') {
-            $products = $products->where('category', $request->input('SearchCategoryId'));
+        if ($request->SearchCategoryId != '') {
+            $products = $products->where('category', $request->SearchCategoryId);
         }
-        if ($request->input('SearchStatusId') != '') {
-            $products = $products->where('status', $request->input('SearchStatusId'));
+        if ($request->SearchStatusId != '') {
+            $products = $products->where('status', $request->SearchStatusId);
         }
-        if ($request->input('SearchPriceMin') != '') {
-            $products = $products->where('price', $request->input('SearchPriceMin'));
+        if ($request->SearchPriceMin != '') {
+            $products = $products->where('price', '>=', $request->SearchPriceMin);
         }
-        if ($request->input('SearchPriceMax') != '') {
-            $products = $products->where('price', $request->input('SearchPriceMax'));
+        if ($request->SearchPriceMax != '') {
+            $products = $products->where('price', '<=', $request->SearchPriceMax);
         }
-        $products = $products->all();
+        if ($request->pagination != '') {
+            $pagination = $request->pagination;
+        }
+        $products = $products->paginate($pagination)->withQueryString();
+
         return view('products.index', compact('products'));
     }
 
@@ -64,7 +69,7 @@ class ProductController extends Controller
                 $product->images()->attach($request->input('images'));
                 $product->sizes()->attach($request->input('sizes'));
             });
-            return redirect()->route('product.index')->with('success', 'Products created successfully');
+            return redirect()->route('product.index')->with('success', 'Product created successfully');
         } catch (\Exception $e) {
             Log::error($e);
             return redirect()->back()
@@ -147,7 +152,7 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
         //
         try {
@@ -160,13 +165,27 @@ class ProductController extends Controller
 
                 $product->delete();
             });
-
-            return response()->json(['success'=> 'Deleted product successfully.']);
+            return response()->json(['success' => 'Deleted product successfully.']);
         } catch (\Exception $e) {
             Log::error($e);
             return redirect()->back()
                 ->withInput(request()->all())
                 ->with('error', 'Error delete product: ' . $e->getMessage() . ' ' . $e->getLine());
+        }
+    }
+
+    public function productDetail(string $id)
+    {
+        $product = Product::with(['images', 'colors', 'sizes'])->find($id);
+        if(!$product){
+            return redirect()->back()->with('error', "Can't find product.");
+        }
+        if (auth('admin')->check()) {
+            $products = Product::with(['images'])->where('id', '!=', $id)->take(4)->get();
+            return view('admin.productDetail', compact('products', 'product'));
+        } else {
+            $products = Product::where('status', 1)->with(['images'])->where('id', '!=', $id)->take(4)->get();
+            return view('users.productDetail', compact('product', 'products'));
         }
     }
 
