@@ -3,22 +3,21 @@
 @section('admin')
     <header class="p-[1.5rem] flex justify-between">
         <div class="">
-            <h1 class="text-5xl">Products</h1>
+            <h1 class="text-5xl">Categories</h1>
         </div>
         <div class="text-white flex">
-            <a href="{{ route('product.create') }}"
+            <a href="{{ route('categories.create') }}"
                 class="flex items-center px-3 py-3 rounded-lg bg-[#3c8dbc] border hover:text-white hover:bg-[#467e9f] mr-3">
                 <i class="text-inherit fas fa-plus-square mr-3"></i>
                 <p class="text-inherit ">Add new</p>
             </a>
-            <span onCLick="deleteSelectProducts()"
+            <span onCLick="deleteSelectCategories()"
                 class="flex items-center px-3 py-3 rounded-lg bg-[#dd4b39] border hover:text-white text-white cursor-pointer">
                 <i class="text-inherit fas fa-trash-alt mr-3"></i>
                 <p class="text-inherit ">Delete (selected)</p>
             </span>
         </div>
     </header>
-    {{-- search --}}
     <div class="bg-white p-[20px] mb-4 rounded-lg">
         <div id="searchHeader" class="flex justify-between cursor-pointer">
             <h2 class="text-4xl"><i class="fas fa-search mr-3" aria-hidden="true"></i>Search</h2>
@@ -147,7 +146,6 @@
             </div>
         </form>
     </div>
-    {{-- table --}}
     <div class="p-20 bg-white rounded-lg">
         <div class='flex mb-3 justify-end'>
             <strong class="mr-3">Number products:</strong>
@@ -169,39 +167,19 @@
             <tr class="fw-bold leading-[2]">
                 <th class="text-inherit"><input type="checkbox" id="checkAll" class="w-[1.6rem] h-[1.6rem]" /></th>
                 <th class="text-inherit">Name</th>
-                <th class="text-inherit">Price</th>
-                <th class="text-inherit">Discounted price</th>
-                <th class="text-inherit">Category</th>
-                <th class="text-inherit">Published</th>
                 <th class="text-inherit">Action</th>
             </tr>
-            @forelse ($products as $product)
-                <tr class="table-light" id="{{ $product->id }}">
+            @forelse ($categories as $category)
+                <tr class="table-light" id="{{ $category->id }}">
                     <td class="p-4"><input type="checkbox" class="checkBox w-[1.6rem] h-[1.6rem]"
-                            value="{{ $product->id }}" /></td>
-                    <td class="p-4"><a
-                            href="{{ route('product.productDetail', ['id' => $product->id]) }}">{{ $product->name }}</a>
-                    </td>
-                    <td class="p-4">{{ $product->price }}</td>
-                    <td class="p-4">{{ $product->discounted_price }}</td>
-                    <td class="p-4">{{ $product->category }}</td>
-                    <td class="p-4">
-                        <label class="cursor-pointer p-1">
-                            <input class="input-status hidden" type="checkbox" name="product-status-check"
-                                {{ $product->status == 1 ? 'checked' : '' }}
-                                onChange="setStatusAjax('{{ route('product.updateStatus', ['id' => $product->id]) }}', this)" />
-                            <i
-                                class="icon-status-check fa-solid fa-circle-check text-[2.4rem] text-[#3c8dbc] hover:text-[#4e9dcb]"></i>
-                            <i
-                                class="icon-status-xmark fa-solid fa-circle-xmark text-[2.4rem] text-[#dd4b39] hover:text-[#dc3545]"></i>
-                        </label>
-                    </td>
+                            value="{{ $category->id }}" /></td>
+                    <td class="p-4">{{ $category->name }}</td>
                     <td class="p-4">
                         <div class="flex items-center justify-center">
-                            <a href="{{ route('product.edit', ['id' => $product->id]) }}"><i
+                            <a href="{{ route('categories.edit', ['id' => $category->id]) }}"><i
                                     class="fa-solid fa-pen-to-square text-[2.4rem] text-[#3c8dbc] mr-5 hover:text-[#4e9dcb]"></i></a>
                             <span class="cursor-pointer"
-                                onClick="deleteProduct('{{ $product->id }}', '{{ route('product.destroy', ['id' => $product->id]) }}')">
+                                onClick="deleteProduct('{{ $category->id }}', '{{ route('categories.destroy', ['id' => $category->id]) }}')">
                                 <i class="fa-solid fa-trash-can text-[2.4rem] text-[#dd4b39] hover:text-[#dc3545]"></i>
                             </span>
                         </div>
@@ -209,16 +187,11 @@
                 </tr>
             @empty
                 <tr>
-                    <td class="p-5" colspan="11">No product.</td>
+                    <td class="p-5" colspan="11">No categories.</td>
                 </tr>
             @endforelse
         </table>
-        <div class="flex justify-center mb-5">
-            @include('products.vendor.pagination')
-        </div>
     </div>
-
-    @vite(['resources/js/productsIndex.js'])
     <script>
         const deleteProduct = (id, url) => {
             if (confirm('Delete Product ?') === true) {

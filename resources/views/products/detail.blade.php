@@ -1,18 +1,20 @@
-<header class="flex justify-between items-center pt-3">
+<header class="flex justify-between items-center pt-3 container">
     <a href="{{ url()->previous() }}" class="text-3xl"><i class="fa-solid fa-chevron-left text-inherit mr-3"></i>Back</a>
-    <div class="text-white flex">
-        <a href="{{ route('product.edit', ['id' => $product->id]) }}"
-            class="flex items-center px-3 py-3 rounded-lg bg-[#3c8dbc] border hover:text-white hover:bg-[#467e9f] mr-3">
-            <i class="text-inherit fas fa-plus-square mr-3"></i>
-            <p class="text-inherit ">Edit</p>
-        </a>
-        <span id="btn-delete" data-url="{{ route('product.destroy', ['id' => $product->id]) }}"
-            data-url-pre="{{ url()->previous() }}"
-            class="flex items-center px-3 py-3 rounded-lg bg-[#dd4b39] border hover:text-white text-white cursor-pointer">
-            <i class="text-inherit fas fa-trash-alt mr-3"></i>
-            <p class="text-inherit ">Delete</p>
-        </span>
-    </div>
+    @if (auth('admin')->check())
+        <div class="text-white flex">
+            <a href="{{ route('product.edit', ['id' => $product->id]) }}"
+                class="flex items-center px-3 py-3 rounded-lg bg-[#3c8dbc] border hover:text-white hover:bg-[#467e9f] mr-3">
+                <i class="text-inherit fas fa-plus-square mr-3"></i>
+                <p class="text-inherit ">Edit</p>
+            </a>
+            <span id="btn-delete" data-url="{{ route('product.destroy', ['id' => $product->id]) }}"
+                data-url-pre="{{ url()->previous() }}"
+                class="flex items-center px-3 py-3 rounded-lg bg-[#dd4b39] border hover:text-white text-white cursor-pointer">
+                <i class="text-inherit fas fa-trash-alt mr-3"></i>
+                <p class="text-inherit ">Delete</p>
+            </span>
+        </div>
+    @endif
 </header>
 
 <!-- content -->
@@ -22,7 +24,7 @@
             <aside class="col-lg-6">
                 <div class="border rounded-4 mb-3 d-flex justify-content-center">
                     <span class="rounded-4">
-                        <img style="max-width: 100%; max-height: 100vh; margin: auto;" class="image-view rounded-4 fit"
+                        <img style="margin: auto;" class="image-view rounded-4 fit max-h-[480px]"
                             src="{{ $product->images[0]->path ?? 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/1.jpg' }}" />
                     </span>
                 </div>

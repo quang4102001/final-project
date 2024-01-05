@@ -113,7 +113,7 @@
                         @else
                             <input class="color-item-radio hidden" type="checkbox" name="colors[]"
                                 value="{{ $color->id }}" id="{{ $color->id }}"
-                                {{ in_array($color->id, $productColors) ? 'checked' : '' }} />
+                                {{ in_array($color->id, $productColorIds) ? 'checked' : '' }} />
                         @endif
                         <label
                             class="color-item-label shadow-md  w-[2.4rem] h-[2.4rem] p-[2px] rounded-full border-[1px] border-transparent"
@@ -148,7 +148,7 @@
                                 {{ in_array($size->id, old('sizes')) ? 'checked' : '' }} />
                         @else
                             <input class="" type="checkbox" name="sizes[]" value="{{ $size->id }}"
-                                {{ in_array($size->id, $productSizes) ? 'checked' : '' }} />
+                                {{ in_array($size->id, $productSizeIds) ? 'checked' : '' }} />
                         @endif
                         <span>{{ $size->name }}</span>
                     </label>
@@ -190,7 +190,7 @@
                                     </label>
                                 @endif
                             @else
-                                @if (in_array($image->id, $productImages))
+                                @if (in_array($image->id, $productImageIds))
                                     <label class="col mb-5 relative">
                                         <input class="position-absolute" type="checkbox" name="images[]"
                                             value="{{ $image->id }}" checked />

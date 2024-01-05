@@ -19,7 +19,6 @@ class Admin extends Authenticatable implements CanResetPassword
 
     protected $guard = 'admin';
 
-
     public function __construct(array $attributes = [])
     {
         // Thêm điều kiện để sinh UUID nếu chưa có

@@ -10,14 +10,11 @@ use Webpatser\Uuid\Uuid;
 class Cart extends Model
 {
     use HasFactory, SoftDeletes;
-
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $fillable = [
-        'user_id',
-    ];
+    protected $guarded = [];
 
     protected static function boot()
     {
@@ -33,7 +30,8 @@ class Cart extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function products() {
-        return $this->belongsToMany(Product::class, 'cart_detail')->withPivot('qty', 'color');
+    public function cartDetails()
+    {
+        return $this->hasMany(CartDetail::class)->onDelete('cascade');
     }
 }

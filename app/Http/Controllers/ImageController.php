@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ImageRequest;
 use App\Models\Image;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ImageController extends Controller
@@ -15,7 +16,6 @@ class ImageController extends Controller
         try {
             $image = $request->file('image');
             $imageName = time() . '.' . $image->extension();
-
             $uuid = Str::uuid();
 
             // Lưu hình ảnh vào thư mục storage
@@ -37,5 +37,11 @@ class ImageController extends Controller
                 ->withInput(request()->all())
                 ->with('error', 'Error update product: ' . $e->getMessage() . ' ' . $e->getLine());
         }
+    }
+
+    public function destroy(Image $image)
+    {
+        // Xóa tập tin
+        Storage::delete($image);
     }
 }

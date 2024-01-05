@@ -15,9 +15,7 @@ class Color extends Model
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $fillable = [
-        'name',
-    ];
+    protected $guarded = [];
 
     protected static function boot()
     {
@@ -32,7 +30,7 @@ class Color extends Model
         return $this->belongsToMany(Product::class,'product_color');
     }
 
-    public function cartDetail() {
-        return $this->hasMany(CartDetail::class);
+    public function cartDetails() {
+        return $this->hasMany(CartDetail::class, 'color_id');
     }
 }

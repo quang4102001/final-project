@@ -144,9 +144,10 @@
                 })
                 filterTimer = setTimeout(function() {
                     filterProducts(categories, 'categories')
-                }, 2000)
+                }, 1000)
             })
         })
+
         $('#colors-list .filter').each(function() {
             $(this).change(function() {
                 clearTimeout(filterTimer)
@@ -156,9 +157,10 @@
                 })
                 filterTimer = setTimeout(function() {
                     filterProducts(colors, 'colors')
-                }, 2000)
+                }, 1000)
             })
         })
+        
         $('#sizes-list .filter').each(function() {
             $(this).change(function() {
                 clearTimeout(filterTimer)
@@ -168,7 +170,7 @@
                 })
                 filterTimer = setTimeout(function() {
                     filterProducts(sizes, 'sizes')
-                }, 2000)
+                }, 1000)
             })
         })
 

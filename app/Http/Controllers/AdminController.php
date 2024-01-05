@@ -12,18 +12,6 @@ class AdminController extends Controller
      */
     public function index()
     {
-        //
         return view("admin.index");
-    }
-
-    public function checkLogin(Request $request)
-    {
-        try {
-            DB::beginTransaction();
-            DB::commit();
-            return view("admin.index");
-        } catch (\Exception $e) {
-            return redirect()->back()->withInput(request()->all())->with("error", "Login failed" . $e->getMessage() . $e->getLine());
-        }
     }
 }

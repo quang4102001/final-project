@@ -15,14 +15,9 @@ class Product extends Model
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $fillable = [
-        'name',
-        'sku',
-        'price',
-        'discounted_price',
-        'category',
-        'status'
-    ];
+    const STATUS = 1;
+
+    protected $guarded = [];
 
     protected static function boot()
     {
@@ -46,11 +41,7 @@ class Product extends Model
         return $this->belongsToMany(Image::class, 'product_image');
     }
 
-    public function carts() {
-        return $this->belongsToMany(Cart::class, 'cart_detail')->withPivot('qty', 'color');
-    }
-
-    public function cartDetail()
+    public function cartDetails()
     {
         return $this->hasMany(CartDetail::class, 'product_id');
     }

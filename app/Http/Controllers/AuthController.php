@@ -6,6 +6,7 @@ use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\ResetPasswordRequest;
+use App\Models\ResetPassword;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -39,7 +40,8 @@ class AuthController extends Controller
             }
         }
 
-        return redirect()->back()
+        return redirect()
+            ->back()
             ->withInput($request->except('password'))
             ->with("error", 'Login failed!');
     }
@@ -53,7 +55,7 @@ class AuthController extends Controller
     {
         try {
             DB::transaction(function () use ($request) {
-                $user = new User([
+                $user = User::create([
                     'id' => Str::uuid(),
                     'username' => $request->input('username'),
                     'name' => $request->input('name'),
@@ -63,24 +65,26 @@ class AuthController extends Controller
                     'remember_token' => Str::random(64),
                 ]);
 
-                $user->save();
                 Auth::login($user);
             });
 
             return redirect()->route('home')->with('success', 'Login successfully!');
         } catch (\Exception $e) {
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->withInput($request->except('password', 'rePassword'))
                 ->with("error", 'Register failed!');
         }
     }
 
+    public function logoutAdmin()
+    {
+        Auth::guard('admin')->logout();
+        return redirect()->route("home")->with("success", "Logout successfully!");
+    }
+
     public function logout()
     {
-        if (auth('admin')->check()) {
-            Auth::guard('admin')->logout();
-            return redirect()->route("home")->with("success", "Logout successfully!");
-        }
         Auth::logout();
         Cookie::queue(Cookie::forget('cart'));
         return redirect()->route("home")->with("success", "Logout successfully!");
@@ -97,16 +101,16 @@ class AuthController extends Controller
             $token = Str::random(length: 64);
 
             DB::transaction(function () use ($request, $token) {
-                DB::table('reset_password')->insert([
+                ResetPassword::create([
                     'id' => Str::uuid(),
                     'email' => $request->email,
                     'token' => $token
                 ]);
+            });
 
-                Mail::send('emails.linkResetPassword', ['token' => $token], function ($message) use ($request) {
-                    $message->to($request->email);
-                    $message->subject('Reset Password');
-                });
+            Mail::send('emails.linkResetPassword', ['token' => $token], function ($message) use ($request) {
+                $message->to($request->email);
+                $message->subject('Reset Password');
             });
 
             return redirect()->route('auth.login')->with('success', 'Have send an email to reset password');
@@ -125,26 +129,32 @@ class AuthController extends Controller
     public function handleResetPassword(ResetPasswordRequest $request, string $token)
     {
         try {
-            $updatePassword = DB::table('reset_password')
-                ->where([
-                    'email' => $request->email,
-                    'token' => $token
-                ])->first();
+            $updatePassword = ResetPassword::where([
+                'email' => $request->email,
+                'token' => $token
+            ])
+                ->first();
 
             if (!$updatePassword) {
-                return back()->withInput($request->except('password', 'rePassword'))->with('error', "Can not find this account!");
+                return redirect()
+                    ->back()
+                    ->withInput($request->except('password', 'rePassword'))
+                    ->with('error', "Can not find this account!");
             }
+
             DB::transaction(function () use ($request) {
 
-                $user = User::where('email', $request->email)
-                    ->update(['password' => Hash::make($request->password)]);
+                User::where('email', $request->email)->update(['password' => Hash::make($request->password)]);
 
-                DB::table('reset_password')->where(['email' => $request->email])->delete();
+                ResetPassword::where(['email' => $request->email])->delete();
             });
 
             return redirect('/login')->with('success', 'Your password has been changed!');
         } catch (\Exception $e) {
-            return back()->withInput($request->except('password', 'rePassword'))->with('error', 'Reset password failed!');
+            return redirect()
+                ->back()
+                ->withInput($request->except('password', 'rePassword'))
+                ->with('error', 'Reset password failed!');
         }
     }
 }

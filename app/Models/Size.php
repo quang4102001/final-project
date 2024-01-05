@@ -15,9 +15,7 @@ class Size extends Model
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $fillable = [
-        'name',
-    ];
+    protected $guarded = [];
 
     protected static function boot()
     {

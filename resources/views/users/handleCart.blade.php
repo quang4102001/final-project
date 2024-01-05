@@ -68,16 +68,14 @@
                 .first()
                 .find(".cart-item-close")
                 .click(function() {
-                    $(this)
-                        .parent()
-                        .fadeOut(300, function() {
-                            exceptFromCart(productId, color.id);
-                            $(this).remove();
-                            if ($("#cart-list .cart-item").size() == 0) {
-                                $("#cart-no-item").fadeIn(500);
-                                $("#checkout").fadeOut(500);
-                            }
-                        });
+                    $(this).closest(".cart-item").fadeOut(300, function() {
+                        exceptFromCart(productId, color.id);
+                        $(this).remove();
+                        if ($("#cart-list .cart-item").size() == 0) {
+                            $("#cart-no-item").fadeIn(500);
+                            $("#checkout").fadeOut(500);
+                        }
+                    });
                 });
         }, 800);
         // Thêm vào giỏ hàng
@@ -137,16 +135,14 @@
                         .last()
                         .find(".cart-item-close")
                         .click(function() {
-                            $(this)
-                                .parent()
-                                .fadeOut(300, function() {
-                                    exceptFromCart(item.id, item.colorId);
-                                    $(this).remove();
-                                    if ($("#cart-list .cart-item").size() == 0) {
-                                        $("#cart-no-item").fadeIn(500);
-                                        $("#checkout").fadeOut(500);
-                                    }
-                                });
+                            $(this).closest(".cart-item").fadeOut(300, function() {
+                                exceptFromCart(item.id, item.colorId);
+                                $(this).remove();
+                                if ($("#cart-list .cart-item").size() == 0) {
+                                    $("#cart-no-item").fadeIn(500);
+                                    $("#checkout").fadeOut(500);
+                                }
+                            });
                         });
                 }
                 const cartRow = makeCartRow(
@@ -165,13 +161,7 @@
                         let id = $(this).attr("data-id");
                         if ($(this).val() <= 0) {
                             removeFromCart(id, item.colorId)
-                            $(this)
-                                .parent()
-                                .parent()
-                                .parent()
-                                .parent()
-                                .parent()
-                                .remove();
+                            $(this).closest(".card").remove();
                         } else {
                             setToCart(id, $(this).val(), item.colorId)
                             let total = $(this).val() * item.price
@@ -189,7 +179,8 @@
                     .click(function() {
                         let id = $(this).attr("data-id");
                         removeFromCart(id, item.colorId);
-                        $(this).parent().parent().parent().parent().remove();
+                        console.log($(this).closest('.card'))
+                        $(this).closest(".card").remove();
                     });
             });
         }
@@ -254,10 +245,92 @@
     })
 </script>
 
+{{-- // check cart --}}
+<script>
+    const checkCart = () => {
+        if (!!Cookies.get('cart')) {
+            const data = JSON.parse(Cookies.get('cart'));
+            $.ajax({
+                url: "{{ route('cart.checkCart') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    cart: data
+                },
+                success: function(res) {
+                    if (res.load == true) {
+                        const cart = Object.values(res.cart)
+                        if (cart.length) {
+                            const value = JSON.stringify(cart);
+                            Cookies.set("cart", value, {
+                                expires: 360
+                            });
+                        } else {
+                            Cookies.remove("cart");
+                        }
+                        location.reload()
+                    }
+                },
+                error: function(res) {
+                    console.log(res)
+                }
+            })
+        }
+    }
+    const checkCartAuth = (cartUser) => {
+        if (cartUser) {
+            console.log(cartUser)
+            $.ajax({
+                url: "{{ route('cart.checkCart') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    cart: cartUser
+                },
+                success: function(res) {
+                    if (res.load == true) {
+                        const cartRes = Object.values(res.cart)
+                        console.log(cartRes)
+
+                        if (cartUser.length !== cartRes.length) {
+
+                            let productsNotExistsId = cartUser
+                                .filter(item => !cartRes.some(cart => cart.id === item.id))
+                                .map(item => item.id)
+
+                            $.ajax({
+                                url: "{{ route('cart.removeByCheckCart') }}",
+                                type: "POST",
+                                data: {
+                                    _token: '{{ csrf_token() }}',
+                                    ids: productsNotExistsId
+                                },
+                                success: function(res) {
+                                    window.location.reload();
+                                },
+                                error: function(res) {
+                                    console.log(res)
+                                }
+                            })
+
+                            cartUser = [...cartRes]
+
+                        }
+                    }
+                },
+                error: function(res) {
+                    console.log(res)
+                }
+            })
+        }
+    }
+</script>
+
 {{-- check auth --}}
 @if (auth()->check())
     <script>
         var cartUser = []
+
         if (Cookies.get('cart')) {
             const cart = JSON.parse(Cookies.get('cart'))
             $.ajax({
@@ -270,6 +343,10 @@
                     userId: '{{ auth()->user()->id }}',
                 },
                 success: function(res) {
+                    cartUser = [...res.cart]
+                    loadCart()
+                    checkCartAuth(cartUser)
+
                     Toastify({
                         text: res.success,
                         duration: 3000,
@@ -277,11 +354,12 @@
                         gravity: "top",
                         position: "right",
                     }).showToast();
-                    cartUser = [...res.cart]
-                    loadCart()
                 },
                 error: function(res) {
                     userCart = [...res.cart]
+                    loadCart()
+                    checkCartAuth(cartUser)
+
                     Toastify({
                         text: res.error,
                         duration: 3000,
@@ -304,10 +382,12 @@
                 success: function(res) {
                     cartUser = [...res.cart]
                     loadCart()
+                    checkCartAuth(cartUser)
                 },
                 error: function(e) {
                     userCart = [...res.cart]
                     loadCart()
+                    checkCartAuth(cartUser)
                 }
             })
         }
@@ -458,11 +538,14 @@
     </script>
 @else
     <script>
-        var cartUser = !!Cookies.get("cart") ? JSON.parse(Cookies.get("cart")) : [];
+        checkCart()
+
+        var cartUser = !!Cookies.get("cart") & Cookies.get("cart") != undefined ? JSON.parse(Cookies.get("cart")) : [];
+
         const setCookieCart = (cart) => {
             const value = JSON.stringify(cart);
             Cookies.set("cart", value, {
-                expires: 7
+                expires: 360
             });
         };
 
@@ -547,88 +630,3 @@
         }
     </script>
 @endif
-
-{{-- handle sidebar --}}
-{{-- <script>
-    $(document).ready(function() {
-        const productCards = $('#grid .product')
-
-        $('#sidebar .filter').each(function() {
-            $(this).change(function() {
-                const categoriesChecked = []
-                $('#category-list input[type="checkbox"]:checked').each(function() {
-                    categoriesChecked.push($(this).val())
-                })
-                const colorsChecked = []
-                $('#colors-list .color-item-radio:checked').each(function() {
-                    colorsChecked.push($(this).attr('id'))
-                })
-                const sizesChecked = []
-                $('#sizes-list .input-size:checked').each(function() {
-                    sizesChecked.push($(this).attr('id'))
-                })
-
-                if (categoriesChecked.length == 0 & colorsChecked.length == 0 &
-                    sizesChecked.length == 0) {
-                    productCards.each(function() {
-                        $(this).show()
-                    })
-                } else {
-                    productCards.each(function() {
-                        let check = false
-                        const productCategory = $(this).find(
-                                '.stats-container p')
-                            .html()
-                        const productColors = []
-                        if ($(this).find('.input-color')) {
-                            $(this).find('.input-color').each(
-                                function() {
-                                    productColors.push($(
-                                        this).val())
-                                })
-                        }
-                        const productSizes = []
-                        if ($(this).find('.size-name')) {
-                            $(this).find('.size-name').each(
-                                function() {
-                                    productSizes.push($(
-                                        this).attr(
-                                        'data-id'))
-                                })
-                        }
-                        //check category
-                        categoriesChecked.forEach(category => {
-                            if (productCategory ===
-                                category) {
-                                $(this).show()
-                                check = true
-                            }
-                        })
-                        //check color
-                        colorsChecked.forEach(item => {
-                            if (productColors.find(
-                                    color => color ===
-                                    item)) {
-                                $(this).show()
-                                check = true
-                            }
-                        })
-                        // check size
-                        sizesChecked.forEach(item => {
-                            if (productSizes.find(
-                                    size => size ===
-                                    item)) {
-                                $(this).show()
-                                check = true
-                            }
-                        })
-
-                        if (!check) {
-                            $(this).hide()
-                        }
-                    })
-                }
-            })
-        })
-    })
-</script> --}}

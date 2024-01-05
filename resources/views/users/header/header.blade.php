@@ -10,7 +10,7 @@
             <img class="icon" src="{{ asset('images/icons/heart.svg') }}" alt="heart-icon">
         </li>
         <li class="min-w-[100px] border-start d-flex justify-content-center align-items-center">
-            @if (auth()->check())
+            @if (auth()->check() || auth('admin')->check())
                 <div class="cursor-pointer header-icon-user relative">
                     <span class="material-symbols-outlined text-[3.5rem]">
                         person
@@ -19,11 +19,22 @@
                     <ul
                         class="header-user-box absolute w-max rounded-lg shadow-md bg-white right-[1rem] top-[70%] z-10">
                         <li class="py-2 px-3 cursor-default rounded-t-lg border-1 text-center">
-                            <strong>{{auth()->user()->name }}</strong>
+                            <strong>{{ auth()->user()->name ?? auth('admin')->user()->name }}</strong>
                         </li>
                         <li class="py-2 px-3 hover:bg-[#eee]">Personal information</li>
+                        @if (auth('admin')->check())
+                            <li class="py-2 px-3 hover:bg-[#eee] rounded-b-lg">
+                                <a class='bg-transparent flex items-center' href='{{ route('admin.index') }}'>
+                                    <span class="material-symbols-outlined mr-3">
+                                        database
+                                    </span>
+                                    Database
+                                </a>
+                            </li>
+                        @endif
                         <li class="py-2 px-3 hover:bg-[#eee] rounded-b-lg">
-                            <a class='bg-transparent flex items-center' href='{{ route('auth.logout') }}'>
+                            <a class='bg-transparent flex items-center'
+                                href="{{ auth('admin')->check() ? route('auth.logoutAdmin') : route('auth.logout') }}">
                                 <span class="material-symbols-outlined mr-3">
                                     logout
                                 </span>

@@ -22,7 +22,7 @@
                 @include('users.data')
             </div>
             <div class="flex justify-center mb-5">
-                @include('vendor.pagination')
+                @include('products.vendor.pagination')
             </div>
             <footer class="credit text-center">Author: shipra - Distributed By:
                 <a title="Awesome web design code &amp; scripts" href="https://www.codehim.com?source=demo-page"
@@ -56,65 +56,15 @@
         }
 
         $(".add_to_cart").click(function() {
-            const productCard = $(this).parent().parent().parent();
+            const productCard = $(this).closest(".product");
             showSelectColorBox(productCard)
         });
 
         $(".add-cart-large").each(function(i, e) {
             $(e).click(function() {
-                const productCard = $(this).parent().parent();
+                const productCard = $(this).closest(".product");
                 showSelectColorBox(productCard)
             });
         });
     </script>
-    {{-- <script>
-        $(window).on('hashchange', function() {
-            var page = getParameterByName('page');
-            if (page && !isNaN(page) && page > 0) {
-                getData(page);
-            }
-        });
-
-        $(document).ready(function() {
-            $(document).on('click', '.pagination a', function(event) {
-                event.preventDefault();
-                $('li').removeClass('active');
-                $(this).parent('li').addClass('active');
-                var page = getParameterByName('page', $(this).attr('href'));
-                getData(page);
-            });
-        });
-
-        function getData(page) {
-            $.ajax({
-                    url: '?page=' + page,
-                    type: "get",
-                    datatype: "html",
-                })
-                .done(function(res) {
-                    $("#grid").empty().html(res);
-                    updateUrl(page);
-                })
-                .fail(function(jqXHR, ajaxOptions, thrownError) {
-                    alert('Không có phản hồi từ máy chủ');
-                });
-        }
-
-        function updateUrl(page) {
-            var url = window.location.protocol + "//" + window.location.host + window.location.pathname;
-            window.history.pushState({
-                path: url
-            }, "", url + '?page=' + page);
-        }
-
-        function getParameterByName(name, url) {
-            if (!url) url = window.location.href;
-            name = name.replace(/[\[\]]/g, "\\$&");
-            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, " "));
-        }
-    </script> --}}
 @endsection

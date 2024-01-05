@@ -1,6 +1,6 @@
 <div class="w-[250px] fixed top-0 left-0 h-[100vh] bg-[#343a40] text-[1.6rem] shadow-lg" id="main-sidebar">
     <div class="header p-2 border-bottom border-[#4b545c] h-[56px] flex justify-center">
-        <img src="{{ asset('images/logo.png') }}" alt="img-logo" class="h-100"/>
+        <img src="{{ asset('images/logo.png') }}" alt="img-logo" class="h-100" />
     </div>
     <div class="">
         <div class="side-bar-form p-[1rem] relative p-[.5rem]">
@@ -21,8 +21,32 @@
                 </li>
                 <li class="p-[10px] hover:bg-[#ffffff1a] hover:text-white text-[#c2c7d0]">
                     <a href="{{ route('product.index') }}" class="flex items-center hover:text-white">
-                        <i class="text-inherit nav-icon fas fa-book mx-3 text-[2rem]"></i>
+                        <i class="text-inherit nav-icon fas fa-shirt mx-3 text-[2rem]"></i>
                         <p class="text-inherit">Products</p>
+                    </a>
+                </li>
+                <li class="p-[10px] hover:bg-[#ffffff1a] hover:text-white text-[#c2c7d0]">
+                    <a href="{{ route('categories.index') }}" class="flex items-center hover:text-white">
+                        <i class="text-inherit nav-icon fa-solid fa-list mx-3 text-[2rem]"></i>
+                        <p class="text-inherit">Categories</p>
+                    </a>
+                </li>
+                <li class="p-[10px] hover:bg-[#ffffff1a] hover:text-white text-[#c2c7d0]">
+                    <a href="{{ route('colors.index') }}" class="flex items-center hover:text-white">
+                        <i class="text-inherit nav-icon fa-solid fa-palette mx-3 text-[2rem]"></i>
+                        <p class="text-inherit">Colors</p>
+                    </a>
+                </li>
+                <li class="p-[10px] hover:bg-[#ffffff1a] hover:text-white text-[#c2c7d0]">
+                    <a href="{{ route('sizes.index') }}" class="flex items-center hover:text-white">
+                        <i class="text-inherit fa-solid fa-up-right-and-down-left-from-center mx-3 text-[2rem]"></i>
+                        <p class="text-inherit">Sizes</p>
+                    </a>
+                </li>
+                <li class="p-[10px] hover:bg-[#ffffff1a] hover:text-white text-[#c2c7d0]">
+                    <a href="{{ route('images.index') }}" class="flex items-center hover:text-white">
+                        <i class="text-inherit nav-icon fa-solid fa-images mx-3 text-[2rem]"></i>
+                        <p class="text-inherit">Images</p>
                     </a>
                 </li>
                 <li class="p-[10px] hover:bg-[#ffffff1a] hover:text-white text-[#c2c7d0]">

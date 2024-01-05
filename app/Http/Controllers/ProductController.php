@@ -8,35 +8,37 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\ProductRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    const PAGINATION = 50;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $pagination = 50;
-        $products = new Product();
-        if ($request->SearchProductName != '') {
-            $products = $products->where('name', 'LIKE', '%' . $request->SearchProductName . '%');
+        $products = Product::query();
+
+        if ($request->SearchProductName) {
+            $products->where('name', 'LIKE', '%' . $request->SearchProductName . '%');
         }
-        if ($request->SearchCategoryId != '') {
-            $products = $products->where('category', $request->SearchCategoryId);
+        if ($request->SearchCategoryName) {
+            $products->where('category', $request->SearchCategoryName);
         }
         if ($request->SearchStatusId != '') {
-            $products = $products->where('status', $request->SearchStatusId);
+            $products->where('status', $request->SearchStatusId);
         }
-        if ($request->SearchPriceMin != '') {
-            $products = $products->where('price', '>=', $request->SearchPriceMin);
+        if ($request->SearchPriceMin) {
+            $products->where('price', '>=', $request->SearchPriceMin);
         }
-        if ($request->SearchPriceMax != '') {
-            $products = $products->where('price', '<=', $request->SearchPriceMax);
+        if ($request->SearchPriceMax) {
+            $products->where('price', '<=', $request->SearchPriceMax);
         }
-        if ($request->pagination != '') {
+        if ($request->pagination) {
             $pagination = $request->pagination;
         }
-        $products = $products->paginate($pagination)->withQueryString();
+        $products = $products->paginate($pagination ?? static::PAGINATION)->withQueryString();
 
         return view('products.index', compact('products'));
     }
@@ -69,10 +71,12 @@ class ProductController extends Controller
                 $product->images()->attach($request->input('images'));
                 $product->sizes()->attach($request->input('sizes'));
             });
+
             return redirect()->route('product.index')->with('success', 'Product created successfully');
         } catch (\Exception $e) {
             Log::error($e);
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->withInput(request()->all())
                 ->with('error', 'Add product failed!');
         }
@@ -87,28 +91,18 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        //
         try {
-            $product = Product::with(['colors', 'images', 'sizes'])->find($id);
+            $product = Product::find($id);
             $images = Image::all();
-            $productColors = [];
-            $productSizes = [];
-            $productImages = [];
+            $productColorIds = $product->colors->pluck('id')->all();
+            $productSizeIds = $product->sizes->pluck('id')->all();
+            $productImageIds = $product->images->pluck('id')->all();
 
-            foreach ($product->colors as $color) {
-                $productColors[] = $color->id;
-            }
-            foreach ($product->sizes as $size) {
-                $productSizes[] = $size->id;
-            }
-            foreach ($product->images as $image) {
-                $productImages[] = $image->id;
-            }
-
-            return view('products.edit', compact('id', 'product', 'images', 'productColors', 'productSizes', 'productImages'));
+            return view('products.edit', compact('id', 'product', 'images', 'productColorIds', 'productSizeIds', 'productImageIds'));
         } catch (\Exception $e) {
             Log::error($e);
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->withInput(request()->all())
                 ->with('error', 'Error go to edit product: ' . $e->getMessage() . ' ' . $e->getLine());
         }
@@ -124,8 +118,7 @@ class ProductController extends Controller
         try {
             DB::transaction(function () use ($request, $id) {
 
-                $product = Product::findOrFail($id);
-
+                $product = Product::find($id);
                 $product->update([
                     'name' => $request->input('name'),
                     'sku' => $request->input('sku'),
@@ -143,7 +136,8 @@ class ProductController extends Controller
 
         } catch (\Exception $e) {
             Log::error($e);
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->withInput(request()->all())
                 ->with('error', 'Error update product: ' . $e->getMessage() . ' ' . $e->getLine());
         }
@@ -154,21 +148,33 @@ class ProductController extends Controller
      */
     public function destroy(Request $request, string $id)
     {
-        //
         try {
             DB::transaction(function () use ($id) {
-                $product = Product::with(['colors', 'images', 'sizes'])->find($id);
+                $images = Product::where('id', $id)->first()->images;
 
-                if (!$product) {
-                    return response()->json(['error' => 'Product not found.'], 404);
+                foreach ($images as $image) {
+                    $url = str_replace('/storage', 'public', $image->path);
+                    Storage::delete($url);
                 }
-
+                
+                $product = Product::find($id);
+                $product->colors()->detach();
+                $product->sizes()->detach();
+                $product->images()->delete();
+                $product->images()->detach();
+                $product->cartDetails()->delete();
                 $product->delete();
             });
-            return response()->json(['success' => 'Deleted product successfully.']);
+
+            if ($request->ajax()) {
+                return response()->json(['success' => 'Deleted product successfully.']);
+            }
+
+            return redirect()->route('product.index')->with('success', 'Deleted product successfully.');
         } catch (\Exception $e) {
             Log::error($e);
-            return redirect()->back()
+            return redirect()
+                ->back()
                 ->withInput(request()->all())
                 ->with('error', 'Error delete product: ' . $e->getMessage() . ' ' . $e->getLine());
         }
@@ -176,16 +182,21 @@ class ProductController extends Controller
 
     public function productDetail(string $id)
     {
-        $product = Product::with(['images', 'colors', 'sizes'])->find($id);
-        if(!$product){
-            return redirect()->back()->with('error', "Can't find product.");
-        }
-        if (auth('admin')->check()) {
-            $products = Product::with(['images'])->where('id', '!=', $id)->take(4)->get();
-            return view('admin.productDetail', compact('products', 'product'));
-        } else {
-            $products = Product::where('status', 1)->with(['images'])->where('id', '!=', $id)->take(4)->get();
-            return view('users.productDetail', compact('product', 'products'));
+        try {
+            $product = Product::find($id);
+            $products = Product::where('id', '!=', $id)->limit(4);
+
+            if (auth('admin')->check()) {
+                $products = $products->get();
+
+                return view('admin.productDetail', compact('products', 'product'));
+            } else {
+                $products = $products->where('status', 1)->get();
+
+                return view('users.productDetail', compact('product', 'products'));
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', "Something failed.");
         }
     }
 

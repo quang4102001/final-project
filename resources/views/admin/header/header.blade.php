@@ -10,7 +10,7 @@
             </li>
             <li class="py-2 px-3 hover:bg-[#eee]">Personal information</li>
             <li class="py-2 px-3 hover:bg-[#eee] rounded-b-lg">
-                <a class='bg-transparent flex items-center' href='{{ route('auth.logout') }}'>
+                <a class='bg-transparent flex items-center' href='{{ route('auth.logoutAdmin') }}'>
                     <span class="material-symbols-outlined mr-3">
                         logout
                     </span>

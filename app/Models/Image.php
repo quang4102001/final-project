@@ -15,10 +15,7 @@ class Image extends Model
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $fillable = [
-        'id',
-        'path',
-    ];
+    protected $guarded = [];
 
     public function products() {
         return $this->belongsToMany(Product::class,'product_image');
