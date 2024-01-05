@@ -24,13 +24,13 @@ class CartController extends Controller
         if ($cartDetails) {
             foreach ($cartDetails as $item) {
                 $cart[] = [
-                    'id' => $item->product_id ?? '',
-                    'name' => $item->product->name ?? 'Tên sản phẩm',
+                    'id' => $item->product_id ?? null,
+                    'name' => $item->product->name ?? null,
                     'img' => $item->product->images[0]->path ?? 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/1.jpg',
-                    'price' => $item->product->discounted_price ?? '9999',
+                    'price' => $item->product->discounted_price ?? 0,
                     'qty' => $item->qty ?? 0,
-                    'colorId' => $item->colors->id ?? '',
-                    'colorName' => $item->colors->name ?? '#fff'
+                    'colorId' => $item->color->id ?? null,
+                    'colorName' => $item->color->name ?? null
                 ];
             }
         }
@@ -47,7 +47,6 @@ class CartController extends Controller
 
     public function addToCart(Request $request)
     {
-        Log::info($request);
         try {
             $userId = auth()->id();
             $cartId = Str::uuid();
@@ -101,21 +100,24 @@ class CartController extends Controller
         try {
             $userId = auth()->id();
             $cartExists = Cart::where('user_id', $userId)->first();
-            $cartDetail = CartDetail::where('cart_id', $cartExists->id)
-                ->where('product_id', $request->productId)
-                ->where('color_id', $request->colorId)
-                ->first();
 
-            if ($cartDetail) {
-                DB::transaction(function () use ($request, $cartDetail) {
-                    if ($cartDetail->qty > 1 && $request->type === 'except') {
-                        $cartDetail->update(['qty' => DB::raw('qty - 1')]);
-                    } else {
-                        $cartDetail->delete();
-                    }
-                });
-            } else {
-                return response()->json(['success' => "Can't find cartDetail."]);
+            if ($cartExists) {
+                $cartDetail = CartDetail::where('cart_id', $cartExists->id)
+                    ->where('product_id', $request->productId)
+                    ->where('color_id', $request->colorId)
+                    ->first();
+
+                if ($cartDetail) {
+                    DB::transaction(function () use ($request, $cartDetail) {
+                        if ($cartDetail->qty > 1 && $request->type === 'except') {
+                            $cartDetail->update(['qty' => DB::raw('qty - 1')]);
+                        } else {
+                            $cartDetail->delete();
+                        }
+                    });
+                } else {
+                    return response()->json(['success' => "Can't find cartDetail."]);
+                }
             }
 
             return response()->json(['success' => 'Delete from cart success.', 'cart' => $this->getCartData()]);
@@ -129,20 +131,22 @@ class CartController extends Controller
         try {
             $userId = auth()->id();
             $cartExists = Cart::where('user_id', $userId)->first();
+            $cartDetail = CartDetail::where('cart_id', $cartExists->id)
+                ->where('product_id', $request->productId)
+                ->where('color_id', $request->colorId)
+                ->first();
 
-            if ($cartExists) {
-                DB::transaction(function () use ($request, $cartExists) {
-                    $cartDetail = CartDetail::where('cart_id', $cartExists->id)
-                        ->where('product_id', $request->productId)
-                        ->where('color_id', $request->colorId)->first();
+            if ($cartDetail) {
+                DB::transaction(function () use ($request, $cartDetail) {
                     if ($request->qty >= 1) {
                         $cartDetail->update(['qty' => $request->qty]);
                     } else {
                         $cartDetail->delete();
                     }
+
                 });
             } else {
-                return response()->json(['success' => "Can't find cartDetail."]);
+                return response()->json(['success' => "Can't find cartDetail.", 'cart' => $this->getCartData()]);
             }
 
             return response()->json(['success' => 'Set quantity successfully.', 'cart' => $this->getCartData()]);
@@ -154,7 +158,7 @@ class CartController extends Controller
     public function checkCart(Request $request)
     {
         $cart = $request->cart;
-        $cartId = array_column($cart, 'id');
+        $cartId = $cart ? array_column($cart, 'id') : [];
         $products = Product::whereIn('id', $cartId)->get();
         //đánh dấu xem có thay đổi mảng cart không
         $check = false;
@@ -170,21 +174,38 @@ class CartController extends Controller
         }
 
         foreach ($cart as $key => $item) {
-            //đánh dấu xem sản phẩm này có còn tồn tại trong database không
-            $isExistsInDatabase = false;
+            //đánh dấu xem sản phẩm này có còn tồn tại trong mối quan hệ không
+            $isExistsInProducts = false;
+            $isExistsInColors = false;
 
             foreach ($products as $product) {
                 // Nếu id của 2 cái bằng nhau thì đánh dấu là có tồn tại trong database và kiểm tra status
                 if ($item['id'] == $product->id) {
-                    $isExistsInDatabase = true;
+                    $isExistsInProducts = true;
                     if ($product->status == 0) {
                         unset($cart[$key]);
                         $check = true;
                     }
+
+                    if (!$product->colors) {
+                        unset($cart[$key]);
+                        $check = true;
+                    }
+
+                    foreach ($product->colors as $color) {
+                        if ($color->id == $item['colorId']) {
+                            $isExistsInColors = true;
+                        }
+                    }
                 }
             }
 
-            if (!$isExistsInDatabase) {
+            if (!$isExistsInProducts) {
+                unset($cart[$key]);
+                $check = true;
+            }
+
+            if (!$isExistsInColors) {
                 unset($cart[$key]);
                 $check = true;
             }
@@ -200,9 +221,12 @@ class CartController extends Controller
     public function removeByCheckCart(Request $request)
     {
         try {
-            DB::transaction(function () use ($request) {
-                CartDetail::whereIn('product_id', $request->ids)->delete();
-            });
+            if ($request->ids) {
+                DB::transaction(function () use ($request) {
+                    CartDetail::whereIn('product_id', $request->ids)->delete();
+                });
+            }
+
             return response()->json(['success' => true]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()]);

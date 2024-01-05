@@ -6,11 +6,6 @@
             <h1 class="text-5xl">Categories</h1>
         </div>
         <div class="text-white flex">
-            <a href="{{ route('categories.create') }}"
-                class="flex items-center px-3 py-3 rounded-lg bg-[#3c8dbc] border hover:text-white hover:bg-[#467e9f] mr-3">
-                <i class="text-inherit fas fa-plus-square mr-3"></i>
-                <p class="text-inherit ">Add new</p>
-            </a>
             <span onCLick="deleteSelectCategories()"
                 class="flex items-center px-3 py-3 rounded-lg bg-[#dd4b39] border hover:text-white text-white cursor-pointer">
                 <i class="text-inherit fas fa-trash-alt mr-3"></i>
@@ -18,6 +13,7 @@
             </span>
         </div>
     </header>
+    {{-- search --}}
     <div class="bg-white p-[20px] mb-4 rounded-lg">
         <div id="searchHeader" class="flex justify-between cursor-pointer">
             <h2 class="text-4xl"><i class="fas fa-search mr-3" aria-hidden="true"></i>Search</h2>
@@ -26,117 +22,31 @@
                 <i id="searchIconOpen" class="fa-solid fa-angle-down"></i>
             </div>
         </div>
-        <form id="searchFormProduct" class="mt-4" action="{{ route('product.index') }}" method="get">
+        <form id="searchFormCategory" class="mt-4" action="{{ route('categories.index') }}" method="get">
             @csrf
 
             <input type="hidden" name="pagination" value="{{ request()->pagination ? request()->pagination : 50 }}">
 
             <div class="fw-bold">
-                <div class="row">
-                    <div class="col-md-5">
-                        {{-- name --}}
-                        <div class="form-group row gx-3 mb-3">
-                            <div class="col-md-4">
-                                <div class="label-wrapper flex justify-end items-center">
-                                    <label class="col-form-label" for="SearchProductName">Product
-                                        name</label>
-                                    <div title="" data-toggle="tooltip" class="ico-help"
-                                        data-original-title="A product name."><i
-                                            class="fas fa-question-circle text-[#3c8dbc] mx-3"></i></div>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <input class="form-control max-w-[425px] text-box single-line" id="SearchProductName"
-                                    name="SearchProductName" type="text" value="{{ request('SearchProductName') }}">
+                {{-- name --}}
+                <div class="flex items-center flex-wrap gap-5">
+                    <div class="form-group row gx-3 mr-3 min-w-[550px]">
+                        <div class="col-md-4">
+                            <div class="label-wrapper flex justify-end items-center">
+                                <label class="col-form-label" for="SearchCategoryName">Category
+                                    name</label>
+                                <div title="" data-toggle="tooltip" class="ico-help"
+                                    data-original-title="A category name."><i
+                                        class="fas fa-question-circle text-[#3c8dbc] mx-3"></i></div>
                             </div>
                         </div>
-                        {{-- category --}}
-                        <div class="form-group row gx-3 mb-3">
-                            <div class="col-md-4">
-                                <div class="label-wrapper flex justify-end items-center">
-                                    <label class="col-form-label" for="SearchCategoryId">Category</label>
-                                    <div title="" data-toggle="tooltip" class="ico-help"
-                                        data-original-title="Search by a specific category."><i
-                                            class="fas fa-question-circle text-[#3c8dbc] mx-3"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <select class="form-control max-w-[425px]" data-val="true"
-                                    data-val-required="The Category field is required." id="SearchCategoryName"
-                                    name="SearchCategoryName">
-                                    <option value=""
-                                        {{ request('SearchCategoryName') == null || request('SearchCategoryName') == '' ? 'selected' : '' }}>
-                                        All</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->name }}"
-                                            {{ request('SearchCategoryName') == $category->name ? 'selected' : '' }}>
-                                            {{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <div class="col-md-8">
+                            <input class="form-control max-w-[425px] text-box single-line" id="SearchCategoryName"
+                                name="SearchCategoryName" type="text" value="{{ request('SearchCategoryName') }}">
                         </div>
                     </div>
-                    <div class="col-md-7">
-                        {{-- status --}}
-                        <div class="form-group row gx-3 mb-3">
-                            <div class="col-md-4">
-                                <div class="label-wrapper flex justify-end items-center">
-                                    <label class="col-form-label" for="SearchStatusId">Status</label>
-                                    <div title="" data-toggle="tooltip" class="ico-help"
-                                        data-original-title="Search by a specific status."><i
-                                            class="fas fa-question-circle text-[#3c8dbc] mx-3"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <select class="form-control max-w-[425px]" data-val="true"
-                                    data-val-required="The Status field is required." id="SearchStatusId"
-                                    name="SearchStatusId">
-                                    <option value=""
-                                        {{ request('SearchStatusId') == null || request('SearchStatusId') == '' ? 'selected' : '' }}>
-                                        All</option>
-                                    <option value="1" {{ request('SearchStatusId') == '1' ? 'selected' : '' }}>
-                                        Published
-                                    </option>
-                                    <option value="0" {{ request('SearchStatusId') == '0' ? 'selected' : '' }}>Draft
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        {{-- price --}}
-                        <div class="form-group row gx-3 mb-3">
-                            <div class="col-md-4">
-                                <div class="label-wrapper flex justify-end items-center">
-                                    <label class="col-form-label" for="SearchStoreId">Price</label>
-                                    <div title="" data-toggle="tooltip" class="ico-help"
-                                        data-original-title="Search by a specific store."><i
-                                            class="fas fa-question-circle text-[#3c8dbc] mx-3"></i>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <div class="row">
-                                    <div class="col col-6">
-                                        <label class="fw-normal" for="SearchPriceMin">From</label>
-                                        <input class="form-control max-w-[425px] text-box single-line" id="SearchPriceMin"
-                                            name="SearchPriceMin" type="text" value="{{ request('SearchPriceMin') }}"
-                                            placeholder="10">
-                                    </div>
-                                    <div class="col col-6">
-                                        <label class="fw-normal" for="SearchPriceMax">To</label>
-                                        <input class="form-control max-w-[425px] text-box single-line" id="SearchPriceMax"
-                                            name="SearchPriceMax" type="text" value="{{ request('SearchPriceMax') }}"
-                                            placeholder="20">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="text-center col-12">
-                        <button type="submit" id="search-products"
+                    <div class="text-center m-w-[150px]">
+                        <button type="submit" id="search-categories"
                             class="bg-[#3c8dbc] text-white px-5 py-3 rounded-lg text-[1.8rem] fw-normal">
                             <i class="fas fa-search text-inherit mr-3"></i>
                             Search
@@ -146,9 +56,58 @@
             </div>
         </form>
     </div>
+
+    {{-- create --}}
+    <div class="bg-white p-[20px] mb-4 rounded-lg">
+        <div id="createHeader" class="flex justify-between cursor-pointer">
+            <h2 class="text-4xl"><i class="fa-solid fa-circle-plus mr-3" aria-hidden="true"></i>Create</h2>
+            <div class="icon-collapse">
+                <i id="createIconClose" class="fa-solid fa-angle-up"></i>
+                <i id="createIconOpen" class="fa-solid fa-angle-down"></i>
+            </div>
+        </div>
+        <form id="createFormCategory" class="mt-4" action="{{ route('categories.store') }}" method="post">
+            @csrf
+
+            <div class="fw-bold">
+                {{-- name --}}
+                <div class="flex items-center flex-wrap gap-5">
+                    <div class="form-group row gx-3 mr-3 min-w-[550px]">
+                        <div class="col-md-4">
+                            <div class="label-wrapper flex justify-end items-center">
+                                <label class="col-form-label" for="CreateCategoryName">Category
+                                    name</label>
+                                <div title="" data-toggle="tooltip" class="ico-help"
+                                    data-original-title="A category name."><i
+                                        class="fas fa-question-circle text-[#3c8dbc] mx-3"></i></div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <input class="form-control max-w-[425px] text-box single-line" id="CreateCategoryName"
+                                name="CreateCategoryName" type="text" value="{{ old('CreateCategoryName') }}">
+                            <span class="error">
+                                @error('CreateCategoryName')
+                                    <span class="text-red-400">{{ $message }}</span>
+                                @enderror
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-center m-w-[150px]">
+                        <button type="submit" id="create-categories"
+                            class="bg-[#3c8dbc] text-white px-5 py-3 rounded-lg text-[1.8rem] fw-normal">
+                            <i class="fa-solid fa-circle-plus text-inherit mr-3"></i>
+                            Create
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {{-- table --}}
     <div class="p-20 bg-white rounded-lg">
         <div class='flex mb-3 justify-end'>
-            <strong class="mr-3">Number products:</strong>
+            <strong class="mr-3">Number categories:</strong>
             <select id="quantitySelect" class="border-2">
                 <option value="10" {{ request()->pagination == 10 ? 'selected' : '' }}>10</option>
                 <option value="20" {{ request()->pagination == 20 ? 'selected' : '' }}>20</option>
@@ -173,14 +132,26 @@
                 <tr class="table-light" id="{{ $category->id }}">
                     <td class="p-4"><input type="checkbox" class="checkBox w-[1.6rem] h-[1.6rem]"
                             value="{{ $category->id }}" /></td>
-                    <td class="p-4">{{ $category->name }}</td>
                     <td class="p-4">
-                        <div class="flex items-center justify-center">
-                            <a href="{{ route('categories.edit', ['id' => $category->id]) }}"><i
-                                    class="fa-solid fa-pen-to-square text-[2.4rem] text-[#3c8dbc] mr-5 hover:text-[#4e9dcb]"></i></a>
+                        <span>{{ $category->name }}</span>
+                        <input type="text" name="edit-name" value="{{ $category->name }}" class="form-control">
+                    </td>
+                    <td class="p-4">
+                        <div class="btnBox1 flex items-center justify-center">
+                            <span onClick="editCategory()" class="cursor-poiter">
+                                <i
+                                    class="fa-solid fa-pen-to-square text-[2.4rem] text-[#3c8dbc] mr-5 hover:text-[#4e9dcb]"></i></span>
                             <span class="cursor-pointer"
-                                onClick="deleteProduct('{{ $category->id }}', '{{ route('categories.destroy', ['id' => $category->id]) }}')">
+                                onClick="deleteCategory('{{ $category->id }}', '{{ route('categories.destroy', ['id' => $category->id]) }}')">
                                 <i class="fa-solid fa-trash-can text-[2.4rem] text-[#dd4b39] hover:text-[#dc3545]"></i>
+                            </span>
+                        </div>
+                        <div class="btnBox2 flex items-center justify-center">
+                            <span class="cursor-pointer"
+                                onClick="updateCategory('{{ $category->id }}', '{{ route('categories.update', ['id' => $category->id]) }}')"><i
+                                    class="fa-solid fa-floppy-disk text-[2.4rem] text-[#3c8dbc] mr-5 hover:text-[#4e9dcb]"></i></span>
+                            <span class="cursor-pointer" onClick="closeCategory()">
+                                <i class="fa-solid fa-circle-xmark text-[2.4rem] text-[#dd4b39] hover:text-[#dc3545]"></i>
                             </span>
                         </div>
                     </td>
@@ -191,10 +162,38 @@
                 </tr>
             @endforelse
         </table>
+        <div class="flex justify-center mb-5">
+            @include('admin.categories.vendor.pagination')
+        </div>
     </div>
+
     <script>
-        const deleteProduct = (id, url) => {
-            if (confirm('Delete Product ?') === true) {
+        $(document).ready(function() {
+            $('.table-light').each(function() {
+                $(this).find("input[name='edit-name']").hide()
+                $(this).find(".btnBox2").hide()
+            })
+        })
+
+        const editCategory = () => {
+            const row = $(event.target).closest('.table-light')
+            row.find("input[name='edit-name']").show()
+            row.find("input[name='edit-name']").val(row.find("td>span").html())
+            row.find(".btnBox2").show()
+            row.find("td>span").hide()
+            row.find(".btnBox1").hide()
+        }
+
+        const closeCategory = () => {
+            const row = $(event.target).closest('.table-light')
+            row.find("input[name='edit-name']").hide()
+            row.find(".btnBox2").hide()
+            row.find("td>span").show()
+            row.find(".btnBox1").show()
+        }
+
+        const deleteCategory = (id, url) => {
+            if (confirm('Delete Category ?') === true) {
                 $.ajax({
                     url: `${url}`,
                     type: "POST",
@@ -228,50 +227,54 @@
             }
         }
 
-        const setStatusAjax = (url, e) => {
-            const status = e.checked ? 1 : 0
-            if (confirm('Change status ?') === true) {
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        status: status
-                    },
-                    success: function(res) {
-                        Toastify({
-                            text: res.success,
-                            duration: 3000,
-                            close: true,
-                            gravity: "top",
-                            position: "right",
-                        }).showToast();
-                    },
-                    error: function(err) {
-                        Toastify({
-                            text: res.error,
-                            duration: 3000,
-                            close: true,
-                            gravity: "top",
-                            position: "right",
-                            style: {
-                                background: "linear-gradient(to right, #dc3545, #dc8890)",
-                            }
-                        }).showToast();
-                        console.error(err);
-                    },
-                });
-            }
-        };
+        const updateCategory = (id, url) => {
+            const row = $(event.target).closest('.table-light')
+            const name = row.find("input[name='edit-name']").val()
+            $.ajax({
+                url: `${url}`,
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    name: name,
+                },
+                success: function(res) {
+                    row.find("input[name='edit-name']").hide()
+                    row.find(".btnBox2").hide()
+                    row.find("td>span").show()
+                    row.find("td>span").html(res.name)
+                    row.find(".btnBox1").show()
+                    Toastify({
+                        text: res.success,
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                    }).showToast();
+                },
+                error: function(res) {
+                    Toastify({
+                        text: res.error,
+                        duration: 3000,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        style: {
+                            background: "linear-gradient(to right, #dc3545, #dc8890)",
+                        }
+                    }).showToast();
+                    console.log(res.validate)
+                }
+            })
+        }
 
-        const deleteSelectProducts = () => {
+        const deleteSelectCategories = () => {
             const ids = []
             $('.checkBox:checked').each(function(i, e) {
                 ids.push(e.value)
             })
-            if (confirm('Delete products ?') === true) {
+            if (confirm('Delete categories ?') === true) {
                 $.ajax({
-                    url: "{{ route('ajax.destroyMany') }}",
+                    url: "{{ route('categories.destroyManyCategories') }}",
                     type: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
@@ -309,47 +312,27 @@
         $(document).ready(function() {
             $('#searchIconClose').hide()
             $('#searchHeader').on('click', function() {
-                if ($('#searchFormProduct').is(':visible')) {
-                    $('#searchFormProduct').hide()
+                if ($('#searchFormCategory').is(':visible')) {
+                    $('#searchFormCategory').hide()
                     $('#searchIconOpen').hide()
                     $('#searchIconClose').show()
-                    console.log('Minh')
                 } else {
-                    console.log('Quang')
-                    $('#searchFormProduct').show()
+                    $('#searchFormCategory').show()
                     $('#searchIconOpen').show()
                     $('#searchIconClose').hide()
                 }
             })
-        })
-
-        $(document).ready(function() {
-            $('#quantitySelect').change(function() {
-                const pagination = $(this).find('option:selected').val()
-                // Lấy URL hiện tại
-                var currentUrl = window.location.href;
-
-                // Kiểm tra xem có tham số truy vấn trong URL không
-                var queryIndex = currentUrl.indexOf('?');
-                var queryString = queryIndex !== -1 ? currentUrl.substring(queryIndex + 1) : '';
-
-                // Chuyển tham số truy vấn thành một đối tượng
-                var params = {};
-                queryString.split('&').forEach(function(pair) {
-                    pair = pair.split('=');
-                    params[pair[0]] = pair[1];
-                });
-
-                // Thêm hoặc cập nhật giá trị 'pagination' trong đối tượng tham số truy vấn
-                params['pagination'] = pagination;
-
-                // Xây dựng URL mới với tham số truy vấn cập nhật
-                var newUrl = currentUrl.split('?')[0] + '?' + Object.keys(params).map(function(key) {
-                    return key + '=' + params[key];
-                }).join('&');
-
-                // Chuyển hướng đến URL mới
-                window.location.href = newUrl;
+            $('#createIconClose').hide()
+            $('#createHeader').on('click', function() {
+                if ($('#createFormCategory').is(':visible')) {
+                    $('#createFormCategory').hide()
+                    $('#createIconOpen').hide()
+                    $('#createIconClose').show()
+                } else {
+                    $('#createFormCategory').show()
+                    $('#createIconOpen').show()
+                    $('#createIconClose').hide()
+                }
             })
         })
     </script>

@@ -359,7 +359,7 @@
         </div>
     </div>
 </section>
-@include('users.handleCart')
+@include('home.handleCart')
 
 <script>
     $(document).ready(function() {

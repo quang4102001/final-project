@@ -6,7 +6,7 @@
                     formData.append('image', e.target.files[0]);
 
                     $.ajax({
-                        url: "{{ route('image.upload') }}",
+                        url: "{{ route('images.upload') }}",
                         type: 'post',
                         data: formData,
                         contentType: false,

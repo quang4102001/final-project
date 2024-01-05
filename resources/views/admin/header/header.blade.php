@@ -1,4 +1,4 @@
-<header class="bg-[#343a40] h-[56px] flex justify-end items-center px-3 fixed top-0 right-0 left-[250px]">
+<header class="bg-[#343a40] h-[56px] flex justify-end items-center px-3 fixed top-0 right-0 left-[250px] z-[999]">
     <div class="cursor-pointer header-icon-user relative text-white">
         <span class="material-symbols-outlined text-[3.5rem] text-inherit">
             person

@@ -1,5 +1,5 @@
-@extends('admin.layout')
+@extends('home.layout')
 
-@section('admin')
+@section('users')
     @include('admin.products.detail')
 @endsection

@@ -1,9 +1,9 @@
-@extends('users.layout')
+@extends('home.layout')
 
 @section('users')
     <div class="row row-cols-5 gx-0">
         <div class="col">
-            @include('users.sidebar.sidebar')
+            @include('home.sidebar.sidebar')
         </div>
         <div class="flex-1 relative">
             <div id="grid-selector">
@@ -19,10 +19,10 @@
             </div>
             {{-- data product --}}
             <div id="grid" class="relative w-100 row row-cols-4 g-5 left-[7.5px] p-5">
-                @include('users.data')
+                @include('home.data')
             </div>
             <div class="flex justify-center mb-5">
-                @include('products.vendor.pagination')
+                @include('admin.products.vendor.pagination')
             </div>
             <footer class="credit text-center">Author: shipra - Distributed By:
                 <a title="Awesome web design code &amp; scripts" href="https://www.codehim.com?source=demo-page"
@@ -31,7 +31,7 @@
         </div>
 
     </div>
-    @include('users.handleCart')
+    @include('home.handleCart')
     <script>
         const showSelectColorBox = (productCard) => {
             const selectColorBox = productCard.find('.color-box')

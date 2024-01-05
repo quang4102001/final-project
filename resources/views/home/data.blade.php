@@ -1,28 +1,14 @@
-@if (session()->has('success'))
-    <script>
-        Toastify({
-            text: "{{ session('success') }}",
-            duration: 3000,
-            close: true,
-            gravity: "top",
-            position: "right",
-        }).showToast();
-    </script>
-    @php
-        session()->forget('success');
-    @endphp
-@endif
-
 @forelse ($products as $product)
     <div class="product col relative flex justify-center">
         <div class="info-large">
-            <h4>{{ $product->name }} status {{ $product->status }}</h4>
+            <h4>{{ $product->name ?? 'Null' }}</h4>
             <div class="sku">
-                PRODUCT SKU: <strong>{{ $product->sku }}</strong>
+                PRODUCT SKU: <strong>{{ $product->sku ?? 'Null' }}</strong>
             </div>
 
             <div class="price-big">
-                <span class="mr-3">${{ $product->price }}</span>${{ $product->discounted_price }}
+                <span
+                    class="mr-3">${{ $product->price ?? 0 }}</span>${{ $product->discounted_price ?? ($product->price ?? 0) }}
             </div>
 
             <h3>COLORS</h3>
@@ -51,7 +37,7 @@
         <div class="make3D">
             <div class="product-front">
                 <div class="shadow"></div>
-                @if (count($product->images) > 0)
+                @if ($product->images && count($product->images) > 0)
                     <img src="{{ $product->images[0]->path }}" alt="{{ $product->images[0]->id }}" />
                 @else
                     <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/1.jpg" alt="" />
@@ -61,11 +47,12 @@
                 <div class="view_gallery">View gallery</div>
                 <div class="stats">
                     <div class="stats-container">
-                        <span class="product_price">${{ $product->discounted_price }}</span>
+                        <span
+                            class="product_price">${{ $product->discounted_price ?? $product->discounted_price }}</span>
                         <span class="product_id hidden">{{ $product->id }}</span>
                         <a href="{{ route('user.productDetail', ['id' => $product->id]) }}"
-                            class="product_name">{{ $product->name }}</a>
-                        <p>{{ $product->category }}</p>
+                            class="product_name">{{ $product->name ?? 'Null' }}</a>
+                        <p>{{ $product->category ? $product->category : 'Chưa có danh mục' }}</p>
 
                         <div class="product-options">
                             <strong>SIZES</strong>
@@ -137,7 +124,7 @@
                         </li>
                     @endforelse
                 </ul>
-                @if ($product->colors->count() > 0)
+                @if ($product->colors)
                     <span class="px-4 py-2 rounded-lg bg-white mt-3 cursor-pointer btn-add-small">
                         Add
                     </span>

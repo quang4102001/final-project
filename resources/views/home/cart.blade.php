@@ -1,4 +1,4 @@
-@extends('users.layout')
+@extends('home.layout')
 
 @section('users')
     <section id="cart-page" class="h-100 bg-white">
@@ -107,5 +107,5 @@
             </div>
         </div>
     </section>
-    @include('users.handleCart')
+    @include('home.handleCart')
 @endsection

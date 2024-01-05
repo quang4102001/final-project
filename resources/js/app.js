@@ -282,7 +282,6 @@ $(document).ready(function () {
     //     Cookies.set("cart", value, { expires: 7 });
     // };
 
-    
     // //make cartItem
     // const makeCartItem = (name, img, price, id) => {
     //     return `<div class="cart-item mt-4 relative">
@@ -298,7 +297,7 @@ $(document).ready(function () {
     //             <i data-id="${id}" class="fa-solid fa-xmark cart-item-close hidden cursor-pointer absolute right-[18px] top-[20px] text-[2rem] text-[#ccc]"></i>
     //         </div>`;
     // };
-    
+
     // //make cartRow
     // const makeCartRow = (id, name, img, price, qty) => {
     //     return `<div class="card mb-3">
@@ -514,4 +513,46 @@ $(document).ready(function () {
     //         addCartInterface(productCard, 1);
     //     });
     // });
+});
+
+$(document).ready(function () {
+    const checkAllChange = function () {
+        var isChecked = $("#checkAll").prop("checked");
+
+        $(".checkBox").prop("checked", isChecked);
+    };
+
+    // Khi click vào checkbox ở header
+    $("#checkAll").change(function () {
+        checkAllChange();
+    });
+
+    // Khi click vào th hoặc td, thay đổi trạng thái của checkbox
+    $("td").click(function (e) {
+        if (e.target.type !== "checkbox") {
+            var checkbox = $(this).find(".checkBox");
+
+            checkbox.prop("checked", !checkbox.prop("checked"));
+            const allChecked =
+                $(".checkBox").length === $(".checkBox:checked").length;
+            $("#checkAll").prop("checked", allChecked);
+        }
+    });
+
+    $("th").click(function (e) {
+        if (e.target.type !== "checkbox") {
+            var checkbox = $(this).find("#checkAll");
+
+            checkbox.prop("checked", !checkbox.prop("checked"));
+            checkAllChange();
+        }
+    });
+
+    $(".checkBox").each(function (i) {
+        $(this).change(function () {
+            const allChecked =
+                $(".checkBox").length === $(".checkBox:checked").length;
+            $("#checkAll").prop("checked", allChecked);
+        });
+    });
 });

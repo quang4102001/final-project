@@ -179,8 +179,7 @@
                     <p class="mb-3"></p>
                     <div id="image-list-box"
                         class="row row-cols-6 p-2 h-[300px] border border-dark position-relative overflow-auto rounded-lg">
-
-                        @forelse ($images as $image)
+                        @foreach ($images as $image)
                             @if (old('images'))
                                 @if (in_array($image->id, old('images')))
                                     <label class="col mb-5 relative">
@@ -190,19 +189,27 @@
                                     </label>
                                 @endif
                             @else
-                                @if (in_array($image->id, $productImageIds))
-                                    <label class="col mb-5 relative">
-                                        <input class="position-absolute" type="checkbox" name="images[]"
-                                            value="{{ $image->id }}" checked />
-                                        <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
-                                    </label>
-                                @endif
+                                <label class="col mb-5 relative">
+                                    <input class="position-absolute" type="checkbox" name="images[]"
+                                        value="{{ $image->id }}" />
+                                    <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
+                                </label>
                             @endif
-                        @empty
-                            <label class="col position-absolut mb-5">
-                                No have image
-                            </label>
-                        @endforelse
+                        @endforeach
+                        @foreach ($product->images as $image)
+                            @if (in_array($image->id, old('images')))
+                                <label class="col mb-5 relative">
+                                    <input class="position-absolute" type="checkbox" name="images[]"
+                                        value="{{ $image->id }}" checked />
+                                    <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
+                                </label>
+                            @endif
+                        @endforeach
+                        @if (!$images && !$product->images)
+                        <label class="col position-absolut mb-5">
+                            No have image
+                        </label>
+                        @endif
 
                     </div>
                 </div>
@@ -214,7 +221,7 @@
             </span>
         </div>
     </form>
-    @include('products.handle.ajaxImage');
+    @include('admin.products.handle.ajaxImage');
     <script>
         const setFormAction = (action) => {
             document.getElementById('product-edit').action = action;

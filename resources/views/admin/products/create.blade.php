@@ -1,7 +1,6 @@
 @extends('admin.layout')
 
 @section('admin')
-
     <form method="post" action="{{ route('product.store') }}">
         @csrf
 
@@ -154,6 +153,12 @@
                     <p class="mb-3"></p>
                     <div id="image-list-box"
                         class="row row-cols-6 p-2 h-[300px] border border-dark position-relative overflow-auto rounded-lg">
+                        @foreach ($images as $image)
+                            <label class="col mb-5 relative">
+                                <input class="position-absolute" type="checkbox" name="images[]" value="{{ $image->id }}"/>
+                                <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
+                            </label>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -164,5 +169,5 @@
             </span>
         </div>
     </form>
-    @include('products.handle.ajaxImage');
+    @include('admin.products.handle.ajaxImage');
 @endsection

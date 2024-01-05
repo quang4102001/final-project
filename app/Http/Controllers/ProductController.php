@@ -38,9 +38,10 @@ class ProductController extends Controller
         if ($request->pagination) {
             $pagination = $request->pagination;
         }
-        $products = $products->paginate($pagination ?? static::PAGINATION)->withQueryString();
 
-        return view('products.index', compact('products'));
+        $products = $products->paginate($pagination ?? static::PAGINATION)->appends($request->except('_token'));
+
+        return view('admin.products.index', compact('products'));
     }
 
     /**
@@ -48,7 +49,8 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('products.create');
+        $images = Image::doesntHave('products')->get();
+        return view('admin.products.create', compact('images'));
     }
 
     /**
@@ -93,12 +95,11 @@ class ProductController extends Controller
     {
         try {
             $product = Product::find($id);
-            $images = Image::all();
+            $images = Image::doesntHave('products')->get();
             $productColorIds = $product->colors->pluck('id')->all();
             $productSizeIds = $product->sizes->pluck('id')->all();
-            $productImageIds = $product->images->pluck('id')->all();
 
-            return view('products.edit', compact('id', 'product', 'images', 'productColorIds', 'productSizeIds', 'productImageIds'));
+            return view('admin.products.edit', compact('id', 'product', 'images', 'productColorIds', 'productSizeIds', 'productImageIds'));
         } catch (\Exception $e) {
             Log::error($e);
             return redirect()
@@ -114,10 +115,8 @@ class ProductController extends Controller
      */
     public function update(ProductRequest $request, string $id)
     {
-        //
         try {
             DB::transaction(function () use ($request, $id) {
-
                 $product = Product::find($id);
                 $product->update([
                     'name' => $request->input('name'),
@@ -150,17 +149,9 @@ class ProductController extends Controller
     {
         try {
             DB::transaction(function () use ($id) {
-                $images = Product::where('id', $id)->first()->images;
-
-                foreach ($images as $image) {
-                    $url = str_replace('/storage', 'public', $image->path);
-                    Storage::delete($url);
-                }
-                
                 $product = Product::find($id);
                 $product->colors()->detach();
                 $product->sizes()->detach();
-                $product->images()->delete();
                 $product->images()->detach();
                 $product->cartDetails()->delete();
                 $product->delete();
@@ -193,10 +184,29 @@ class ProductController extends Controller
             } else {
                 $products = $products->where('status', 1)->get();
 
-                return view('users.productDetail', compact('product', 'products'));
+                return view('home.productDetail', compact('product', 'products'));
             }
+            
         } catch (\Exception $e) {
             return redirect()->back()->with('error', "Something failed.");
+        }
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            DB::transaction(function () use ($request, $id) {
+                $product = Product::find($id);
+                // Cập nhật thông tin cơ bản của sản phẩm
+                $product->update([
+                    'status' => $request->input('status'),
+                ]);
+            });
+
+            return response()->json(['success' => 'Update status successfully']);
+        } catch (\Exception $e) {
+            Log::error($e);
+            return response()->json(['error' => 'Update status failed!']);
         }
     }
 

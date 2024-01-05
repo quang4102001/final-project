@@ -214,11 +214,10 @@
             @endforelse
         </table>
         <div class="flex justify-center mb-5">
-            @include('products.vendor.pagination')
+            @include('admin.products.vendor.pagination')
         </div>
     </div>
 
-    @vite(['resources/js/productsIndex.js'])
     <script>
         const deleteProduct = (id, url) => {
             if (confirm('Delete Product ?') === true) {
@@ -298,7 +297,7 @@
             })
             if (confirm('Delete products ?') === true) {
                 $.ajax({
-                    url: "{{ route('ajax.destroyMany') }}",
+                    url: "{{ route('product.destroyManyProducts') }}",
                     type: 'POST',
                     data: {
                         _token: '{{ csrf_token() }}',
@@ -340,43 +339,11 @@
                     $('#searchFormProduct').hide()
                     $('#searchIconOpen').hide()
                     $('#searchIconClose').show()
-                    console.log('Minh')
                 } else {
-                    console.log('Quang')
                     $('#searchFormProduct').show()
                     $('#searchIconOpen').show()
                     $('#searchIconClose').hide()
                 }
-            })
-        })
-
-        $(document).ready(function() {
-            $('#quantitySelect').change(function() {
-                const pagination = $(this).find('option:selected').val()
-                // Lấy URL hiện tại
-                var currentUrl = window.location.href;
-
-                // Kiểm tra xem có tham số truy vấn trong URL không
-                var queryIndex = currentUrl.indexOf('?');
-                var queryString = queryIndex !== -1 ? currentUrl.substring(queryIndex + 1) : '';
-
-                // Chuyển tham số truy vấn thành một đối tượng
-                var params = {};
-                queryString.split('&').forEach(function(pair) {
-                    pair = pair.split('=');
-                    params[pair[0]] = pair[1];
-                });
-
-                // Thêm hoặc cập nhật giá trị 'pagination' trong đối tượng tham số truy vấn
-                params['pagination'] = pagination;
-
-                // Xây dựng URL mới với tham số truy vấn cập nhật
-                var newUrl = currentUrl.split('?')[0] + '?' + Object.keys(params).map(function(key) {
-                    return key + '=' + params[key];
-                }).join('&');
-
-                // Chuyển hướng đến URL mới
-                window.location.href = newUrl;
             })
         })
     </script>

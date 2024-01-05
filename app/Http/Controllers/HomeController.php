@@ -7,7 +7,7 @@ use App\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
-class UserController extends Controller
+class HomeController extends Controller
 {
     public function index(Request $request)
     {
@@ -32,12 +32,12 @@ class UserController extends Controller
             });
         }
 
-        $products = $products->where('status', 1)->paginate(12)->onEachSide(2)->withQueryString();
-        return view('users.index', compact('products'));
+        $products = $products->where('status', 1)->paginate(12)->appends($request->except('_token'));
+        return view('home.index', compact('products'));
     }
 
     public function cart()
     {
-        return view('users.cart');
+        return view('home.cart');
     }
 }

@@ -28,6 +28,7 @@ class AuthController extends Controller
 
         if (Auth::guard('admin')->attempt(['username' => $credentials['username'], 'password' => $credentials['password'],], $request->has('remember'))) {
             $user = Auth::guard('admin')->user();
+
             if ($user->role === 'admin') {
                 return redirect()->route('admin.index')->with('success', 'Admin login successfully!');
             }
@@ -35,6 +36,7 @@ class AuthController extends Controller
 
         if (Auth::guard('web')->attempt(['username' => $credentials['username'], 'password' => $credentials['password']], $request->has('remember'))) {
             $user = Auth::user();
+
             if ($user->role === 'user') {
                 return redirect()->route('home')->with('success', 'User login successfully!');
             }
@@ -108,7 +110,7 @@ class AuthController extends Controller
                 ]);
             });
 
-            Mail::send('emails.linkResetPassword', ['token' => $token], function ($message) use ($request) {
+            Mail::send('home.emails.linkResetPassword', ['token' => $token], function ($message) use ($request) {
                 $message->to($request->email);
                 $message->subject('Reset Password');
             });
@@ -132,8 +134,7 @@ class AuthController extends Controller
             $updatePassword = ResetPassword::where([
                 'email' => $request->email,
                 'token' => $token
-            ])
-                ->first();
+            ])->first();
 
             if (!$updatePassword) {
                 return redirect()
@@ -145,7 +146,6 @@ class AuthController extends Controller
             DB::transaction(function () use ($request) {
 
                 User::where('email', $request->email)->update(['password' => Hash::make($request->password)]);
-
                 ResetPassword::where(['email' => $request->email])->delete();
             });
 

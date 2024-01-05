@@ -179,7 +179,6 @@
                     .click(function() {
                         let id = $(this).attr("data-id");
                         removeFromCart(id, item.colorId);
-                        console.log($(this).closest('.card'))
                         $(this).closest(".card").remove();
                     });
             });
@@ -277,6 +276,7 @@
             })
         }
     }
+
     const checkCartAuth = (cartUser) => {
         if (cartUser) {
             console.log(cartUser)
@@ -297,25 +297,26 @@
                             let productsNotExistsId = cartUser
                                 .filter(item => !cartRes.some(cart => cart.id === item.id))
                                 .map(item => item.id)
-
-                            $.ajax({
-                                url: "{{ route('cart.removeByCheckCart') }}",
-                                type: "POST",
-                                data: {
-                                    _token: '{{ csrf_token() }}',
-                                    ids: productsNotExistsId
-                                },
-                                success: function(res) {
-                                    window.location.reload();
-                                },
-                                error: function(res) {
-                                    console.log(res)
-                                }
-                            })
-
-                            cartUser = [...cartRes]
+                                console.log(productsNotExistsId)
+                            if (productsNotExistsId) {
+                                $.ajax({
+                                    url: "{{ route('cart.removeByCheckCart') }}",
+                                    type: "POST",
+                                    data: {
+                                        _token: '{{ csrf_token() }}',
+                                        ids: productsNotExistsId
+                                    },
+                                    success: function(res) {
+                                        window.location.reload();
+                                    },
+                                    error: function(res) {
+                                        console.log(res)
+                                    }
+                                })
+                            }
 
                         }
+                        cartUser = [...cartRes]
                     }
                 },
                 error: function(res) {

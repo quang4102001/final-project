@@ -1,6 +1,6 @@
 @extends('index')
 
 @section('body')
-    @include('users.header.header')
+    @include('home.header.header')
     @yield('users')
 @endsection

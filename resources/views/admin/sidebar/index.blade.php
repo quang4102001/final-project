@@ -14,6 +14,12 @@
         <nav class="mt-3">
             <ul>
                 <li class="p-[10px] hover:bg-[#ffffff1a] hover:text-white text-[#c2c7d0]">
+                    <a href="{{ route('home') }}" class="flex items-center hover:text-white">
+                        <i class="text-inherit nav-icon fa-solid fa-store mx-3 text-[2rem]"></i>
+                        <p class="text-inherit">Home</p>
+                    </a>
+                </li>
+                <li class="p-[10px] hover:bg-[#ffffff1a] hover:text-white text-[#c2c7d0]">
                     <a href="{{ route('admin.index') }}" class="flex items-center hover:text-white">
                         <i class="text-inherit nav-icon fas fa-desktop mx-3 text-[2rem]"></i>
                         <p class="text-inherit">Dashboard</p>

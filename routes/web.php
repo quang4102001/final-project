@@ -10,7 +10,7 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ImagesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SizesController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,9 +25,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::get('/', [UserController::class, 'index'])->name('home');
-Route::middleware('check.notAccess')->group(function () {
-    Route::get('/cart', [UserController::class, 'cart'])->name('user.cart');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::middleware('check.notAdmin')->group(function () {
+    Route::get('/cart', [HomeController::class, 'cart'])->name('user.cart');
     Route::post('/cart_to_view', [CartController::class, 'cartDataToView'])->name('cart.cartDataToView');
     Route::post('/add_to_cart', [CartController::class, 'addToCart'])->name('cart.addToCart');
     Route::post('/except_from_cart', [CartController::class, 'exceptFromCart'])->name('cart.exceptFromCart');
@@ -39,6 +39,11 @@ Route::middleware('check.notAccess')->group(function () {
 
 Route::middleware('auth.checkAdmin')->prefix("/admin")->group(function () {
     Route::get("/", [AdminController::class, "index"])->name("admin.index");
+    Route::post('/delete_multiple_products', [AjaxController::class, 'destroyManyProducts'])->name('product.destroyManyProducts');
+    Route::post('/delete_multiple_categories', [AjaxController::class, 'destroyManyCategories'])->name('categories.destroyManyCategories');
+    Route::post('/delete_multiple_colors', [AjaxController::class, 'destroyManyColors'])->name('colors.destroyManyColors');
+    Route::post('/delete_multiple_sizes', [AjaxController::class, 'destroyManySizes'])->name('sizes.destroyManySizes');
+    Route::post('/delete_multiple_images', [AjaxController::class, 'destroyManyImages'])->name('images.destroyManyImages');
     Route::prefix('/products')->group(function () {
         Route::get('/', [ProductController::class, 'index'])->name('product.index');
         Route::get('/create', [ProductController::class, 'create'])->name('product.create');
@@ -47,28 +52,30 @@ Route::middleware('auth.checkAdmin')->prefix("/admin")->group(function () {
         Route::post('/{id}', [ProductController::class, 'update'])->name('product.update');
         Route::post('/{id}/delete', [ProductController::class, 'destroy'])->name('product.destroy');
         Route::get('/product_detail/{id}', [ProductController::class, 'productDetail'])->name('product.productDetail');
+        Route::post('/{id}/update_status', [ProductController::class, 'updateStatus'])->name('product.updateStatus');
     });
     Route::prefix('/categories')->group(function () {
         Route::get('/', [CategoriesController::class, 'index'])->name('categories.index');
-        Route::get('/create', [CategoriesController::class, 'create'])->name('categories.create');
-        Route::get('/edit/{id}', [CategoriesController::class, 'edit'])->name('categories.edit');
+        Route::post('/store', [CategoriesController::class, 'store'])->name('categories.store');
+        Route::post('/update/{id}', [CategoriesController::class, 'update'])->name('categories.update');
         Route::post('/destroy/{id}', [CategoriesController::class, 'destroy'])->name('categories.destroy');
     });
     Route::prefix('/colors')->group(function () {
         Route::get('/', [ColorsController::class, 'index'])->name('colors.index');
+        Route::post('/store', [ColorsController::class, 'store'])->name('colors.store');
+        Route::post('/update/{id}', [ColorsController::class, 'update'])->name('colors.update');
+        Route::post('/destroy/{id}', [ColorsController::class, 'destroy'])->name('colors.destroy');
     });
     Route::prefix('/sizes')->group(function () {
         Route::get('/', [SizesController::class, 'index'])->name('sizes.index');
+        Route::post('/store', [SizesController::class, 'store'])->name('sizes.store');
+        Route::post('/update/{id}', [SizesController::class, 'update'])->name('sizes.update');
+        Route::post('/destroy/{id}', [SizesController::class, 'destroy'])->name('sizes.destroy');
     });
     Route::prefix('/images')->group(function () {
         Route::get('/', [ImagesController::class, 'index'])->name('images.index');
-    });
-    Route::prefix('/ajax')->group(function () {
-        Route::post('/delete_many', [AjaxController::class, 'destroyMany'])->name('ajax.destroyMany');
-        Route::post('/{id}/update_status', [AjaxController::class, 'updateStatus'])->name('product.updateStatus');
-    });
-    Route::prefix('/images')->group(function () {
-        Route::post('/upload', [ImageController::class, 'upload'])->name('image.upload');
+        Route::post('/upload', [ImagesController::class, 'upload'])->name('images.upload');
+        Route::post('/destroy/{id}', [ImagesController::class, 'destroy'])->name('images.destroy');
     });
 });
 
@@ -83,5 +90,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset_password/{token}', [AuthController::class, 'handleResetPassword'])->name('auth.handleResetPassword');
 });
 
-Route::middleware('checkLogoutAccess')->middleware('check.notAccess')->get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
-Route::middleware('checkLogoutAccess')->middleware('auth.checkAdmin')->get('/logout_admin', [AuthController::class, 'logoutAdmin'])->name('auth.logoutAdmin');
+Route::middleware('checkLogoutAccess')->group(function(){
+    Route::middleware('check.notAdmin')->get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+    Route::middleware('auth.checkAdmin')->get('/logout_admin', [AuthController::class, 'logoutAdmin'])->name('auth.logoutAdmin');
+});
