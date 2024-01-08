@@ -39,7 +39,7 @@ class ProductController extends Controller
             $pagination = $request->pagination;
         }
 
-        $products = $products->paginate($pagination ?? static::PAGINATION)->appends($request->except('_token'));
+        $products = $products->paginate($pagination ?? static::PAGINATION)->appends($request->all());
 
         return view('admin.products.index', compact('products'));
     }
@@ -58,20 +58,15 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        try {
-            DB::transaction(function () use ($request) {
-                $product = Product::create([
-                    'name' => $request->input('name'),
-                    'sku' => $request->input('sku'),
-                    'price' => $request->input('price'),
-                    'discounted_price' => $request->input('discounted_price'),
-                    'category' => $request->input('category'),
-                    'status' => '1',
-                ]);
+        $params = $request->only(['name', 'sku', 'price', 'discounted_price', 'category']);
+        $params = array_merge($params, ['status' => '1']);
 
-                $product->colors()->attach($request->input('colors'));
-                $product->images()->attach($request->input('images'));
-                $product->sizes()->attach($request->input('sizes'));
+        try {
+            DB::transaction(function () use ($request, $params) {
+                $product = Product::create($params);
+                $product->colors()->attach($request->colors);
+                $product->images()->attach($request->images);
+                $product->sizes()->attach($request->sizes);
             });
 
             return redirect()->route('product.index')->with('success', 'Product created successfully');
@@ -116,17 +111,12 @@ class ProductController extends Controller
     public function update(ProductRequest $request, string $id)
     {
         try {
-            DB::transaction(function () use ($request, $id) {
-                $product = Product::find($id);
-                $product->update([
-                    'name' => $request->input('name'),
-                    'sku' => $request->input('sku'),
-                    'price' => $request->input('price'),
-                    'discounted_price' => $request->input('discounted_price'),
-                    'category' => $request->input('category'),
-                    'status' => '1',
-                ]);
+            $params = $request->only(['name', 'sku', 'price', 'discounted_price', 'category']);
+            $params = array_merge($params, ['status' => '1']);
 
+            $product = Product::find($id);
+            DB::transaction(function () use ($request, $params, $product) {
+                $product->update($params);
                 $product->colors()->sync($request->input('colors', []));
                 $product->images()->sync($request->input('images', []));
                 $product->sizes()->sync($request->input('sizes', []));
@@ -138,7 +128,7 @@ class ProductController extends Controller
             return redirect()
                 ->back()
                 ->withInput(request()->all())
-                ->with('error', 'Error update product: ' . $e->getMessage() . ' ' . $e->getLine());
+                ->with('error', 'Product update failed.');
         }
     }
 
@@ -186,7 +176,7 @@ class ProductController extends Controller
 
                 return view('home.productDetail', compact('product', 'products'));
             }
-            
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', "Something failed.");
         }
@@ -195,13 +185,9 @@ class ProductController extends Controller
     public function updateStatus(Request $request, $id)
     {
         try {
-            DB::transaction(function () use ($request, $id) {
-                $product = Product::find($id);
-                // Cập nhật thông tin cơ bản của sản phẩm
-                $product->update([
-                    'status' => $request->input('status'),
-                ]);
-            });
+            Product::find($id)->update([
+                'status' => $request->input('status'),
+            ]);
 
             return response()->json(['success' => 'Update status successfully']);
         } catch (\Exception $e) {

@@ -23,8 +23,6 @@
             </div>
         </div>
         <form id="searchFormColor" class="mt-4" action="{{ route('colors.index') }}" method="get">
-            @csrf
-
             <input type="hidden" name="pagination" value="{{ request()->pagination ? request()->pagination : 50 }}">
 
             <div class="fw-bold">

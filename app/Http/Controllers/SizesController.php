@@ -22,7 +22,7 @@ class SizesController extends Controller
             $sizes->where('name', 'LIKE', '%' . $request->SearchSizeName . '%');
         }
 
-        $sizes = $sizes->paginate($request->pagination ?? static::PAGINATION)->appends($request->except('_token'));
+        $sizes = $sizes->paginate($request->pagination ?? static::PAGINATION)->appends($request->all());
 
         return view("admin.sizes.index", compact('sizes'));
     }
@@ -30,33 +30,10 @@ class SizesController extends Controller
     public function store(Request $request)
     {
         try {
-            $rules = [
-                'CreateSizeName' => 'required|min:1|max:255|unique:sizes,name',
-            ];
-
-            $messages = [
-                'CreateSizeName.required' => 'Bắt buộc phải nhập trường tên danh mục.',
-                'CreateSizeName.min' => 'Nhập ít nhất :min kí tự.',
-                'CreateSizeName.max' => 'Nhập nhiều nhất :max kí tự.',
-                'CreateSizeName.unique' => 'Trùng tên danh mục.',
-            ];
-
-            $validator = Validator::make($request->all(), $rules, $messages);
-
-            if ($validator->fails()) {
-                return redirect()
-                    ->back()
-                    ->withErrors($validator)
-                    ->withInput()
-                    ->with('error', 'Check your input.');
-            }
-
-            DB::transaction(function () use ($request) {
-                Size::create([
-                    'id' => Str::uuid(),
-                    'name' => $request->CreateSizeName
-                ]);
-            });
+            Size::create([
+                'id' => Str::uuid(),
+                'name' => $request->CreateSizeName
+            ]);
 
             return redirect()->route('sizes.index')->with('success', 'Add size successfully.');
 
@@ -72,28 +49,9 @@ class SizesController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            $rules = [
-                'name' => 'required|min:3|max:255|unique:sizes,name',
-            ];
-
-            $messages = [
-                'name.required' => 'Bắt buộc phải nhập trường tên danh mục.',
-                'name.min' => 'Nhập ít nhất :min kí tự.',
-                'name.max' => 'Nhập nhiều nhất :max kí tự.',
-                'name.unique' => 'Trùng tên danh mục.',
-            ];
-
-            $validator = Validator::make($request->all(), $rules, $messages);
-
-            if ($validator->fails()) {
-                return response()->json(['error' => 'Check your input.', 'validate' => $validator]);
-            }
-
-            DB::transaction(function () use ($request, $id) {
-                Size::find($id)->update([
-                    'name' => $request->name
-                ]);
-            });
+            Size::find($id)->update([
+                'name' => $request->name
+            ]);
 
             return response()->json(['success' => 'Update size successfully.', 'name' => $request->name]);
         } catch (\Exception $e) {

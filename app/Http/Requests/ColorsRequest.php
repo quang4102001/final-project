@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ProductDestroyManyRequest extends FormRequest
+class ColorsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,21 @@ class ProductDestroyManyRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
-            'ids' => ['required'],
+            'CreateColorName' => 'required|unique:colors,name',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'CreateColorName.required' => 'Bắt buộc phải nhập trường :attributes.',
+            'CreateColorName.unique' => 'Trùng :attributes.',
+        ];
+    }
+
+    public function attributes(){
+        return [
+            'CreateColorName' => 'mã màu'
         ];
     }
 }

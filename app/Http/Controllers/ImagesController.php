@@ -32,12 +32,13 @@ class ImagesController extends Controller
     {
         try {
             $image = Image::find($id);
-
+            
             DB::transaction(function () use ($image) {
                 $image->products()->detach();
-                $this->destroyFromStorage($image->path);
                 $image->delete();
             });
+            
+            $this->destroyFromStorage($image->path);
 
             return response()->json(['success' => 'Delete image successfully.']);
         } catch (\Exception $e) {

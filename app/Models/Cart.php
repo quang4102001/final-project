@@ -14,7 +14,7 @@ class Cart extends Model
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $guarded = [];
+    protected $fillable = ['id', 'user_id'];
 
     protected static function boot()
     {

@@ -28,8 +28,6 @@
             </div>
         </div>
         <form id="searchFormProduct" class="mt-4" action="{{ route('product.index') }}" method="get">
-            @csrf
-
             <input type="hidden" name="pagination" value="{{ request()->pagination ? request()->pagination : 50 }}">
 
             <div class="fw-bold">

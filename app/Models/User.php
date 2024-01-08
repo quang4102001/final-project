@@ -17,17 +17,16 @@ class User extends Authenticatable implements CanResetPassword
 
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $guarded = [];
+    protected $fillable = ['id', 'username', 'name', 'email', 'role', 'remember_token'];
+
+    protected $hidden = [
+        'password',
+    ];
 
     protected $guard = 'web';
 
-    public function __construct(array $attributes = [])
+    public function isUser()
     {
-        // Thêm điều kiện để sinh UUID nếu chưa có
-        if (!isset($attributes['id'])) {
-            $attributes['id'] = Uuid::uuid4()->toString();
-        }
-
-        parent::__construct($attributes);
+        return $this->role === 'user';
     }
 }

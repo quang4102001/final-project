@@ -94,3 +94,6 @@ Route::middleware('checkLogoutAccess')->group(function(){
     Route::middleware('check.notAdmin')->get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::middleware('auth.checkAdmin')->get('/logout_admin', [AuthController::class, 'logoutAdmin'])->name('auth.logoutAdmin');
 });
+
+
+// Route::view('/{any}', 'app')->where('any', '.*');

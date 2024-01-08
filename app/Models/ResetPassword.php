@@ -16,5 +16,5 @@ class ResetPassword extends Model
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $guarded = [];
+    protected $fillable = ['id', 'email', 'token'];
 }

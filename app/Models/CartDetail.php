@@ -13,7 +13,7 @@ class CartDetail extends Model
 
     protected $table = 'cart_details';
 
-    protected $guarded = [];
+    protected $fillable = ['id', 'cart_id', 'product_id', 'color_id', 'qty'];
 
     public function product()
     {

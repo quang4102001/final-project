@@ -38,20 +38,18 @@ class AjaxController extends Controller
     public function destroyManyCategories(Request $request)
     {
         try {
-            DB::transaction(function () use ($request) {
-                if ($request->ids) {
-                    $categories = Category::whereIn('id', $request->ids)->get();
+            if ($request->ids) {
+                $categories = Category::whereIn('id', $request->ids)->get();
 
+                DB::transaction(function () use ($request, $categories) {
                     foreach ($categories as $category) {
                         Product::where('category', $category->name)->update([
                             'category' => ''
                         ]);
                     }
-
                     Category::whereIn('id', $request->ids)->delete();
-                }
-
-            });
+                });
+            }
 
             return response()->json(['success' => 'Delete selected categories successfully.']);
         } catch (\Exception $e) {
@@ -63,19 +61,17 @@ class AjaxController extends Controller
     public function destroyManyColors(Request $request)
     {
         try {
-            DB::transaction(function () use ($request) {
-                if ($request->ids) {
-                    $colors = Color::whereIn('id', $request->ids);
-
+            if ($request->ids) {
+                $colors = Color::whereIn('id', $request->ids);
+                DB::transaction(function () use ($colors) {
                     foreach ($colors as $color) {
                         $color->cartDetails()->delete();
                         $color->products()->detach();
                     }
 
                     $colors->delete();
-                }
-
-            });
+                });
+            }
 
             return response()->json(['success' => 'Delete selected colors successfully.']);
         } catch (\Exception $e) {
@@ -87,17 +83,16 @@ class AjaxController extends Controller
     public function destroyManySizes(Request $request)
     {
         try {
-            DB::transaction(function () use ($request) {
-                if ($request->ids) {
-                    $sizes = Size::whereIn('id', $request->ids);
-
+            if ($request->ids) {
+                $sizes = Size::whereIn('id', $request->ids);
+                DB::transaction(function () use ($request, $sizes) {
                     foreach ($sizes as $size) {
                         $size->products()->detach();
                     }
 
                     $sizes->delete();
-                }
-            });
+                });
+            }
 
             return response()->json(['success' => 'Delete selected sizes successfully.']);
         } catch (\Exception $e) {
@@ -109,19 +104,18 @@ class AjaxController extends Controller
     public function destroyManyImages(Request $request)
     {
         try {
-            DB::transaction(function () use ($request) {
-                if ($request->ids) {
-                    $images = Image::whereIn('id', $request->ids);
+            if ($request->ids) {
+                $images = Image::whereIn('id', $request->ids);
 
+                DB::transaction(function () use ($request, $images) {
                     foreach ($images as $image) {
                         $image->products()->detach();
                         $url = str_replace('/storage', 'public', $image->path);
                         Storage::delete($url);
                     }
-
                     $images->delete();
-                }
-            });
+                });
+            }
 
             return response()->json(['success' => 'Delete selected images successfully.']);
         } catch (\Exception $e) {

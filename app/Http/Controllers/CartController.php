@@ -52,13 +52,14 @@ class CartController extends Controller
             $cartId = Str::uuid();
             $cartExists = Cart::where('user_id', $userId)->first();
 
-            DB::transaction(function () use ($request, $cartExists, $cartId, $userId) {
-                if (!$cartExists) {
-                    $cartExists = Cart::create([
-                        'id' => $cartId,
-                        'user_id' => $userId,
-                    ]);
-                }
+            if (!$cartExists) {
+                $cartExists = Cart::create([
+                    'id' => $cartId,
+                    'user_id' => $userId,
+                ]);
+            }
+
+            DB::transaction(function () use ($request, $cartExists) {
 
                 if ($request->type == 'many') {
                     foreach ($request->cart as $item) {
@@ -87,7 +88,7 @@ class CartController extends Controller
                 }
             });
 
-            Cookie::queue(Cookie::forget('cart'));
+            Cookie::forget('cart');
             return response()->json(['success' => 'Add to cart successfully.', 'cart' => $this->getCartData()]);
         } catch (\Exception $e) {
             Log::info($e);
@@ -116,7 +117,7 @@ class CartController extends Controller
                         }
                     });
                 } else {
-                    return response()->json(['success' => "Can't find cartDetail."]);
+                    return response()->json(['error' => "Can't find cartDetail."]);
                 }
             }
 
@@ -186,12 +187,10 @@ class CartController extends Controller
                         unset($cart[$key]);
                         $check = true;
                     }
-
                     if (!$product->colors) {
                         unset($cart[$key]);
                         $check = true;
                     }
-
                     foreach ($product->colors as $color) {
                         if ($color->id == $item['colorId']) {
                             $isExistsInColors = true;
@@ -199,18 +198,15 @@ class CartController extends Controller
                     }
                 }
             }
-
             if (!$isExistsInProducts) {
                 unset($cart[$key]);
                 $check = true;
             }
-
             if (!$isExistsInColors) {
                 unset($cart[$key]);
                 $check = true;
             }
         }
-
         if (!$check) {
             return response()->json(['load' => $check]);
         }
@@ -222,9 +218,7 @@ class CartController extends Controller
     {
         try {
             if ($request->ids) {
-                DB::transaction(function () use ($request) {
-                    CartDetail::whereIn('product_id', $request->ids)->delete();
-                });
+                CartDetail::whereIn('product_id', $request->ids)->delete();
             }
 
             return response()->json(['success' => true]);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ColorsRequest;
 use App\Models\Color;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,39 +22,18 @@ class ColorsController extends Controller
             $colors->where('name', 'LIKE', '%' . $request->SearchColorName . '%');
         }
 
-        $colors = $colors->paginate($request->pagination ?? static::PAGINATION)->appends($request->except('_token'));
+        $colors = $colors->paginate($request->pagination ?? static::PAGINATION)->appends($request->all());
 
         return view("admin.colors.index", compact('colors'));
     }
 
-    public function store(Request $request)
+    public function store(ColorsRequest $request)
     {
         try {
-            $rules = [
-                'CreateColorName' => 'required|unique:colors,name',
-            ];
-
-            $messages = [
-                'CreateColorName.required' => 'Bắt buộc phải nhập trường mã màu.',
-                'CreateColorName.unique' => 'Trùng mã màu.',
-            ];
-
-            $validator = Validator::make($request->all(), $rules, $messages);
-
-            if ($validator->fails()) {
-                return redirect()
-                    ->back()
-                    ->withErrors($validator)
-                    ->withInput()
-                    ->with('error', 'Check your input.');
-            }
-
-            DB::transaction(function () use ($request) {
-                Color::create([
-                    'id' => Str::uuid(),
-                    'name' => $request->CreateColorName
-                ]);
-            });
+            Color::create([
+                'id' => Str::uuid(),
+                'name' => $request->CreateColorName
+            ]);
 
             return redirect()->route('colors.index')->with('success', 'Add color successfully.');
 
@@ -66,29 +46,12 @@ class ColorsController extends Controller
         }
     }
 
-    public function update(Request $request, string $id)
+    public function update(ColorsRequest $request, string $id)
     {
         try {
-            $rules = [
-                'name' => 'required|unique:colors,name',
-            ];
-
-            $messages = [
-                'name.required' => 'Bắt buộc phải nhập trường tên danh mục.',
-                'name.unique' => 'Trùng tên danh mục.',
-            ];
-
-            $validator = Validator::make($request->all(), $rules, $messages);
-            
-            if ($validator->fails()) {
-                return response()->json(['error' => 'Check your input.', 'validate' => $validator]);
-            }
-
-            DB::transaction(function () use ($request, $id) {
-                Color::find($id)->update([
-                    'name' => $request->name
-                ]);
-            });
+            Color::find($id)->update([
+                'name' => $request->name
+            ]);
 
             return response()->json(['success' => 'Update color successfully.', 'name' => $request->name]);
         } catch (\Exception $e) {

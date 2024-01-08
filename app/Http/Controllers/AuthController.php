@@ -29,7 +29,7 @@ class AuthController extends Controller
         if (Auth::guard('admin')->attempt(['username' => $credentials['username'], 'password' => $credentials['password'],], $request->has('remember'))) {
             $user = Auth::guard('admin')->user();
 
-            if ($user->role === 'admin') {
+            if ($user->isAdmin()) {
                 return redirect()->route('admin.index')->with('success', 'Admin login successfully!');
             }
         }
@@ -37,7 +37,7 @@ class AuthController extends Controller
         if (Auth::guard('web')->attempt(['username' => $credentials['username'], 'password' => $credentials['password']], $request->has('remember'))) {
             $user = Auth::user();
 
-            if ($user->role === 'user') {
+            if ($user->isUser()) {
                 return redirect()->route('home')->with('success', 'User login successfully!');
             }
         }
@@ -56,19 +56,16 @@ class AuthController extends Controller
     public function checkRegister(RegisterRequest $request)
     {
         try {
-            DB::transaction(function () use ($request) {
-                $user = User::create([
-                    'id' => Str::uuid(),
-                    'username' => $request->input('username'),
-                    'name' => $request->input('name'),
-                    'password' => Hash::make($request->input('password')),
-                    'email' => $request->input('email'),
-                    'role' => 'user',
-                    'remember_token' => Str::random(64),
-                ]);
+            $params = $request->only(['username, name, email, password']);
+            $params = array_merge($params, [
+                'id' => Str::uuid(),
+                'role' => 'user',
+                'remember_token' => Str::random(64),
+            ]);
 
-                Auth::login($user);
-            });
+            $user = User::create($params);
+
+            Auth::login($user);
 
             return redirect()->route('home')->with('success', 'Login successfully!');
         } catch (\Exception $e) {
@@ -88,7 +85,7 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
-        Cookie::queue(Cookie::forget('cart'));
+        Cookie::forget('cart');
         return redirect()->route("home")->with("success", "Logout successfully!");
     }
 
@@ -102,13 +99,11 @@ class AuthController extends Controller
         try {
             $token = Str::random(length: 64);
 
-            DB::transaction(function () use ($request, $token) {
-                ResetPassword::create([
-                    'id' => Str::uuid(),
-                    'email' => $request->email,
-                    'token' => $token
-                ]);
-            });
+            ResetPassword::queue(ResetPassword::create([
+                'id' => Str::uuid(),
+                'email' => $request->email,
+                'token' => $token
+            ]));
 
             Mail::send('home.emails.linkResetPassword', ['token' => $token], function ($message) use ($request) {
                 $message->to($request->email);
@@ -144,7 +139,6 @@ class AuthController extends Controller
             }
 
             DB::transaction(function () use ($request) {
-
                 User::where('email', $request->email)->update(['password' => Hash::make($request->password)]);
                 ResetPassword::where(['email' => $request->email])->delete();
             });

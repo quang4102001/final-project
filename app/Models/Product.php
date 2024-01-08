@@ -17,7 +17,7 @@ class Product extends Model
 
     const STATUS = 1;
 
-    protected $guarded = [];
+    protected $fillable = ['id', 'name', 'sku', 'price', 'discounted_price', 'category', 'status'];
 
     protected static function boot()
     {

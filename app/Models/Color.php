@@ -15,7 +15,7 @@ class Color extends Model
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $guarded = [];
+    protected $fillable = ['id', 'name'];
 
     protected static function boot()
     {

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Category;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -32,7 +30,7 @@ class HomeController extends Controller
             });
         }
 
-        $products = $products->where('status', 1)->paginate(12)->appends($request->except('_token'));
+        $products = $products->where('status', 1)->paginate(12)->appends($request->all());
         return view('home.index', compact('products'));
     }
 
