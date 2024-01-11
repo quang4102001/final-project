@@ -7,7 +7,6 @@ use App\Models\CartDetail;
 use App\Models\Color;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +14,7 @@ use Illuminate\Support\Facades\Session;
 
 class CartController extends Controller
 {
-    private $sessionKey = 'cart';
+    private $sessionKeyCart = 'cart';
 
     public function addToCart(Request $request)
     {
@@ -25,7 +24,7 @@ class CartController extends Controller
             $sessionCartId = $productId . $colorId;
 
             if (auth()->check()) {
-                $this->sessionKey = "cartUser";
+                $this->sessionKeyCart = "cartUser";
                 $userId = auth()->id();
                 $cartExists = Cart::where('user_id', $userId)->first();
 
@@ -49,12 +48,12 @@ class CartController extends Controller
                 );
             }
 
-            $cart = Session::get($this->sessionKey, []);
+            $cart = Session::get($this->sessionKeyCart, []);
             // đã tồn tại trong giỏ hàng
             if (isset($cart[$sessionCartId]) && $cart[$sessionCartId]['productId'] == $productId && $cart[$sessionCartId]['colorId'] == $colorId) {
                 $cart[$sessionCartId]['qty'] += 1;
 
-                Session::put($this->sessionKey, $cart);
+                Session::put($this->sessionKeyCart, $cart);
                 return response()->json(['success' => 'Add to cart successfully.']);
             }
 
@@ -62,7 +61,7 @@ class CartController extends Controller
             $product = Product::find($productId);
             $color = Color::find($colorId);
             if (!($product && $color)) {
-                return response()->json(['error' => "Do not find product or color."]);
+                return response()->json(['success' => "Do not find product or color."]);
             }
 
             $cart[$sessionCartId] = [
@@ -75,8 +74,8 @@ class CartController extends Controller
                 'colorName' => $color->name ?? "white",
             ];
 
-            Session::put($this->sessionKey, $cart);
-            Log::info(Session::get($this->sessionKey));
+            Session::put($this->sessionKeyCart, $cart);
+            Log::info(Session::get($this->sessionKeyCart));
             return response()->json(['success' => 'Add to cart successfully.']);
         } catch (\Exception $e) {
             Log::info($e);
@@ -92,7 +91,7 @@ class CartController extends Controller
             $sessionCartId = $productId . $colorId;
 
             if (auth()->check()) {
-                $this->sessionKey = "cartUser";
+                $this->sessionKeyCart = "cartUser";
                 $userId = auth()->id();
                 $cartExists = Cart::where('user_id', $userId)->first();
 
@@ -112,7 +111,7 @@ class CartController extends Controller
                 }
             }
 
-            $cart = Session::get($this->sessionKey, []);
+            $cart = Session::get($this->sessionKeyCart, []);
             if (!$cart) {
                 return response()->json(['error' => "Cart is empty."]);
             }
@@ -126,7 +125,7 @@ class CartController extends Controller
             }
 
             Log::info($cart);
-            Session::put($this->sessionKey, $cart);
+            Session::put($this->sessionKeyCart, $cart);
             return response()->json(['success' => 'Except product successfully']);
         } catch (\Exception $e) {
             Log::info($e);
@@ -143,7 +142,7 @@ class CartController extends Controller
             $qty = $request->qty;
 
             if (auth()->check()) {
-                $this->sessionKey = "cartUser";
+                $this->sessionKeyCart = "cartUser";
                 $userId = auth()->id();
                 $cartExists = Cart::where('user_id', $userId)->first();
                 $cartDetail = CartDetail::where('cart_id', $cartExists->id)
@@ -162,7 +161,7 @@ class CartController extends Controller
                 }
             }
 
-            $cart = Session::get($this->sessionKey, []);
+            $cart = Session::get($this->sessionKeyCart, []);
             if (!$cart) {
                 return response()->json(['error' => "Cart is empty."]);
             }
@@ -175,7 +174,7 @@ class CartController extends Controller
                 }
             }
 
-            Session::put($this->sessionKey, $cart);
+            Session::put($this->sessionKeyCart, $cart);
             return response()->json(['success' => 'Set quantity successfully']);
         } catch (\Exception $e) {
             Log::info($e);
@@ -191,7 +190,7 @@ class CartController extends Controller
             $sessionCartId = $productId . $colorId;
 
             if (auth()->check()) {
-                $this->sessionKey = "cartUser";
+                $this->sessionKeyCart = "cartUser";
                 $userId = auth()->id();
                 $cartExists = Cart::where('user_id', $userId)->first();
 
@@ -201,7 +200,7 @@ class CartController extends Controller
                     ->delete();
             }
 
-            $cart = Session::get($this->sessionKey, []);
+            $cart = Session::get($this->sessionKeyCart, []);
             if (!$cart) {
                 return response()->json(['error' => "Cart is empty."]);
             }
@@ -210,7 +209,7 @@ class CartController extends Controller
                 unset($cart[$sessionCartId]);
             }
 
-            Session::put($this->sessionKey, $cart);
+            Session::put($this->sessionKeyCart, $cart);
             return response()->json(['success' => 'Remove from cart successfully']);
         } catch (\Exception $e) {
             Log::info($e);
@@ -271,6 +270,7 @@ class CartController extends Controller
 
             Session::put('cartUser', $newCart ?? []);
             Log::info(Session::get('cartUser'));
+
             return response()->json(['info' => 'merge cart with database successfully.']);
         } catch (\Exception $e) {
             Log::info($e);
@@ -278,53 +278,26 @@ class CartController extends Controller
         }
     }
 
-    // --------------------------------------------------------------------------------------
-    public function getCartData()
+    public function checkSessionCart()
     {
-        $userId = auth()->id();
-        $cartExists = Cart::where('user_id', $userId)->first();
-        $cartDetails = $cartExists ? CartDetail::where('cart_id', $cartExists->id)->with(['color', 'product.images'])->get() : null;
-        $cart = [];
-
-        if ($cartDetails) {
-            foreach ($cartDetails as $item) {
-                $cart[] = [
-                    'id' => $item->product_id ?? null,
-                    'name' => $item->product->name ?? null,
-                    'img' => $item->product->images[0]->path ?? 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/245657/1.jpg',
-                    'price' => $item->product->discounted_price ?? 0,
-                    'qty' => $item->qty ?? 0,
-                    'colorId' => $item->color->id ?? null,
-                    'colorName' => $item->color->name ?? null
-                ];
-            }
+        if (auth()->check()) {
+            $this->sessionKeyCart = 'cartUser';
         }
-
-        return $cart;
-    }
-
-    public function cartDataToView()
-    {
-        $cart = $this->getCartData();
-
-        return response()->json(['cart' => $cart]);
-    }
-
-    public function checkCart(Request $request)
-    {
-        $cart = $request->cart;
-        $cartId = $cart ? array_column($cart, 'id') : [];
-        $products = Product::whereIn('id', $cartId)->get();
+        $cart = Session::get($this->sessionKeyCart);
+        $cartIds = $cart ? array_column($cart, 'productId') : [];
+        $products = Product::whereIn('id', $cartIds)->where('status', 1)->get();
         //đánh dấu xem có thay đổi mảng cart không
         $check = false;
 
         // kiểm tra nếu 1 trong 2 mảng là rỗng thì return luôn
         if (!$products) {
             $check = true;
-            return response()->json(['load' => $check, 'cart' => []]);
+            Session::put($this->sessionKeyCart, []);
+            return response()->json(['load' => $check]);
         }
 
         if (!$cart) {
+            Session::put($this->sessionKeyCart, []);
             return response()->json(['load' => $check]);
         }
 
@@ -335,7 +308,7 @@ class CartController extends Controller
 
             foreach ($products as $product) {
                 // Nếu id của 2 cái bằng nhau thì đánh dấu là có tồn tại trong database và kiểm tra status
-                if ($item['id'] == $product->id) {
+                if ($item['productId'] == $product->id) {
                     $isExistsInProducts = true;
                     if ($product->status == 0) {
                         unset($cart[$key]);
@@ -362,22 +335,52 @@ class CartController extends Controller
             }
         }
         if (!$check) {
+            Session::put($this->sessionKeyCart, $cart);
             return response()->json(['load' => $check]);
         }
-
-        return response()->json(['load' => $check, 'cart' => $cart]);
+        Session::put($this->sessionKeyCart, $cart);
+        return response()->json(['load' => $check]);
     }
 
-    public function removeByCheckCart(Request $request)
+    public function checkDatabaseCart()
     {
         try {
-            if ($request->ids) {
-                CartDetail::whereIn('product_id', $request->ids)->delete();
+            $userId = auth()->id();
+            $cartExists = Cart::where('user_id', $userId)->first();
+            if (!$cartExists) {
+                return response()->json(['info', 'Cart do not exists.']);
             }
 
-            return response()->json(['success' => true]);
+            $cartDetails = CartDetail::where('cart_id', $cartExists->id)->get();
+            if ($cartDetails->isEmpty()) {
+                return response()->json(['info', 'Cart is empty.']);
+            }
+            $productCartIds = $cartDetails ? $cartDetails->pluck('product_id')->all() : [];
+
+            $products = Product::whereIn('id', $productCartIds)->where('status', 1)->get();
+            if ($products->isEmpty()) {
+                return response()->json(['info', 'Cart to empty array.']);
+            }
+
+            DB::transaction(function () use ($cartDetails, $products) {
+                foreach ($cartDetails as $item) {
+                    if (!$products->pluck('id')->contains($item->product_id)) {
+                        $item->delete();
+                        continue;
+                    }
+                    $isColorExistInProduct = $products->contains(function ($product) use ($item) {
+                        return $product->id == $item->product_id && $product->colors->pluck('id')->contains($item->color_id);
+                    });
+                    if (!$isColorExistInProduct) {
+                        $item->delete();
+                    }
+                }
+            });
+
+            return response()->json(['info', 'Check cart successfully.']);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()]);
+            Log::info($e);
+            return response()->json(['info', 'Check cart failed.']);
         }
     }
 }

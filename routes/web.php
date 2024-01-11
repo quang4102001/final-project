@@ -32,14 +32,11 @@ Route::post('/except_from_cart', [CartController::class, 'exceptFromCart'])->nam
 Route::post('/remove_from_cart', [CartController::class, 'removeFromCart'])->name('cart.removeFromCart');
 Route::post('/merge_cart_database', [CartController::class, 'mergeCartWithDatabase'])->name('cart.mergeCartWithDatabase');
 Route::post('/set_to_cart', [CartController::class, 'setToCart'])->name('cart.setToCart');
+Route::post('/check_session_cart', [CartController::class, 'checkSessionCart'])->name('cart.checkSessionCart');
+Route::post('/check_database_cart', [CartController::class, 'checkDatabaseCart'])->name('cart.checkDatabaseCart');
 Route::get('/cart', [HomeController::class, 'cart'])->name('user.cart');
 
-Route::middleware('check.notAdmin')->group(function () {
-    Route::post('/cart_to_view', [CartController::class, 'cartDataToView'])->name('cart.cartDataToView');
-    Route::post('/check_cart', [CartController::class, 'checkCart'])->name('cart.checkCart');
-    Route::post('/remove_by_check_cart', [CartController::class, 'removeByCheckCart'])->name('cart.removeByCheckCart');
-    Route::get('/product_detail/{id}', [ProductController::class, 'productDetail'])->name('user.productDetail');
-});
+Route::middleware('check.notAdmin')->get('/product_detail/{id}', [ProductController::class, 'productDetail'])->name('user.productDetail');
 
 Route::middleware('auth.checkAdmin')->prefix("/admin")->group(function () {
     Route::get("/", [AdminController::class, "index"])->name("admin.index");
@@ -94,7 +91,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset_password/{token}', [AuthController::class, 'handleResetPassword'])->name('auth.handleResetPassword');
 });
 
-Route::middleware('checkLogoutAccess')->group(function(){
+Route::middleware('checkLogoutAccess')->group(function () {
     Route::middleware('check.notAdmin')->get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::middleware('auth.checkAdmin')->get('/logout_admin', [AuthController::class, 'logoutAdmin'])->name('auth.logoutAdmin');
 });

@@ -112,7 +112,6 @@ class ProductController extends Controller
     {
         try {
             $params = $request->only(['name', 'sku', 'price', 'discounted_price', 'category_id']);
-            $params = array_merge($params, ['status' => '1']);
 
             $product = Product::find($id);
             DB::transaction(function () use ($request, $params, $product) {

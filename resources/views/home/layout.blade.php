@@ -22,7 +22,42 @@
         </script>
     @endif
 
+    @if (auth()->check())
+        <script>
+            $.ajax({
+                url: "{{ route('cart.checkDatabaseCart') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                },
+                success: function(res) {
+                    console.log(res)
+                },
+                error: function(res) {
+                    console.log(res)
+                }
+            })
+        </script>
+    @endif
+
     <script>
+        $(document).ready(function() {
+            $.ajax({
+                url: "{{ route('cart.checkSessionCart') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                },
+                success: function(res) {
+                    if (res.load) {
+                        window.location.reload();
+                    }
+                },
+                error: function(res) {
+                    console.log(res)
+                }
+            })
+        })
         const addToCart = (id, colorId) => {
             $.ajax({
                 url: "{{ route('cart.addToCart') }}",
