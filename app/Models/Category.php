@@ -11,7 +11,7 @@ class Category extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table='categories';
+    protected $table = 'categories';
 
     protected $primaryKey = 'id';
     public $incrementing = false;
@@ -26,5 +26,10 @@ class Category extends Model
         static::creating(function ($model) {
             $model->id = Uuid::generate()->string;
         });
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'category_id');
     }
 }

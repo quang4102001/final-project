@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -13,6 +14,7 @@ class ProductsTableSeeder extends Seeder
      */
     public function run(): void
     {
+        $CategoryIds = Category::pluck('id');
         // Thêm dữ liệu mẫu
         $products = [
             [
@@ -21,7 +23,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P1',
                 'price' => 19,
                 'discounted_price' => 15,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -30,7 +32,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P2',
                 'price' => 29,
                 'discounted_price' => 25,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -39,7 +41,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P3',
                 'price' => 30,
                 'discounted_price' => 15,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -48,7 +50,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P3',
                 'price' => 37,
                 'discounted_price' => 17,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -57,7 +59,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P4',
                 'price' => 30,
                 'discounted_price' => 25,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -66,7 +68,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P4',
                 'price' => 37,
                 'discounted_price' => 27,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -75,7 +77,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P1',
                 'price' => 19,
                 'discounted_price' => 15,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -84,7 +86,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P2',
                 'price' => 29,
                 'discounted_price' => 25,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -93,7 +95,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P3',
                 'price' => 30,
                 'discounted_price' => 15,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -102,7 +104,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P3',
                 'price' => 37,
                 'discounted_price' => 17,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -111,7 +113,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P4',
                 'price' => 30,
                 'discounted_price' => 25,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             [
@@ -120,7 +122,7 @@ class ProductsTableSeeder extends Seeder
                 'sku' => 'P4',
                 'price' => 37,
                 'discounted_price' => 27,
-                'category' => 'Dressed',
+                'category_id' => $CategoryIds->random(),
                 'status' => '1'
             ],
             // Thêm nhiều sản phẩm khác nếu cần

@@ -52,7 +52,7 @@
                         <span class="product_id hidden">{{ $product->id }}</span>
                         <a href="{{ route('user.productDetail', ['id' => $product->id]) }}"
                             class="product_name">{{ $product->name ?? 'Null' }}</a>
-                        <p>{{ $product->category ? $product->category : 'Chưa có danh mục' }}</p>
+                        <p>{{ $product->category->name ? $product->category->name : 'Chưa có danh mục' }}</p>
 
                         <div class="product-options">
                             <strong>SIZES</strong>

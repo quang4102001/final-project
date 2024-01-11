@@ -13,7 +13,7 @@ class HomeController extends Controller
 
         if ($request->categories) {
             $categories = explode(',', $request->categories);
-            $products->whereIn('category', $categories);
+            $products->whereIn('category_id', $categories);
         }
 
         if ($request->colors) {

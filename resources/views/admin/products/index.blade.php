@@ -53,7 +53,7 @@
                         <div class="form-group row gx-3 mb-3">
                             <div class="col-md-4">
                                 <div class="label-wrapper flex justify-end items-center">
-                                    <label class="col-form-label" for="SearchCategoryId">Category</label>
+                                    <label class="col-form-label" for="SearchCategory">Category</label>
                                     <div title="" data-toggle="tooltip" class="ico-help"
                                         data-original-title="Search by a specific category."><i
                                             class="fas fa-question-circle text-[#3c8dbc] mx-3"></i>
@@ -62,14 +62,14 @@
                             </div>
                             <div class="col-md-8">
                                 <select class="form-control max-w-[425px]" data-val="true"
-                                    data-val-required="The Category field is required." id="SearchCategoryName"
-                                    name="SearchCategoryName">
+                                    data-val-required="The Category field is required." id="SearchCategory"
+                                    name="SearchCategory">
                                     <option value=""
-                                        {{ request('SearchCategoryName') == null || request('SearchCategoryName') == '' ? 'selected' : '' }}>
+                                        {{ request('SearchCategory') == null || request('SearchCategory') == '' ? 'selected' : '' }}>
                                         All</option>
                                     @foreach ($categories as $category)
-                                        <option value="{{ $category->name }}"
-                                            {{ request('SearchCategoryName') == $category->name ? 'selected' : '' }}>
+                                        <option value="{{ $category->id }}"
+                                            {{ request('SearchCategory') == $category->id ? 'selected' : '' }}>
                                             {{ $category->name }}</option>
                                     @endforeach
                                 </select>
@@ -182,7 +182,7 @@
                     </td>
                     <td class="p-4">{{ $product->price }}</td>
                     <td class="p-4">{{ $product->discounted_price }}</td>
-                    <td class="p-4">{{ $product->category }}</td>
+                    <td class="p-4">{{ $product->category->name }}</td>
                     <td class="p-4">
                         <label class="cursor-pointer p-1">
                             <input class="input-status hidden" type="checkbox" name="product-status-check"

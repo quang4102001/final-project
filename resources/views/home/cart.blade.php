@@ -12,9 +12,93 @@
                                         <i class="fas fa-long-arrow-alt-left me-2"></i>Continue shopping</a>
                                 </h5>
                                 <hr>
-                                <p id="cart-no-item" class="py-2 flex justify-center mt-5">
-                                    <i class="text-[#ccc]">No item in cart.</i>
-                                </p>
+                                @if (session('cartUser'))
+                                    @foreach (session('cartUser') as $item)
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <div class="d-flex flex-row align-items-center">
+                                                        <div>
+                                                            <img src="{{ $item['img'] }}"
+                                                                class="img-fluid rounded-3 w-[65px]" alt="Shopping item">
+                                                        </div>
+                                                        <div class="ms-3">
+                                                            <h5>{{ $item['name'] }}</h5>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex flex-row align-items-center">
+                                                        <div class="mr-[40px] h-100 flex items-center">
+                                                            <div
+                                                                class="w-[30px] h-[30px] rounded-full shadow-md bg-[{{ $item['colorName'] }}]">
+                                                            </div>
+                                                        </div>
+                                                        <div class="mr-[40px]">
+                                                            <input data-id="{{ $item['productId'] }}"
+                                                                data-colorId="{{ $item['colorId'] }}"
+                                                                data-price="{{ $item['price'] }}" type="number"
+                                                                class="cart-input border rounded-lg leading-[2] px-3 w-[80px]"
+                                                                value="{{ $item['qty'] }}" />
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="mb-0 w-[80px] quantity">
+                                                                ${{ $item['price'] * $item['qty'] }}</h5>
+                                                        </div>
+                                                        <a data-id="{{ $item['productId'] }}"
+                                                            data-colorId="{{ $item['colorId'] }}" href="#!"
+                                                            class="text-[#dd4b39] cart-item-trash"><i
+                                                                class="fas fa-trash-alt"></i></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                                @if (session('cart'))
+                                    @foreach (session('cart') as $item)
+                                        <div class="card mb-3">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <div class="d-flex flex-row align-items-center">
+                                                        <div>
+                                                            <img src="{{ $item['img'] }}"
+                                                                class="img-fluid rounded-3 w-[65px]" alt="Shopping item">
+                                                        </div>
+                                                        <div class="ms-3">
+                                                            <h5>{{ $item['name'] }}</h5>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex flex-row align-items-center">
+                                                        <div class="mr-[40px] h-100 flex items-center">
+                                                            <div
+                                                                class="w-[30px] h-[30px] rounded-full shadow-md bg-[{{ $item['colorName'] }}]">
+                                                            </div>
+                                                        </div>
+                                                        <div class="mr-[40px]">
+                                                            <input data-id="{{ $item['productId'] }}"
+                                                                data-colorId="{{ $item['colorId'] }}"
+                                                                data-price="{{ $item['price'] }}" type="number"
+                                                                class="cart-input border rounded-lg leading-[2] px-3 w-[80px]"
+                                                                value="{{ $item['qty'] }}" />
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="mb-0 w-[80px] quantity">
+                                                                ${{ $item['price'] * $item['qty'] }}</h5>
+                                                        </div>
+                                                        <a data-id="{{ $item['productId'] }}"
+                                                            data-colorId="{{ $item['colorId'] }}" href="#!"
+                                                            class="text-[#dd4b39] cart-item-trash"><i
+                                                                class="fas fa-trash-alt"></i></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                                @if (!session('cart') && !session('cartUser'))
+                                    <p id="cart-no-item" class="py-2 flex justify-center mt-5">
+                                        <i class="text-[#ccc]">No item in cart.</i>
+                                    </p>
+                                @endif
                             </div>
                             <div class="col-lg-5">
 
@@ -55,7 +139,8 @@
                                                     <div class="form-outline form-white">
                                                         <input type="text" id="typeExp"
                                                             class="form-control form-control-lg" placeholder="MM/YYYY"
-                                                            size="7" id="exp" minlength="7" maxlength="7" />
+                                                            size="7" id="exp" minlength="7"
+                                                            maxlength="7" />
                                                         <label class="form-label" for="typeExp">Expiration</label>
                                                     </div>
                                                 </div>
@@ -108,4 +193,37 @@
         </div>
     </section>
     @include('home.handleCart')
+    <script>
+        $(document).ready(function() {
+            //change input quantity cart
+            $("#cart-page .cart-input").each(function() {
+                $(this).change(function() {
+                    let productId = $(this).attr("data-id");
+                    let colorId = $(this).attr("data-colorId");
+                    let price = $(this).attr("data-price");
+                    console.log(price)
+
+                    if ($(this).val() <= 0) {
+                        removeFromCart(productId, colorId)
+                        $(this).closest(".card").remove();
+                    } else {
+                        setToCart(productId, $(this).val(), colorId)
+                        let total = $(this).val() * price
+                        $(this).parent().parent().find('.quantity').html(`$${total}`)
+
+                    }
+                });
+            })
+
+            //click icon trash to remove item out
+            $("#cart-page .cart-item-trash").each(function() {
+                $(this).click(function() {
+                    let productId = $(this).attr("data-id");
+                    let colorId = $(this).attr("data-colorId");
+                    removeFromCart(productId, colorId);
+                    $(this).closest(".card").remove();
+                });
+            })
+        })
+    </script>
 @endsection

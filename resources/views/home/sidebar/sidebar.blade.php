@@ -11,7 +11,45 @@
             </a>
         </header>
         <div id="cart-list" class="max-h-[300px] overflow-auto my-3">
-            <p id="cart-no-item" class="py-2">
+            @if (session('cartUser'))
+                @foreach (session('cartUser') as $item)
+                    @for ($i = 0; $i < $item['qty']; $i++)
+                        <div class="cart-item mt-4 relative">
+                            <div class="d-flex items-center">
+                                <div class="bg-[url('{{ $item['img'] }}')] w-[50px] h-[50px] bg-cover">
+                                </div>
+                                <div class="flex-1 ml-5 pr-[45px]">
+                                    <p class="cart-item-title">{{ $item['name'] }}</p>
+                                    <p class="cart-item-title text-[#5ff7d2] fw-bold">${{ $item['price'] }}</p>
+                                </div>
+                            </div>
+                            <div class="cart-item-border mr-[45px] border-bottom mt-3"></div>
+                            <i data-id="{{ $item['productId'] }}" data-colorId="{{ $item['colorId'] }}"
+                                class="fa-solid fa-xmark cart-item-close hidden cursor-pointer absolute right-[18px] top-[8px] text-[2rem] text-[#ccc] p-3"></i>
+                        </div>
+                    @endfor
+                @endforeach
+            @endif
+            @if (session('cart'))
+                @foreach (session('cart') as $item)
+                    @for ($i = 0; $i < $item['qty']; $i++)
+                        <div class="cart-item mt-4 relative">
+                            <div class="d-flex items-center">
+                                <div class="bg-[url('{{ $item['img'] }}')] w-[50px] h-[50px] bg-cover">
+                                </div>
+                                <div class="flex-1 ml-5 pr-[45px]">
+                                    <p class="cart-item-title">{{ $item['name'] }}</p>
+                                    <p class="cart-item-title text-[#5ff7d2] fw-bold">${{ $item['price'] }}</p>
+                                </div>
+                            </div>
+                            <div class="cart-item-border mr-[45px] border-bottom mt-3"></div>
+                            <i data-id="{{ $item['productId'] }}" data-colorId="{{ $item['colorId'] }}"
+                                class="fa-solid fa-xmark cart-item-close hidden cursor-pointer absolute right-[18px] top-[8px] text-[2rem] text-[#ccc] p-3"></i>
+                        </div>
+                    @endfor
+                @endforeach
+            @endif
+            <p id="cart-no-item" class="py-2 hidden">
                 <i class="text-[#ccc]">No item in cart.</i>
             </p>
         </div>
@@ -22,15 +60,15 @@
             @forelse ($categories as $category)
                 @if (request()->categories)
                     <li class="py-2">
-                        <input type="checkbox" id="{{ $category->id }}" value="{{ $category->name }}" class="filter"
+                        <input type="checkbox" id="{{ $category->id }}" value="{{ $category->id }}" class="filter"
                             name="categories[]"
-                            {{ in_array($category->name, explode(',', request()->categories)) ? 'checked' : '' }}>
+                            {{ in_array($category->id, explode(',', request()->categories)) ? 'checked' : '' }}>
                         <label class="ml-3 text-[#676a74] hover:text-[#333]"
                             for="{{ $category->id }}">{{ $category->name }}</label>
                     </li>
                 @else
                     <li class="py-2">
-                        <input type="checkbox" id="{{ $category->id }}" value="{{ $category->name }}" class="filter"
+                        <input type="checkbox" id="{{ $category->id }}" value="{{ $category->id }}" class="filter"
                             name="categories[]">
                         <label class="ml-3 text-[#676a74] hover:text-[#333]"
                             for="{{ $category->id }}">{{ $category->name }}</label>
@@ -105,6 +143,11 @@
 
 <script>
     $(document).ready(function() {
+        if ($("#cart-list .cart-item").size() == 0) {
+            $("#cart-no-item").fadeIn(500);
+            $("#checkout").fadeOut(500);
+        }
+
         const filterProducts = function(value, param) {
             // Lấy URL hiện tại
             var currentUrl = window.location.href;
@@ -160,7 +203,7 @@
                 }, 1000)
             })
         })
-        
+
         $('#sizes-list .filter').each(function() {
             $(this).change(function() {
                 clearTimeout(filterTimer)
@@ -174,5 +217,19 @@
             })
         })
 
+        $("#cart-list .cart-item-close").each(function() {
+            $(this).off('click').on('click', function() {
+                const productId = $(this).attr('data-id');
+                const colorId = $(this).attr('data-colorId');
+                exceptFromCart(productId, colorId);
+                $(this).closest(".cart-item").fadeOut(300, function() {
+                    $(this).remove();
+                    if ($("#cart-list .cart-item").size() == 0) {
+                        $("#cart-no-item").fadeIn(500);
+                        $("#checkout").fadeOut(500);
+                    }
+                });
+            });
+        })
     })
 </script>

@@ -17,7 +17,7 @@ class User extends Authenticatable implements CanResetPassword
 
     protected $keyType = 'string';
     public $incrementing = false;
-    protected $fillable = ['id', 'username', 'name', 'email', 'role', 'remember_token'];
+    protected $fillable = ['id', 'username', 'name', 'password', 'email', 'role', 'remember_token'];
 
     protected $hidden = [
         'password',

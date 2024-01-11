@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::create('sizes', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->integer('minHeight');
+            $table->integer('maxHeight');
+            $table->integer('minWeight');
+            $table->integer('maxWeight');
             $table->softDeletes();
             $table->timestamps();
         });

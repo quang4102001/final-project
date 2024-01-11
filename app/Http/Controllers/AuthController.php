@@ -12,7 +12,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -56,9 +58,10 @@ class AuthController extends Controller
     public function checkRegister(RegisterRequest $request)
     {
         try {
-            $params = $request->only(['username, name, email, password']);
+            $params = $request->only(['username', 'name', 'email']);
             $params = array_merge($params, [
                 'id' => Str::uuid(),
+                'password' => Hash::make($request->password),
                 'role' => 'user',
                 'remember_token' => Str::random(64),
             ]);
@@ -69,6 +72,7 @@ class AuthController extends Controller
 
             return redirect()->route('home')->with('success', 'Login successfully!');
         } catch (\Exception $e) {
+            Log::info($e);
             return redirect()
                 ->back()
                 ->withInput($request->except('password', 'rePassword'))
@@ -79,13 +83,14 @@ class AuthController extends Controller
     public function logoutAdmin()
     {
         Auth::guard('admin')->logout();
+        Session::forget('cart');
         return redirect()->route("home")->with("success", "Logout successfully!");
     }
 
     public function logout()
     {
         Auth::logout();
-        Cookie::forget('cart');
+        Session::forget('cartUser');
         return redirect()->route("home")->with("success", "Logout successfully!");
     }
 

@@ -9,24 +9,16 @@ use Webpatser\Uuid\Uuid;
 
 class Size extends Model
 {
-    use HasFactory,SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'uuid';
 
-    protected $fillable = ['id', 'name'];
+    protected $fillable = ['id', 'name', 'minHeight', 'maxHeight', 'minWeight', 'maxWeight',];
 
-    protected static function boot()
+    public function products()
     {
-        parent::boot();
-
-        static::creating(function ($model) {
-            $model->id = Uuid::generate()->string;
-        });
-    }
-
-    public function products() {
-        return $this->belongsToMany(Product::class,'product_size');
+        return $this->belongsToMany(Product::class, 'product_size');
     }
 }

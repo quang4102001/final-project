@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AjaxController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CartsController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ColorsController;
 use App\Http\Controllers\ImageController;
@@ -26,12 +27,15 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::post('/add_to_cart', [CartController::class, 'addToCart'])->name('cart.addToCart');
+Route::post('/except_from_cart', [CartController::class, 'exceptFromCart'])->name('cart.exceptFromCart');
+Route::post('/remove_from_cart', [CartController::class, 'removeFromCart'])->name('cart.removeFromCart');
+Route::post('/merge_cart_database', [CartController::class, 'mergeCartWithDatabase'])->name('cart.mergeCartWithDatabase');
+Route::post('/set_to_cart', [CartController::class, 'setToCart'])->name('cart.setToCart');
+Route::get('/cart', [HomeController::class, 'cart'])->name('user.cart');
+
 Route::middleware('check.notAdmin')->group(function () {
-    Route::get('/cart', [HomeController::class, 'cart'])->name('user.cart');
     Route::post('/cart_to_view', [CartController::class, 'cartDataToView'])->name('cart.cartDataToView');
-    Route::post('/add_to_cart', [CartController::class, 'addToCart'])->name('cart.addToCart');
-    Route::post('/except_from_cart', [CartController::class, 'exceptFromCart'])->name('cart.exceptFromCart');
-    Route::post('/set_to_cart', [CartController::class, 'setToCart'])->name('cart.setToCart');
     Route::post('/check_cart', [CartController::class, 'checkCart'])->name('cart.checkCart');
     Route::post('/remove_by_check_cart', [CartController::class, 'removeByCheckCart'])->name('cart.removeByCheckCart');
     Route::get('/product_detail/{id}', [ProductController::class, 'productDetail'])->name('user.productDetail');
@@ -94,6 +98,3 @@ Route::middleware('checkLogoutAccess')->group(function(){
     Route::middleware('check.notAdmin')->get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
     Route::middleware('auth.checkAdmin')->get('/logout_admin', [AuthController::class, 'logoutAdmin'])->name('auth.logoutAdmin');
 });
-
-
-// Route::view('/{any}', 'app')->where('any', '.*');

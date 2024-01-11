@@ -17,7 +17,7 @@ class Product extends Model
 
     const STATUS = 1;
 
-    protected $fillable = ['id', 'name', 'sku', 'price', 'discounted_price', 'category', 'status'];
+    protected $fillable = ['id', 'name', 'sku', 'price', 'discounted_price', 'category_id', 'status'];
 
     protected static function boot()
     {
@@ -44,5 +44,9 @@ class Product extends Model
     public function cartDetails()
     {
         return $this->hasMany(CartDetail::class, 'product_id');
+    }
+
+    public function category(){
+        return $this->belongsTo(Category::class);
     }
 }

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
+use App\Http\Requests\SizesStoreRequest;
+use App\Http\Requests\SizesUpdateRequest;
 use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
 
 class SizesController extends Controller
 {
@@ -21,22 +21,33 @@ class SizesController extends Controller
         if ($request->SearchSizeName) {
             $sizes->where('name', 'LIKE', '%' . $request->SearchSizeName . '%');
         }
+        if ($request->SearchMinHeight) {
+            $sizes->where('minHeight', $request->SearchMinHeight);
+        }
+        if ($request->SearchMaxHeight) {
+            $sizes->where('maxHeight', $request->SearchMaxHeight);
+        }
+        if ($request->SearchMinWeight) {
+            $sizes->where('minWeight', $request->SearchMinWeight);
+        }
+        if ($request->SearchMaxWeight) {
+            $sizes->where('maxWeight', $request->SearchMaxWeight);
+        }
 
         $sizes = $sizes->paginate($request->pagination ?? static::PAGINATION)->appends($request->all());
 
         return view("admin.sizes.index", compact('sizes'));
     }
 
-    public function store(Request $request)
+    public function store(SizesStoreRequest $request)
     {
         try {
-            Size::create([
-                'id' => Str::uuid(),
-                'name' => $request->CreateSizeName
-            ]);
+            $params = $request->only(['name', 'minHeight', 'maxHeight', 'minWeight', 'maxWeight',]);
+            $params = array_merge($params, ['id' => Str::uuid()]);
+
+            Size::create($params);
 
             return redirect()->route('sizes.index')->with('success', 'Add size successfully.');
-
         } catch (\Exception $e) {
             Log::info($e);
             return redirect()
@@ -46,18 +57,17 @@ class SizesController extends Controller
         }
     }
 
-    public function update(Request $request, string $id)
+    public function update(SizesUpdateRequest $request, string $id)
     {
         try {
-            Size::find($id)->update([
-                'name' => $request->name
-            ]);
+            $params = $request->only(['name', 'minHeight', 'maxHeight', 'minWeight', 'maxWeight',]);
 
-            return response()->json(['success' => 'Update size successfully.', 'name' => $request->name]);
+            Size::find($id)->update($params);
+
+            return response()->json(['success' => 'Update size successfully.', 'params' => $params]);
         } catch (\Exception $e) {
             Log::info($e);
             return response()->json(['error' => 'Update size failed.']);
-
         }
     }
 
@@ -72,6 +82,7 @@ class SizesController extends Controller
 
             return response()->json(['success' => 'Delete size successfully.']);
         } catch (\Exception $e) {
+            Log::info($e);
             return response()->json(['error' => 'Delete size successfully.']);
         }
     }

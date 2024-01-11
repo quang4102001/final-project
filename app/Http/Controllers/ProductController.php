@@ -23,8 +23,8 @@ class ProductController extends Controller
         if ($request->SearchProductName) {
             $products->where('name', 'LIKE', '%' . $request->SearchProductName . '%');
         }
-        if ($request->SearchCategoryName) {
-            $products->where('category', $request->SearchCategoryName);
+        if ($request->SearchCategory) {
+            $products->where('category_id', $request->SearchCategory);
         }
         if ($request->SearchStatusId != '') {
             $products->where('status', $request->SearchStatusId);
@@ -58,7 +58,7 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        $params = $request->only(['name', 'sku', 'price', 'discounted_price', 'category']);
+        $params = $request->only(['name', 'sku', 'price', 'discounted_price', 'category_id']);
         $params = array_merge($params, ['status' => '1']);
 
         try {
@@ -94,7 +94,7 @@ class ProductController extends Controller
             $productColorIds = $product->colors->pluck('id')->all();
             $productSizeIds = $product->sizes->pluck('id')->all();
 
-            return view('admin.products.edit', compact('id', 'product', 'images', 'productColorIds', 'productSizeIds', 'productImageIds'));
+            return view('admin.products.edit', compact('id', 'product', 'images', 'productColorIds', 'productSizeIds'));
         } catch (\Exception $e) {
             Log::error($e);
             return redirect()
@@ -111,7 +111,7 @@ class ProductController extends Controller
     public function update(ProductRequest $request, string $id)
     {
         try {
-            $params = $request->only(['name', 'sku', 'price', 'discounted_price', 'category']);
+            $params = $request->only(['name', 'sku', 'price', 'discounted_price', 'category_id']);
             $params = array_merge($params, ['status' => '1']);
 
             $product = Product::find($id);

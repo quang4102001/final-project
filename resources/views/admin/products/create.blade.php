@@ -66,17 +66,20 @@
                 </div>
                 <div class="col">
                     <label for="form-category" class="form-label fw-bold">Category:</label>
-                    <select class="form-select form-select-lg form-control" name="category" id="form-category"
-                        value="{{ old('category') }}" required>
-                        <option selected value="">Choose one</option>
+                    <select class="form-select form-select-lg form-control" name="category_id" id="form-category"
+                        value="{{ old('category_id') }}" required>
+                        <option {{ old('category_id') ? '' : 'selected' }} value="">Choose one</option>
                         @forelse ($categories as $category)
-                            <option value="{{ $category->name }}">{{ $category->name }}</option>
+                            <option value="{{ $category->id }}"
+                                {{ old('category_id') && old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
                         @empty
                             <option value="nothing">Nothing</option>
                         @endforelse
                     </select>
                     <span class="error">
-                        @error('category')
+                        @error('category_id')
                             <span class="text-red-400">{{ $message }}</span>
                         @enderror
                     </span>
@@ -92,8 +95,14 @@
 
                     @forelse ($colors as $color)
                         <div class="mx-5">
-                            <input class="color-item-radio hidden" type="checkbox" name="colors[]"
-                                value="{{ $color->id }}" id="{{ $color->id }}" />
+                            @if (old('colors'))
+                                <input class="color-item-radio hidden" type="checkbox" name="colors[]"
+                                    value="{{ $color->id }}" id="{{ $color->id }}"
+                                    {{ in_array($color->id, old('colors')) ? 'checked' : '' }} />
+                            @else
+                                <input class="color-item-radio hidden" type="checkbox" name="colors[]"
+                                    value="{{ $color->id }}" id="{{ $color->id }}" />
+                            @endif
                             <label
                                 class="color-item-label shadow-md w-[2.4rem] h-[2.4rem] p-[2px] rounded-full border-[1px] border-transparent"
                                 for="{{ $color->id }}">
@@ -123,7 +132,12 @@
 
                     @forelse ($sizes as $size)
                         <label class="mx-5">
-                            <input class="" type="checkbox" name="sizes[]" value="{{ $size->id }}">
+                            @if (old('sizes'))
+                                <input class="" type="checkbox" name="sizes[]" value="{{ $size->id }}"
+                                    {{ in_array($size->id, old('sizes')) ? 'checked' : '' }} />
+                            @else
+                                <input class="" type="checkbox" name="sizes[]" value="{{ $size->id }}" />
+                            @endif
                             <span>{{ $size->name }}</span>
                         </label>
                     @empty
@@ -154,10 +168,19 @@
                     <div id="image-list-box"
                         class="row row-cols-6 p-2 h-[300px] border border-dark position-relative overflow-auto rounded-lg">
                         @foreach ($images as $image)
-                            <label class="col mb-5 relative">
-                                <input class="position-absolute" type="checkbox" name="images[]" value="{{ $image->id }}"/>
-                                <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
-                            </label>
+                            @if (old('images') && in_array($image->id, old('images')))
+                                <label class="col mb-5 relative">
+                                    <input class="position-absolute" type="checkbox" name="images[]"
+                                        value="{{ $image->id }}" checked />
+                                    <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
+                                </label>
+                            @else
+                                <label class="col mb-5 relative">
+                                    <input class="position-absolute" type="checkbox" name="images[]"
+                                        value="{{ $image->id }}" />
+                                    <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
+                                </label>
+                            @endif
                         @endforeach
                     </div>
                 </div>

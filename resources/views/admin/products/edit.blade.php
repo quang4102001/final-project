@@ -75,17 +75,19 @@
                 </div>
                 <div class="col">
                     <label for="form-category" class="form-label fw-bold">Category:</label>
-                    <select class="form-select form-select-lg form-control" name="category" id="form-category"
-                        value="{{ old('category') ?? $product->category }}" required>
+                    <select class="form-select form-select-lg form-control" name="category_id" id="form-category"
+                        value="{{ old('category_id') ?? $product->category_id }}" required>
                         @forelse ($categories as $category)
-                            @if (old('category'))
-                                <option value="{{ $category->name }}"
-                                    {{ old('category') == $category->name ? 'selected' : '' }}>
-                                    {{ $category->name }}</option>
+                            @if (old('category_id'))
+                                <option value="{{ $category->id }}"
+                                    {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
                             @else
-                                <option value="{{ $category->name }}"
-                                    {{ $product->category == $category->name ? 'selected' : '' }}>
-                                    {{ $category->name }}</option>
+                                <option value="{{ $category->id }}"
+                                    {{ $product->category_id == $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
                             @endif
                         @empty
                             <option value="nothing">Nothing</option>
@@ -179,7 +181,7 @@
                     <p class="mb-3"></p>
                     <div id="image-list-box"
                         class="row row-cols-6 p-2 h-[300px] border border-dark position-relative overflow-auto rounded-lg">
-                        @foreach ($images as $image)
+                        @foreach ($product->images as $image)
                             @if (old('images'))
                                 @if (in_array($image->id, old('images')))
                                     <label class="col mb-5 relative">
@@ -187,7 +189,28 @@
                                             value="{{ $image->id }}" checked />
                                         <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
                                     </label>
+                                @else
+                                    <label class="col mb-5 relative">
+                                        <input class="position-absolute" type="checkbox" name="images[]"
+                                            value="{{ $image->id }}" />
+                                        <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
+                                    </label>
                                 @endif
+                            @else
+                                <label class="col mb-5 relative">
+                                    <input class="position-absolute" type="checkbox" name="images[]"
+                                        value="{{ $image->id }}" checked />
+                                    <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
+                                </label>
+                            @endif
+                        @endforeach
+                        @foreach ($images as $image)
+                            @if (old('images') && in_array($image->id, old('images')))
+                                <label class="col mb-5 relative">
+                                    <input class="position-absolute" type="checkbox" name="images[]"
+                                        value="{{ $image->id }}" checked />
+                                    <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
+                                </label>
                             @else
                                 <label class="col mb-5 relative">
                                     <input class="position-absolute" type="checkbox" name="images[]"
@@ -196,19 +219,10 @@
                                 </label>
                             @endif
                         @endforeach
-                        @foreach ($product->images as $image)
-                            @if (in_array($image->id, old('images')))
-                                <label class="col mb-5 relative">
-                                    <input class="position-absolute" type="checkbox" name="images[]"
-                                        value="{{ $image->id }}" checked />
-                                    <img src="{{ $image->path }}" alt="Image" style="width: 100px;">
-                                </label>
-                            @endif
-                        @endforeach
                         @if (!$images && !$product->images)
-                        <label class="col position-absolut mb-5">
-                            No have image
-                        </label>
+                            <label class="col position-absolut mb-5">
+                                No have image
+                            </label>
                         @endif
 
                     </div>

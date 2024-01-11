@@ -36,7 +36,6 @@ class CategoriesController extends Controller
             ]);
 
             return redirect()->route('categories.index')->with('success', 'Add category successfully.');
-
         } catch (\Exception $e) {
             Log::info($e);
             return redirect()
@@ -57,24 +56,17 @@ class CategoriesController extends Controller
         } catch (\Exception $e) {
             Log::info($e);
             return response()->json(['error' => 'Update category failed.']);
-
         }
     }
 
     public function destroy(string $id)
     {
         try {
-            $category = Category::find($id);
-
-            DB::transaction(function () use ($category) {
-                Product::where('category', $category->name)->update([
-                    'category' => ''
-                ]);
-                $category->delete();
-            });
+            Category::find($id)->delete();
 
             return response()->json(['success' => 'Delete category successfully.']);
         } catch (\Exception $e) {
+            Log::info($e);
             return response()->json(['error' => 'Delete category successfully.']);
         }
     }
