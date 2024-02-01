@@ -16,15 +16,23 @@ class CartController extends Controller
 {
     private $sessionKeyCart = 'cart';
 
+    public function checkAuth()
+    {
+        if (auth()->check()) {
+            $this->sessionKeyCart = 'cartUser';
+        }
+    }
+
     public function addToCart(Request $request)
     {
         try {
+            $this->checkAuth();
+
             $productId = $request->productId;
             $colorId = $request->colorId;
             $sessionCartId = $productId . $colorId;
 
             if (auth()->check()) {
-                $this->sessionKeyCart = "cartUser";
                 $userId = auth()->id();
                 $cartExists = Cart::where('user_id', $userId)->first();
 
@@ -75,7 +83,6 @@ class CartController extends Controller
             ];
 
             Session::put($this->sessionKeyCart, $cart);
-            Log::info(Session::get($this->sessionKeyCart));
             return response()->json(['success' => 'Add to cart successfully.']);
         } catch (\Exception $e) {
             Log::info($e);
@@ -86,12 +93,13 @@ class CartController extends Controller
     public function exceptFromCart(Request $request)
     {
         try {
+            $this->checkAuth();
+
             $productId = $request->productId;
             $colorId = $request->colorId;
             $sessionCartId = $productId . $colorId;
 
             if (auth()->check()) {
-                $this->sessionKeyCart = "cartUser";
                 $userId = auth()->id();
                 $cartExists = Cart::where('user_id', $userId)->first();
 
@@ -124,7 +132,6 @@ class CartController extends Controller
                 }
             }
 
-            Log::info($cart);
             Session::put($this->sessionKeyCart, $cart);
             return response()->json(['success' => 'Except product successfully']);
         } catch (\Exception $e) {
@@ -136,13 +143,14 @@ class CartController extends Controller
     public function setToCart(Request $request)
     {
         try {
+            $this->checkAuth();
+
             $productId = $request->productId;
             $colorId = $request->colorId;
             $sessionCartId = $productId . $colorId;
             $qty = $request->qty;
 
             if (auth()->check()) {
-                $this->sessionKeyCart = "cartUser";
                 $userId = auth()->id();
                 $cartExists = Cart::where('user_id', $userId)->first();
                 $cartDetail = CartDetail::where('cart_id', $cartExists->id)
@@ -185,12 +193,13 @@ class CartController extends Controller
     public function removeFromCart(Request $request)
     {
         try {
+            $this->checkAuth();
+
             $productId = $request->productId;
             $colorId = $request->colorId;
             $sessionCartId = $productId . $colorId;
 
             if (auth()->check()) {
-                $this->sessionKeyCart = "cartUser";
                 $userId = auth()->id();
                 $cartExists = Cart::where('user_id', $userId)->first();
 
@@ -280,9 +289,8 @@ class CartController extends Controller
 
     public function checkSessionCart()
     {
-        if (auth()->check()) {
-            $this->sessionKeyCart = 'cartUser';
-        }
+        $this->checkAuth();
+
         $cart = Session::get($this->sessionKeyCart);
         $cartIds = $cart ? array_column($cart, 'productId') : [];
         $products = Product::whereIn('id', $cartIds)->where('status', 1)->get();

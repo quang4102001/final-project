@@ -14,7 +14,7 @@ class ProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'max:255', 'min:6'],
+            'name' => ['required', 'max:255', 'min:6', 'unique:products,name,' . $this->id . ',id,deleted_at,NULL'],
             'sku' => ['required', 'max:255', 'min:3'],
             'price' => ['required', 'numeric', 'min:1'],
             'discounted_price' => ['required', 'numeric', 'min:1'],
@@ -29,6 +29,7 @@ class ProductRequest extends FormRequest
     {
         return [
             'name.required' => "Trường :attribute là bắt buộc.",
+            'name.unique' => ":attribute đã tồn tại.",
             'name.min' => "Trường :attribute không được ít hơn :min kí tự.",
             'name.max' => "Trường :attribute không được nhiều hơn :max kí tự.",
             'sku.max' => "Trường :attribute không được nhiều hơn :max kí tự.",

@@ -32,7 +32,7 @@ class CategoriesController extends Controller
         try {
             Category::create([
                 'id' => Str::uuid(),
-                'name' => $request->CreateCategoryName
+                'name' => $request->name
             ]);
 
             return redirect()->route('categories.index')->with('success', 'Add category successfully.');

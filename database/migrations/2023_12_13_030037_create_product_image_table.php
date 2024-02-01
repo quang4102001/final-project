@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::create('product_image', function (Blueprint $table) {
             $table->id();
-            $table->uuid('product_id');
-            $table->uuid('image_id');
+            $table->uuid('product_id')->index();
+            $table->uuid('image_id')->index();
             $table->softDeletes();
             $table->timestamps();
 

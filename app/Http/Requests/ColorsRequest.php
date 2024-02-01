@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class ColorsRequest extends FormRequest
 {
@@ -22,21 +23,22 @@ class ColorsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'CreateColorName' => 'required|unique:colors,name',
+            'name' => 'required|unique:colors,name,' . $this->id . ',id,deleted_at,NULL',
         ];
     }
 
     public function messages()
     {
         return [
-            'CreateColorName.required' => 'Bắt buộc phải nhập trường :attributes.',
-            'CreateColorName.unique' => 'Trùng :attributes.',
+            'name.required' => 'Bắt buộc phải nhập trường :attribute.',
+            'name.unique' => 'Trùng :attribute.',
         ];
     }
 
-    public function attributes(){
+    public function attributes()
+    {
         return [
-            'CreateColorName' => 'mã màu'
+            'name' => 'mã màu'
         ];
     }
 }

@@ -32,16 +32,17 @@ class ImagesController extends Controller
     {
         try {
             $image = Image::find($id);
-            
+
             DB::transaction(function () use ($image) {
                 $image->products()->detach();
                 $image->delete();
             });
-            
+
             $this->destroyFromStorage($image->path);
 
             return response()->json(['success' => 'Delete image successfully.']);
         } catch (\Exception $e) {
+            Log::error($e);
             return response()->json(['error' => 'Delete image successfully.']);
         }
     }
@@ -49,27 +50,24 @@ class ImagesController extends Controller
     public function upload(ImageRequest $request)
     {
         try {
-            $image = $request->file('image');
-            $imageName = time() . '.' . $image->extension();
+            $imageFile = $request->file('image');
+            $imageName = time() . '.' . $imageFile->extension();
             $id = Str::uuid();
 
-            // Lưu hình ảnh vào thư mục storage
-            $image->storeAs('public/images', $imageName);
-
             // Lưu đường dẫn vào cơ sở dữ liệu
-            DB::transaction(function () use ($id, $imageName) {
-                Image::create([
-                    'id' => $id,
-                    'path' => '/storage/images/' . $imageName,
-                ]);
-            });
-
-            return response()->json([
+            $image = Image::create([
                 'id' => $id,
-                'path' => asset('storage/images/' . $imageName),
-                'success' => 'Uploading image successfully.'
+                'path' => '/storage/images/' . $imageName,
             ]);
 
+            // Lưu hình ảnh vào thư mục storage
+            $imageFile->storeAs('public/images', $imageName);
+
+            return response()->json([
+                'id' => $image->id,
+                'path' => asset($image->path),
+                'success' => 'Uploading image successfully.'
+            ]);
         } catch (\Exception $e) {
             Log::error($e);
             return response()->json(['error', 'Uploading image failed.']);

@@ -22,7 +22,7 @@ class SizesStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|min:1|max:255|unique:sizes,name',
+            'name' => 'required|min:1|max:255|unique:sizes,name,' . $this->id . ',id,deleted_at,NULL',
             'minHeight' => 'required|numeric|min:1',
             'maxHeight' => 'required|numeric|min:1',
             'minWeight' => 'required|numeric|min:1',
@@ -33,22 +33,22 @@ class SizesStoreRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => 'Bắt buộc phải nhập trường :attributes.',
+            'name.required' => 'Bắt buộc phải nhập trường :attribute.',
             'name.min' => 'Nhập ít nhất :min kí tự.',
             'name.max' => 'Nhập nhiều nhất :max kí tự.',
-            'name.unique' => 'Trùng :attributes.',
-            'minHeight.required' => 'Bắt buộc phải nhập trường :attributes.',
-            'minHeight.min' => ':Attributes phải lớn hơn :min.',
-            'minHeight.numeric' => ':Attributes phải là chữ số.',
-            'maxHeight.required' => 'Bắt buộc phải nhập trường :attributes.',
-            'maxHeight.min' => ':Attributes phải lớn hơn :min.',
-            'maxHeight.numeric' => ':Attributes phải là chữ số.',
-            'minWeight.required' => 'Bắt buộc phải nhập trường :attributes.',
-            'minWeight.min' => ':Attributes phải lớn hơn :min.',
-            'minWeight.numeric' => ':Attributes phải là chữ số.',
-            'maxWeight.required' => 'Bắt buộc phải nhập trường :attributes.',
-            'maxWeight.min' => ':Attributes phải lớn hơn :min.',
-            'maxWeight.numeric' => ':Attributes phải là chữ số.',
+            'name.unique' => 'Trùng :attribute.',
+            'minHeight.required' => 'Bắt buộc phải nhập trường :attribute.',
+            'minHeight.min' => ':Attribute phải lớn hơn :min.',
+            'minHeight.numeric' => ':Attribute phải là chữ số.',
+            'maxHeight.required' => 'Bắt buộc phải nhập trường :attribute.',
+            'maxHeight.min' => ':Attribute phải lớn hơn :min.',
+            'maxHeight.numeric' => ':Attribute phải là chữ số.',
+            'minWeight.required' => 'Bắt buộc phải nhập trường :attribute.',
+            'minWeight.min' => ':Attribute phải lớn hơn :min.',
+            'minWeight.numeric' => ':Attribute phải là chữ số.',
+            'maxWeight.required' => 'Bắt buộc phải nhập trường :attribute.',
+            'maxWeight.min' => ':Attribute phải lớn hơn :min.',
+            'maxWeight.numeric' => ':Attribute phải là chữ số.',
         ];
     }
 

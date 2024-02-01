@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+// Route::view("/{any}", "app")->where("any", ".*");
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/add_to_cart', [CartController::class, 'addToCart'])->name('cart.addToCart');

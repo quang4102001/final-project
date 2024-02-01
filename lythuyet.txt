@@ -1,0 +1,675 @@
+p1. GET vs POST
+    GET: phương thức truyền dữ liệu qua url. Dễ để lộ thông tin. có giới hạn về kích thước khoảng 2000 kí tự
+    POST: phương thức truyền dữ liệu qua body request. Không bị lộ thông tin trên url.
+
+2. Quản lý file trong PHP
+    Mở file: 
+        fopen(filename, mode): dùng để mở file, có 2 tham số để truyền vào. Cái thứ nhất là tên file. Cái thứ 2 chỉ định chế độ mở như:
+                                r: mở và chỉ đọc
+                                r+: mở, đọc và viết
+                                w: mở, chỉ ghi file. Khi mở thì nội dung của file sẽ bị xóa sạch. Nếu file không tồn tại sẽ tạo file mới
+                                w+: mở, ghi, đọc file. Khi mở thì nội dung của file sẽ bị xóa sạch. Nếu file không tồn tại sẽ tạo file mới
+                                a: mở file để ghi, bắt đầu ở cuối file. Nếu file không tồn tại sẽ tạo file mới
+                                a+: mở file để đọc, ghi
+                                x: tạo mới file để ghi, return false và báo lỗi nếu file đã tồn tại
+                                x+: tạo mới file để đọc và ghi, return false và báo lỗi nếu file đã tồn tại
+                                c: mở file chỉ để ghi hoặc tạo mới nếu file không tồn tại
+                                c+: mở file để đọc và ghi hoặc tạo mới nếu file không tồn tại
+        Khi gán fopen() vào một biến, ví dụ $myfile = fopen("text.txt", "w") thì:
+            sử dụng feof($myfile) để kiểm tra con trỏ có ở cuối file hay không     
+            sử dụng fclose($myfile) để đóng file đang Mở
+
+    Ghi dữ liệu vào file:
+        fwrite($myfile, data): dùng để ghi dữ liệu vào file, có hai tham số truyền vào. Cái thứ nhất là biến mở file ( fopen ). Cái thứ 2 
+                               là dữ liệu để ghi
+        file_put_contents(filename, data, $flag): dùng để ghi file, có 3 tham số. Tham số thứ nhất là tên file. Tham số thứ 2 là dữ 
+                                                  liệu cần ghi.
+                                                  Tham số thứ 3 là cờ, nếu là 0 thì sẽ xóa nội dung file và ghi đè dữ liệu vào file,
+                                                  nếu là FILE_APPEND thì sẽ ghi thêm vào cuối file
+
+    Đọc nội dung file:
+        fread($myfile, number): dùng để đọc file, có hai tham số truyền vào. Cái thức nhất là biến mở file ( fopen ). Cái thứ 2 là số kí tự đọc
+
+    Đọc một dòng của file:
+        fgets($myfile): dùng để đọc một dòng của file tại vị trí con trỏ hiện tại, có 1 tham số truyền vào. Tham số là biến mở file ( fopen )
+                        nếu mà con trỏ ở cuối file hàm sẽ trả về false và lỗi
+
+    Đọc toàn bộ nội dung của file:
+        file(filename): dùng để đọc toàn bộ nội dung của file, có 1 tham số duy nhất đó là tên file. Hàm này trả về một mảng
+        readfile(filename): dùng để đọc toàn bộ nội dung của file, có 1 tham số duy nhất đó là tên file. Hàm này sẽ in ra luôn
+        file_get_contents(filename): dùng để đọc toàn bộ nội dung của file, có một tham số duy nhất đó là tên file. Hàm này trả về một chuỗi
+
+    Đổi tên file:
+        rename(filename, newname): dùng để đổi tên file, có 2 tham số. Tham số thứ nhất là tên file. Tham số thứ 2 là tên mới của file
+
+    Xóa file:
+        unlink(filename): dùng để xóa file, có một tham số duy nhất là tên file
+
+3. OOP
+    có 4 tính chất:
+        trìu tượng: là đơn giản hóa đối tượng, lấy những đặc điểm quan tâm.
+                    interface:  là khuôn mẫu, tạo ra bộ khung, không phải lớp, không thể khởi tạo
+                                -chỉ được khai báo phương thức
+                                -có thể khai báo hằng nhưng không thể khai báo biến
+                                -các lớp implement interface phải định nghĩa lại các phương thức có trong interface
+                                -một class có thể implement nhiều interface
+                                -interface có thể kế thừa lẫn nhau
+                    abstract class: là lớp đặc biệt định nghĩa các phương thức để cho các lớp con kế thừa và viết lại
+                                    -không thể khởi tạo
+                                    -các phương thức được khai báo là abstract không viết logic bên trong, chỉ được
+                                     khai báo ở mức độ public và protected
+                                    -các lớp kế thừa, phải định nghĩa lại hết cá phương thức trong abstract class
+                                    -có thể kế thừa một lớp và nhiều interface
+                    so sánh:
+                        Giống:
+                            - không thể khởi tạo
+                            - chứa các phương thức không có thân hàm
+                        khác:
+                            interface:
+                                - chỉ có thể kế thừa từ các interface
+                                - chỉ có khai báo, không có nội dung
+                                - không có constructor và destructor
+                                - phạm vi truy cập mặc định là public
+                                - dùng để định nghĩa một khuôn mẫu hoặc quy tắc chung
+                                - cần thời gian tìm phương thức thực tế -> chậm hơn
+                                - khi thêm phương thức mới thì các lớp đang implement để định nghĩa nội dung nếu không sẽ lỗi
+                            abstract class: 
+                                - có thể kế thừa từ 1 lớp và các interface
+                                - có cả thuộc tính, các phương thức bình thường
+                                - có constructor và destructor
+                                - có thể định nghĩa modifier
+                                - sử dụng để định nghĩa cốt lõi của lớp
+                                - nhanh hơn interface
+                                - khi thêm phương thức bình thường sẽ không sao cả
+                    
+        kế thừa: là các lớp có thể sử dụng các thuộc tính, phương thức của lớp mà nó kế thừa -> mối quan hệ lớp cha - lớp con 
+        
+        đóng gói: là các phương thức, thuộc tính của lớp được giới hạn qua các từ khóa:
+            private: chỉ sử dụng được trong lớp.
+            protected: chỉ sử dụng được trong lớp, và lớp con của nó.
+            public: có thể sử dụng ở trong lớp, lớp con, khi khởi tạo.
+        
+        đa hình: là các lớp con khi kế thừa các phương thức từ lớp cha có thể viết lại logic trong phương thức đó (ovewrite)
+
+        trait: sinh ra để giải quyết các vấn đề của php đó là không có đa kế thừa. 
+               Ví dụ có class goodbye, hello, Message muốn kế thừa 2 lớp này để lấy phương thức, nhưng chỉ có thể kế thừa một lớp
+            -tạo trait gần giống class bình thường: 
+                trait Goodbye {
+                    function goodbye () {
+                        echo "Goodbye";
+                    }
+                }
+                trait Hello {
+                    function hello () {
+                        echo "Hello";
+                    }
+                }
+            -sử dụng: dùng từ khóa use để sử dụng
+                class Message {
+                    use Goodbye; -> có thể dùng cái phương thức goodbye như là của mình
+                    use Hello; -> có thể dùng cái phương thức hello như là của mình
+                }
+            -trait được ưu tiên hơn extends (kế thừa một lớp): khi trait và lớp có trùng tên phương thức thì trait sẽ được ưu tiên hơn
+            -khi có nhiều trait mà nó còn trùng tên phương thức thì sử dụng từ khóa "insteadof"
+                class Talker {
+                    use A, B, C {
+                        B::smallTalk insteadof A, C;     -> khi gọi smallTalk, sẽ dùng của trait B
+                        A::bigTalk insteadof B, C;      -> khi gọi bigTalk, sẽ dùng của trait A
+                        C::bigTalk as talk;          -> đổi tên bigTalk của C thành talk
+                    }
+                }
+            -có thể khai báo phương thức abstract
+            -class sử dụng trait không được có thuộc tính trùng tên với thuộc tính của trait mà khác giá trị, nếu không sẽ lỗi
+            -nếu trùng tên phương thức với class thì nó sẽ ưu tiên dùng phương thức của class
+
+4.Method magic
+    -__construct() và __destruct(): là 2 phương thức sẽ chạy khi lớp được khởi tạo hoặc khi bị destroy. Destruct ít khi được sử dụng
+
+    -getting và setting:
+        -__get: là phương thức sẽ chạy khi mà bạn đang cố gắng truy cập vào thuộc tính không public
+        -__set: là phương thức sẽ chạy khi mà bạn cố gắng set một thuộc tính không public
+
+    -__isset(): là phương thước để kiểm tra xem thuộc tính có được truy cập public hay không
+
+    -__unset(): là phương thức sẽ chạy khi bạn cố unset một thuộc tính không public
+
+    -__toString(): là phương thức sẽ chạy khi bạn cố gắng in ra một object, và nó sẽ in ra 1 string
+                   Ví dụ:
+                            public function __toString() {
+                                return $this->text;          ->khi bạn cố gắng echo 1 đối tượng, nó sẽ chạy cái này và in ra thuộc tính text
+                            }
+
+    -__call(): là phương thức sẽ được chạy khi bạn cố gắng gọi một phương thức không được public
+               Ví dụ: 
+                    ở đây hàm reTweet() sẽ thực hiện tăng số lượng tweetNumber:
+                        protected function reTweet() {
+                            $this->tweetNumber++;
+                        }
+
+                    nhưng nó lại có modifier là protected thì sẽ kích hoạt __call():
+                        public function __call($method, $parameters) {      -> method là phương thức, parameters là các tham số khi mình cố gọi phương thức
+                            return call_user_func_array(array($this, $method), $parameters);
+                        }
+                    
+                    Khi sử dụng thì
+                    $tweet->tweetNumber;        -> đáp án là 9
+                    $tweet->reTweet();    -> cố gọi reTweet nhưng nó là protected
+                    $tweet->tweetNumber;        -> đáp án là 10
+
+        -__cloning(): là phương thức sẽ chạy khi bạn thực hiện clone.
+                      là phương thức khi bạn gán 1 thuộc tính của object bằng 1 object khác rồi bạn lại clone cái object đó. Nếu bạn có sử dụng cái 
+                      thuộc tính đó, hoặc object khác ra sao thì 2 cái sẽ không bị cùng nhau thay đổi mà nó
+                      Sẽ có sự tách biệt.
+                      là phương thức sẽ chạy khi một thuộc tính được gán bằng một object và object được clone.  
+                      Ví dụ:
+                            class Notification {
+                                protected $read = false;
+
+                                public function markAsRead(){
+                                    $this->read = true;
+                                }
+
+                                public function isRead() {
+                                    return $this->read;
+                                }
+                            }
+
+                            class Tweet {
+                                protected $notification;
+
+                                public function __construct(Notification $notification) {
+                                    $this->notification = $notification;
+                                }
+
+                                public function __clone() {
+                                    $this->notification = clone $this->notification;
+                                }
+                            }
+
+                            $tweet1 = new Tweet(new Notification);
+                            $tweet2 = clone $tweet1;      -> __clone() lúc này đã chạy
+
+                            $tweet1->markAsRead();   -> đổi thằng tweet1 thành đã đọc
+                            $tweet1->isRead();    -> true
+                            $tweet2->isRead();    -> false
+
+5.Session và cookie
+    - session: được dùng để lưu trữ, thường là thông tin của người dùng, giỏ hàng, tồn tại xuyên xuốt từ trang này 
+               đến trang khác trong website và kết thúc khi bạn đóng ứng dụng.
+               Giá trị của session sẽ được lưu ở file trên server. 
+    -cookie: được dùng để lưu trữ thông tin tạm thời, nhưng được để ở client. Mỗi cookie có thời gian tồn tại nhất định.
+    -so sánh:
+        -session:
+            - lưu ở server
+            - dữ liệu khó sửa đổi vì nó ở máy chủ
+            - sau khi đóng trình duyệt sẽ hết phiên làm việc
+        -cookie:
+            - lưu ở client
+            - dữ liệu có thể tiếp cận và sửa đổi vì nó ở trên trình duyệt
+            - sẽ biến mất khi hết hạn
+
+6.Life cyrcle laravel
+    - đầu tiên request được gửi đến file index.php trong thư mục public:
+        - đăng kí cơ chế autoload ở vendor/autoload.php
+        - chuẩn bị để khởi động ứng dụng bằng kết nối với bootstrap/app.php:
+            - tạo ứng dụng
+            - đăng kí các interface
+            - trả về đối tượng ứng dụng
+        - chạy ứng dụng:
+            - xử lý request
+            - trả về response
+    - sau đó, request được gửi đến app/Http/Kernel.php thực hiện xử lý lỗi, logger, xác định môi trường
+        thực hiện middleware
+    - sau đó, đến service provider trong config/app.php đăng kí service provider, khởi động service provider, 
+        khởi động database, router, validation, ...
+    - sau đó, đến router kiểm các route xem cái nào khớp với reuqest để chạy. Có 2 hướng
+        - đi đến middleware rồi tới controller/action nếu route có middleware ràng buộc để kiểm tra
+        - đi đến controller/action
+    - khi đến controller/action sẽ trả về response sau khi xử lý request
+    - sau đó sẽ đi qua view để tạo ra giao diện mới do người dùng, hoặc đi thằng đến client.
+
+7.config/env
+    - Lấy các thiết lập:
+        - env('name', default): Lấy các thiết lập từ file .env. Có 2 tham số. Tham số 1 là tên biến. Tham số thứ 2 là giá trị mặc định
+                                Ví dụ: env('APP_DEBUG', false);
+    - Xác định môi trường hiện tại:
+        - environment: sử dụng phương thức "environment" từ App facade
+                        Ví dụ:
+                            - App::environment() trả về môi trường hiện tại
+                            - App::environment('local') kiểm tra xem môi tường có phải là "local" không, trả về true hoặc false 
+                            - App::environment(['local', 'production']) kiểm tra xem môi tường có phải là "local" hoặc "production" không,
+                                trả về true hoặc false 
+    - Ẩn biến môi tường từ trang debug:
+        - muốn ẩn biến nào đó thì thêm nó vào "debug_blacklist" trong config/app.php
+    - Tạo file config:
+        - Tạo một file mới trong thư mục config và thiết lập các cấu hình
+            Ví dụ:
+                return [
+                    'api_key' => env('API_KEY', 'your_default_api_key'),
+                    'debug_mode' => env('DEBUG_MODE', false),
+                ];
+        - Sử dụng: dùng hàm config() tham số truyền vào là "tên file config"."tên biến" được đặt trong ngoặc
+            Ví dụ:
+                $apiKey = config('app_settings.api_key');
+
+8.Cấu trúc thư mục
+    - app: chứa các code cốt lõi, hầu như các class được viết ở trong thư mục này
+    - boostrap: chưa file app.php dùng để khởi động ứng dụng. Có thư mục cache chứa các file bộ nhớ config, 
+                route, service để tối ưu hiệu năng
+    - config: chứa các file cấu hình của ứng dụng
+    - database:
+        - factory: tạo dữ liệu ảo
+        - migrate: tạo, sửa bảng
+        - seed: chứa dữ liệu thiết lập sẵn
+    - pubic: chứa file index.php là đích đến của các request, chứa các tài nguyên có thể truy cập từ trình duyệt
+    - resources: chứa tài nguyên thô view, js, sass
+    - routes:
+        - web.php: chứa các route chưa request từ trình duyệt, chịu ảnh hưởng session, cookie, CSRF
+        - api.php: chứa các route chức năng là api chịu ảnh hưởng kiểm duyệt token, authenticated có thể giới hạn thời gian tồn tại
+        - console.php: có thể định nghĩa clouser bằng lệnh console
+            Ví dụ:
+                Artisan::command('inspire', function () {
+                    $this->comment(Inspiring::quote());
+                })->describe('Display an inspiring quote');
+                sau đó chạy lệnh "php artisan inspire" trên terminal, nó sẽ trả về một câu danh ngôn
+        - channels.php: giúp ta có thể tương tác với người dùng client ở thời gian thực
+    - storage:
+        - app: chứa các file do ứng dụng tạo ra, người dùng đăng tải
+        - framework: chứa các file cache, session
+        - logs: chứa các file logger được ghi khi gặp lỗi
+
+9.Router
+    Ví dụ:
+        Route::middleware('auth.checkAdmin')->prefix("/admin")->group(function () {
+            Route::get("/", [AdminController::class, "index"])->name("admin.index");
+            Route::post('/delete_multiple_products', [AjaxController::class, 'destroyManyProducts'])->name('product.destroyManyProducts');
+            Route::prefix('/images')->group(function () {
+                Route::get('/', [ImagesController::class, 'index'])->name('images.index');
+                Route::post('/upload', [ImagesController::class, 'upload'])->name('images.upload');
+                Route::post('/destroy/{id}', [ImagesController::class, 'destroy'])->name('images.destroy');
+            });
+        });
+
+10. Middleware
+    - tạo middleware trong app/Http/middleware
+    - sau đó, đăng kí ở trong file app/Http/Kernel.php
+    - sau đó sử dụng nó ở trong route, ...
+        Ví dụ:
+            - trong route:
+                Route::get('/example', function () {
+                    // Sử dụng middleware 'custom' với tham số 'something'
+                })->middleware('custom:something');
+            - trong controller:
+                public function someMethod()
+                {
+                    $this->middleware('custom:something');
+                    // Logic controller
+                }
+
+11. CSRF-token
+    - trong laravel, mỗi phiên làm việc với form đều có một token đi kèm
+    - kiểm tra csrf-token được viết ở middleware VerifyCsrfToken, nếu muốn 1 route không bị ảnh hưởng thì thêm route đó 
+        vào $except trong middleware đó
+
+12. Request
+    - Cách lấy file từ form: 
+        - Kiểm tra file đã được gửi hay chưa:
+            $request->hasFile('file')     -> return về true hoặc false
+        - Lấy đối tượng file từ form: 
+            $request->file('file')      -> return về đối tượng file
+        - Lấy tên file:
+            $file->getClientOriginalName()              -> return về tên của file, đây là phương thức có sẵn của laravel
+        - Lấy đường dẫn tạm thời:
+            $file->getRealPath()            -> return về đường dẫn tạm thời của file
+        - Lưu file:
+            $file->move('uploads', $fileName)       -> thực hiện hành động lưu file vào ('public/upload') với tên file được gán ở biến $fileName
+    - Cách lấy cookie:
+        - trong controller:
+            $request->cookie('cookie_name')     -> sử dụng $request luôn, vì cookie luôn ở trong request
+        - ngoài controller:
+            request()->cookie('cookie_name')        -> sử dụng request() - helper function có tác dụng như $request ở trong controller
+    - Cách lấy header:
+        - trong controller:
+            $request->header('header_name')      -> sử dụng request luôn
+        - trong form request:
+            $this->header('header_name')        -> sử dụng $this, trong form request thằng $this chứa rất nhiều thứ, kể cả request
+
+13. Response
+    - Cách thêm header vào response:
+        return ...->header('header_name', header_value)      ->tham số 1 là tên header, tham số 2 là giá trị được truyền vào
+    - Cách thêm cookie vào response:
+        return ...->cookie('cookie_name', cookie_value, time)    -> tham số thứ nhất là tên cookie, tham số thứ 2 là giá trị của cookie,
+                                                                    tham số thứ 3 là thời gian hết hạn cookie
+        
+        $cookie = cookie('name', $value, $minutes)
+        return ...->cookie($cookie)         -> gán vào biến cũng được luôn
+    - Redirect tới 1 link bất kì:
+        return redirect('url')          -> sử dụng redirect() và truyền đường dẫn vào
+        return redirect('url')->with('data', $data)         -> có thể dùng với with để kèm thêm dữ liệu
+        return redirect()->route('route_name')      -> chuyển đến route khác
+        return redirect()->away('https://www.google.com')       -> dùng away để chuyển đến đường dẫn không thuộc về ứng dụng
+        return back()       -> chuyển đến trang trước đó
+        return back->withInput()            -> chuyển đến trang trước đó và thêm dữ liệu đã nhập ở trong form trước đó
+    - Trả về json:
+        - return response()->json([
+            'name' => 'Quang',
+            'age' => '23'
+        ])                  -> sử dụng json() truyền dữ liệu vào, ứng dụng sẽ tự động chuyển Content_type thành application/json,
+                                chuyển cái mảng đã truyền vào thành json bằng "json_encode"
+    - Response trả vê file download:
+        - return response()->download($filePath, $fileName, $header)        -> tham số 1 là đường dẫn của file, tham số 2 là tên file, tham số
+                                                                                3 là header
+            $filePath = public_path('path/to/your/file.zip')
+            $fileName = file_name.zip
+            $header = ['Cache-Control' => 'public, max-age=86400']
+        -return response()->download($filePath)         -> tham số filePath là bắt buộc. Truyền đường dẫn cụ thể đến file
+
+        -return response->streamDownload(function() {
+            //  Logic để stream dữ liệu vào response
+        }, $name, $header)                  ->  thay vì truyền đường dẫn cụ thể đến file, truyền hàm để stream dữ liệu vào response
+                                                hữu ích khi không muốn hoặc không thể đọc toàn bộ file vào bộ nhớ trước khi trả về.
+                                                Thích hợp cho các file lớn.
+        -return response->streamDownload(function() {
+            $file = fopen($filePath, 'r');                  ->  đọc file
+
+            fpassthru($file);                               ->  stream dữ liệu từ file vào response
+
+            fclose($file)                                   ->  đóng file
+
+        }, $name)
+        
+        - return response()->file($pathToFile, $headers);       ->  tham số 1 là bắt buộc, tham số 2 có thể bỏ
+            $headers = ['Cache-Control' => 'public, max-age=3600'];
+        
+14. Validation
+    - Cách tạo form request: gõ lệnh terminal: php artisan make:request TestRequest        -> TestRequest là tên file, tên class của form request
+        -Trong form request:
+            - authorize(ủy quyền): return true để request có thể dùng.
+            - rules: các luật được khai báo trong đây required, unique, min, max, ...
+            - messages: các thông báo khi không qua được các luật
+            - attributes: các tên trường sẽ được custom ở đây
+    - Cách tạo 1 Validator ở Controller - kiểm tra lỗi ở controller:
+        - import validator: use Illuminate\Support\Facades\Validator;
+        - sử dụng:
+            - định nghĩa các luật:
+                $rules = [
+                    'name' => 'required|string|max:30',
+                    ...
+                ]
+                $messages = [
+                    ...
+                ]
+                $attributes = [
+                    ...
+                ]
+            - tạo validator:
+                $validator = Validator::make($request->all(), $rules, $messages, $attributes)
+            - check lỗi:
+                if($validator->fails()) {
+                    $errors = $validator->errors();         -> lấy danh sách lỗi
+
+                    return back()->withErrors($errors)->withInput($request->except('password'))
+                }
+    - 1 số rule:
+        - nullable: cho phép trường có thể trống.
+        - Confirmed: Kiểm tra xác nhận trường (thường được sử dụng với mật khẩu).
+        - required: phải tồn tại và không được trống.
+        - unique: kiểm tra xem giá trị của trường có phải là duy nhất trong bảng hoặc cột cụ thể.
+        - exist: kiểm tra xem giá trị của trường có tồn tại trong cột không.
+    - Hiểu rõ cách define validate cho nested array input:
+        - nested array input có dạng:
+            nested_array = [
+                {name => "Quang", age => 23},
+                {name => "Quang", age => 23},
+                {name => "Quang", age => 23},
+            ]               -> là mảng chứa các mảng
+        - kiểm tra các trường:
+            nested_array.* => 'required'        -> * đại diện cho key của mỗi mảng con. Theo như mảng ví dụ thì key là 0, 1, 2
+        - kiểm tra từng trường:
+            nested_array.*.name => 'required|min:6'
+            nested_array.*.age => 'required'            -> mỗi trường name, ,age của mảng con sẽ được kiểm tra 
+        - kiểm tra từng trường riêng lẻ:
+            nested_array.1.name => 'required|min:6'         -> chỉ có trường name của mảng con có key là 1 mới được kiểm tra
+    - Custom validator
+        - object rule: laravel cho phép tạo object rule. chỉ có 2 phương thức passes và message
+            class TestRule implements Rule {
+                public function passes($attribute, $value){
+                    return $value > 0;          -> value phải lớn hơn 0
+                }
+
+                public function message() {
+                    return ':attribute phải lớn hơn 0.'
+                }
+            }
+            'age' => ['required','numeric',new TestRule]            -> sử dụng
+        - clouser: 
+            - dùng trong controller: sử dụng trực tiếp qua function
+                $validator = Validator::make($data, [
+                    'age' => [
+                        'required',
+                        function ($attribute, value, $fail) {
+                            if( !is_int($value) || $value <= 0 ){               -> kiểm tra xem $value không phải là số nguyên hoặc <= 0
+                                $fail($attribute.' phải là số nguyên dương.')
+                            }
+                        }
+                    ]
+                ])
+            - dùng trong form request: dùng qua phương thức withValidator(Validator $validator)
+                function rules() {
+                    return [
+                        'age' => 'required',
+                    ]
+                }
+                function withValidator(Validator $validator){
+                    $validator->after( function ($validator){           -> after thêm hàm tùy chỉnh sau khi các quy tắc kiểm tra chính thức
+                        $this->customValidation($validator);
+                    })
+                }
+                protected function customValidation(Validator $validator){
+                    $validator->sometimes(                  -> sometime là dùng để thêm 1 quy tắc tùy chỉnh
+                        'age',
+                        function ($attribute, $value) {
+                            return $value > 0 && is_int($value);            -> kiểm tra xem có phải là số nguyên và > 0
+                        },
+                        function ($validator) {
+                            $validator->errors()->add('age', ':attribute phải là số nguyên dương')      -> errors()->add() thêm vào danh sách lỗi
+                        }
+                    )
+                }
+        - Implicit Rules: các rule kiểu dữ liệu như string, numeric, date, email,...
+
+    - validate 000-0000:
+        class ZipCode implements Rule {
+            public function passes($attribute, $value){
+                return is_numeric($value) && preg_match('/^\d{3}-\d{4}$/', $value);
+            }
+            public function message() {
+                return ':attribute không hợp lệ. Định dạng phải là 000-0000.';
+            }
+        }
+        public function rules(){
+            return [
+                'zip_code' => ['required', new ZipCode],
+            ]
+        }
+    - ví dụ unique
+        class UniqueRule implements Rule {
+            private $table;
+            private $column;
+
+            function __construct($table, $column) {
+                $this->table = $table;
+                $this->column = $column;
+            }
+
+            function passes ($attribute, $value) {
+                $result = DB:table($this->table)
+                ->where($this->column, $value)
+                ->whereNull('deleted_at')
+                ->orWhereNotNull('deleted_at')
+                ->first();
+
+                return !result;
+            }
+
+            function message() {
+                return ':attribute đã tồn tại.'
+            }
+        }
+
+        function rules() {
+            'name' => ['required', new UniqueRule('table_name', 'column_name')];
+        }
+
+15. View
+    - truyền dữ liệu xuống view: with(), compact(), ...
+    - view composer: 
+        - closure: 
+            View::composer(['view1', 'view2'], function ($view) {
+                $categories = Category::all();
+
+                $view->with('categories', $categories);
+            });
+        - class:
+            tạo class xong đó sử dụng ở trong AppServiceProvider
+                class AppServiceProvider extends ServiceProvider
+                {
+                    public function boot()
+                    {
+                        View::composer(['view1', 'view2'], CategoryColorSizeComposer::class);
+                    }
+                }
+    - view share:
+        - View::share('sizes', Size::all());
+        - View::share(['sizes', 'colors], function ($view){
+            $sizes = Size::all();
+            $colors = Color::all();
+
+            $view->with(compact('sizes', 'colors'))
+        });
+    - Khi dùng trong __construct thì các view được sử dụng data của view share
+
+16. Blade
+    - là templating engine của laravel, dễ dàng sử dụng code php
+    - Hiển thị dữ liệu:
+        - <p>Xin chào {{ $name }}</p>           -> dùng biến
+        - <p>Xin chào {{ getName() }}</p>           -> dùng hàm
+        - {{ isset($name) ? $name : 'Default' }}
+        - {{ $name or 'Default' }}
+        - hoặc có thể dùng @{{ $name }}
+    - Cách sử dụng @include, @stack, @section, @yield ...
+        - @include: chèn view vào trang khác
+        - @stack và @push: quản lý các block js và css
+            @push('script_1')
+                console.log("Quang")
+            @endpush 
+            @stack('script_1')
+        - @section và @yield: định nghĩa và hiển thị nội dung trong layout
+    - Cách tạo component:
+        chạy lệnh terminal: php artisan make:component Alert
+            // app/views/components/alert.php
+            class Alert extends Component
+            {
+                public $type;
+                public function __construct($type)
+                {
+                    $this->type = $type;
+                }
+                public function render()
+                {
+                    return view('components.alert');
+                }
+            }
+            //  views/component/alert.blade.php
+            <div class="alert alert-{{ $type }}">
+                {{ $slot }}
+            </div>
+            //  trong các view khác
+            <x-alert type="success">
+                This is a success message.          -> chính là $slot
+            </x-alert>
+    
+17. Session
+    - lưu vào file: xét SESSION_DRIVER = file
+    - lưu vào database: xét SESSION_DRIVER = database tạo migrate cho sessions
+        - php artisan session:table
+        - php artisan migrate
+    - lấy dữ liệu: $value = session('key')
+    - lưu dữ liệu: 
+        - session(['key' => 'value']);
+        - session()->put('key', 'value')
+    - xóa dữ liệu: 
+        - session()->forget('key')
+        - session()->flush()              -> xóa toàn bộ session
+    - session()->flash('key', 'value');                 -> lưu dữ liệu chỉ trong một request và được xóa tự động sau request đó
+    - Cách tạo lại:
+        session()->flush();                 -> Xóa toàn bộ session data
+        session()->regenerate();                -> Tạo mới session
+
+18. Migrate
+    - Tạo table: Schema::create...
+    - Sửa table: Schema::table...
+    - Sửa tên column:   Schema::table('your_table_name', function (Blueprint $table) {
+                            $table->renameColumn('old_column_name', 'new_column_name');             -> sử dụng renameColumn()
+                        });
+    - Xóa column:   Schema::table('your_table_name', function (Blueprint $table) {
+                        $table->dropColumn('column_to_be_deleted');
+                    });
+    - Cho phép null: $table->string('nullable_column')->nullable();              -> thêm nullable() vào cuối
+    - Có giá trị mặc định:  $table->string('default_column')->default('default_value');             -> thêm default('gia_tri_mac_dinh')
+    - datatype:
+        - increments: id tự tăng
+        - string: chuỗi
+        - datetime: ngày, giờ
+        - timestamp: 2 cột created_at, updated_at
+        - softDelete: deleted_at
+        - text: văn bản
+    - tạo index:
+        $table->index('column_name')
+        $table->index(['column_name', ''])
+        $table->string('column_name')->index()
+    - tạo unique:
+        $table->unique('column_name')
+        $table->string('column_name')->unique()
+
+19. Query Builder
+    - công cụ mạnh mẽ xây dựng truy vẫn SQL mà không cần dùng câu lệnh SQL
+    - phương thức cơ bản:
+        - select: chọn cột từ bảng
+            ...->select('name', 'age')->get()
+        - distinct: lấy các giá trị duy nhất từ một cột
+            ...->distinct()->pluck('email')
+        - where: thêm điều kiện
+            DB::table(users)->where('last_name', 'Quang')->get()
+        - groupBy: nhóm kết quả theo giá trị của một cột hoặc nhiều cột
+            DB::table('order')->groupBy('product_id')->select('product_id', DB::raw('COUNT(*) as number_order'))->get()
+        - orderBy: sắp xếp
+            DB::table('order')->orderBy('quantity')->get()
+            DB::table('order')->orderBy('quantity', 'desc')->get()
+        - join: thực hiện kết nối các bảng
+            $users = DB::table('users')
+                ->join('contacts', 'users.id', '=', 'contacts.user_id')
+                ->select('users.*', 'contacts.phone')
+                ->get();
+        - leftJoin: kết nối các bảng, trả về tất cả các dòng vế trái, và các dòng phug hợp của vế phải
+            $users = DB::table('users')
+                ->leftJoin('posts', 'users.id', '=', 'posts.user_id')
+                ->get();
+    - subQuery: truy vấn con - sử dụng phương thức selectSub, addSelect, DB::raw
+        - selectSub: tạo subquery trong câu truy vấn, cho phép chọn subquery từ một bảng và sử dụng như một cột
+            $latestPosts = DB::table('posts')
+                ->select('user_id', DB::raw('MAX(created_at) as latest_post_date'))
+                ->groupBy('user_id');
+
+            $usersWithLatestPosts = DB::table('users')
+                ->select('id', 'username', DB::raw('(' . $latestPosts->toSql() . ') as latest_post'))
+                ->mergeBindings($latestPosts)
+                ->get();
+        - addSelect và DB::raw:
+            $usersWithLatestPosts = DB::table('users')
+                ->leftJoin('posts', 'users.id', '=', 'posts.user_id')
+                ->select('users.id', 'users.username', DB::raw('MAX(posts.created_at) as latest_post_date'))
+                ->groupBy('users.id', 'users.username')
+                ->get();
+    - Increment và Decrement: 
+

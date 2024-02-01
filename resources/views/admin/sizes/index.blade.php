@@ -440,7 +440,7 @@
                 },
                 error: function(res) {
                     Toastify({
-                        text: res.error,
+                        text: res.responseJSON.message,
                         duration: 3000,
                         close: true,
                         gravity: "top",

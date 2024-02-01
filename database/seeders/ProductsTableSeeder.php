@@ -20,7 +20,7 @@ class ProductsTableSeeder extends Seeder
             [
                 'id' => Str::uuid(), // Tạo UUID mới
                 'name' => 'Product 1',
-                'sku' => 'P1',
+                'sku' => 'Pro1',
                 'price' => 19,
                 'discounted_price' => 15,
                 'category_id' => $CategoryIds->random(),
@@ -29,7 +29,7 @@ class ProductsTableSeeder extends Seeder
             [
                 'id' => Str::uuid(),
                 'name' => 'Product 2',
-                'sku' => 'P2',
+                'sku' => 'Pro2',
                 'price' => 29,
                 'discounted_price' => 25,
                 'category_id' => $CategoryIds->random(),
@@ -38,7 +38,7 @@ class ProductsTableSeeder extends Seeder
             [
                 'id' => Str::uuid(), // Tạo UUID mới
                 'name' => 'Product 3',
-                'sku' => 'P3',
+                'sku' => 'Pro3',
                 'price' => 30,
                 'discounted_price' => 15,
                 'category_id' => $CategoryIds->random(),
@@ -47,7 +47,7 @@ class ProductsTableSeeder extends Seeder
             [
                 'id' => Str::uuid(), // Tạo UUID mới
                 'name' => 'Product 5',
-                'sku' => 'P3',
+                'sku' => 'Pro5',
                 'price' => 37,
                 'discounted_price' => 17,
                 'category_id' => $CategoryIds->random(),
@@ -56,7 +56,7 @@ class ProductsTableSeeder extends Seeder
             [
                 'id' => Str::uuid(),
                 'name' => 'Product 4',
-                'sku' => 'P4',
+                'sku' => 'Pro4',
                 'price' => 30,
                 'discounted_price' => 25,
                 'category_id' => $CategoryIds->random(),
@@ -65,7 +65,7 @@ class ProductsTableSeeder extends Seeder
             [
                 'id' => Str::uuid(),
                 'name' => 'Product 6',
-                'sku' => 'P4',
+                'sku' => 'Pro6',
                 'price' => 37,
                 'discounted_price' => 27,
                 'category_id' => $CategoryIds->random(),
@@ -73,8 +73,8 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid(), // Tạo UUID mới
-                'name' => 'Product 1',
-                'sku' => 'P1',
+                'name' => 'Product 7',
+                'sku' => 'Pro7',
                 'price' => 19,
                 'discounted_price' => 15,
                 'category_id' => $CategoryIds->random(),
@@ -82,8 +82,8 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid(),
-                'name' => 'Product 2',
-                'sku' => 'P2',
+                'name' => 'Product 8',
+                'sku' => 'Pro8',
                 'price' => 29,
                 'discounted_price' => 25,
                 'category_id' => $CategoryIds->random(),
@@ -91,8 +91,8 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid(), // Tạo UUID mới
-                'name' => 'Product 3',
-                'sku' => 'P3',
+                'name' => 'Product 9',
+                'sku' => 'Pro9',
                 'price' => 30,
                 'discounted_price' => 15,
                 'category_id' => $CategoryIds->random(),
@@ -100,8 +100,8 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid(), // Tạo UUID mới
-                'name' => 'Product 5',
-                'sku' => 'P3',
+                'name' => 'Product 10',
+                'sku' => 'Pro10',
                 'price' => 37,
                 'discounted_price' => 17,
                 'category_id' => $CategoryIds->random(),
@@ -109,8 +109,8 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid(),
-                'name' => 'Product 4',
-                'sku' => 'P4',
+                'name' => 'Product 11',
+                'sku' => 'Pro11',
                 'price' => 30,
                 'discounted_price' => 25,
                 'category_id' => $CategoryIds->random(),
@@ -118,8 +118,8 @@ class ProductsTableSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid(),
-                'name' => 'Product 6',
-                'sku' => 'P4',
+                'name' => 'Product 12',
+                'sku' => 'Pro12',
                 'price' => 37,
                 'discounted_price' => 27,
                 'category_id' => $CategoryIds->random(),

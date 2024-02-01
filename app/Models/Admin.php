@@ -18,7 +18,7 @@ class Admin extends Authenticatable implements CanResetPassword
     protected $fillable = ['id', 'username', 'name', 'password', 'email', 'role', 'remember_token'];
 
     protected $hidden = [
-        'password',
+        'password', 'remember_token'
     ];
 
     protected $guard = 'admin';

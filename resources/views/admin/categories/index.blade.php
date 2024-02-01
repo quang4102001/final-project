@@ -73,7 +73,7 @@
                     <div class="form-group row gx-3 mr-3 min-w-[550px]">
                         <div class="col-md-4">
                             <div class="label-wrapper flex justify-end items-center">
-                                <label class="col-form-label" for="CreateCategoryName">Category
+                                <label class="col-form-label" for="name">Category
                                     name</label>
                                 <div title="" data-toggle="tooltip" class="ico-help"
                                     data-original-title="A category name."><i
@@ -81,10 +81,10 @@
                             </div>
                         </div>
                         <div class="col-md-8">
-                            <input class="form-control max-w-[425px] text-box single-line" id="CreateCategoryName"
-                                name="CreateCategoryName" type="text" value="{{ old('CreateCategoryName') }}">
+                            <input class="form-control max-w-[425px] text-box single-line" id="name"
+                                name="name" type="text" value="{{ old('name') }}">
                             <span class="error">
-                                @error('CreateCategoryName')
+                                @error('name')
                                     <span class="text-red-400">{{ $message }}</span>
                                 @enderror
                             </span>
@@ -251,7 +251,7 @@
                 },
                 error: function(res) {
                     Toastify({
-                        text: res.error,
+                        text: res.responseJSON.message,
                         duration: 3000,
                         close: true,
                         gravity: "top",

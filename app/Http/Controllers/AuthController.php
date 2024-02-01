@@ -9,7 +9,6 @@ use App\Http\Requests\ResetPasswordRequest;
 use App\Models\ResetPassword;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -28,7 +27,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only('username', 'password');
 
-        if (Auth::guard('admin')->attempt(['username' => $credentials['username'], 'password' => $credentials['password'],], $request->has('remember'))) {
+        if (Auth::guard('admin')->attempt(['username' => $credentials['username'], 'password' => $credentials['password'],])) {
             $user = Auth::guard('admin')->user();
 
             if ($user->isAdmin()) {
@@ -36,7 +35,7 @@ class AuthController extends Controller
             }
         }
 
-        if (Auth::guard('web')->attempt(['username' => $credentials['username'], 'password' => $credentials['password']], $request->has('remember'))) {
+        if (Auth::guard('web')->attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
             $user = Auth::user();
 
             if ($user->isUser()) {
@@ -104,11 +103,11 @@ class AuthController extends Controller
         try {
             $token = Str::random(length: 64);
 
-            ResetPassword::queue(ResetPassword::create([
+            ResetPassword::create([
                 'id' => Str::uuid(),
                 'email' => $request->email,
                 'token' => $token
-            ]));
+            ]);
 
             Mail::send('home.emails.linkResetPassword', ['token' => $token], function ($message) use ($request) {
                 $message->to($request->email);
@@ -117,6 +116,7 @@ class AuthController extends Controller
 
             return redirect()->route('auth.login')->with('success', 'Have send an email to reset password');
         } catch (\Exception $e) {
+            Log::info($e);
             return redirect()->back()
                 ->withInput(request()->all())
                 ->with("error", 'Send email failed!');

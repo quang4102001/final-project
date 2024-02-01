@@ -1,0 +1,12 @@
+.input-status:checked ~ .icon-status-check {
+  display: block;
+}
+.input-status:checked ~ .icon-status-xmark {
+  display: none;
+}
+.input-status:not(:checked) ~ .icon-status-check {
+  display: none;
+}
+.input-status:not(:checked) ~ .icon-status-xmark {
+  display: block;
+}/*# sourceMappingURL=app.css.map */

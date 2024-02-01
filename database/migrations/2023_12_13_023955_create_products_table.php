@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('sku');
             $table->integer('price');
             $table->integer('discounted_price');
-            $table->string('category_id');
+            $table->string('category_id')->index();
             $table->tinyInteger('status')->default(0);
             $table->softDeletes();
             $table->timestamps();

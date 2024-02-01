@@ -36,8 +36,6 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     {{-- toast js --}}
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.js"></script>
-    {{-- cookie libary --}}
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
 
     @vite(['resources/css/app.css', 'resources/sass/app.scss'])
     <style type="text/tailwindcss">
@@ -85,6 +83,9 @@
                 close: true,
                 gravity: "top",
                 position: "right",
+                style: {
+                    background: "linear-gradient(to right, #dc3545, #dc8890)",
+                },
             }).showToast();
         </script>
         @php

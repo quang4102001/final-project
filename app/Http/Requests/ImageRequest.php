@@ -34,5 +34,5 @@ class ImageRequest extends FormRequest
             'image.mimes' => 'The image must be a file of type: jpeg, png, jpg, gif.',
             'image.max' => 'The image may not be greater than 2048 kilobytes.',
         ];
-    }
+    } 
 }

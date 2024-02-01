@@ -57,7 +57,7 @@ class SizesController extends Controller
         }
     }
 
-    public function update(SizesUpdateRequest $request, string $id)
+    public function update(SizesStoreRequest $request, string $id)
     {
         try {
             $params = $request->only(['name', 'minHeight', 'maxHeight', 'minWeight', 'maxWeight',]);

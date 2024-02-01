@@ -12,9 +12,9 @@ return new class extends Migration {
     {
         Schema::create('cart_details', function (Blueprint $table) {
             $table->id();
-            $table->uuid('cart_id');
-            $table->uuid('product_id');
-            $table->uuid('color_id');
+            $table->uuid('cart_id')->index();
+            $table->uuid('product_id')->index();
+            $table->uuid('color_id')->index();
             $table->integer('qty');
             $table->softDeletes();
             $table->timestamps();

@@ -73,17 +73,17 @@
                     <div class="form-group row gx-3 mr-3 min-w-[550px]">
                         <div class="col-md-4">
                             <div class="label-wrapper flex justify-end items-center">
-                                <label class="col-form-label" for="CreateColorName">Color</label>
+                                <label class="col-form-label" for="name">Color</label>
                                 <div title="" data-toggle="tooltip" class="ico-help"
                                     data-original-title="A color name."><i
                                         class="fas fa-question-circle text-[#3c8dbc] mx-3"></i></div>
                             </div>
                         </div>
                         <div class="col-md-8">
-                            <input class="form-control max-w-[425px] text-box single-line" id="CreateColorName"
-                                name="CreateColorName" type="color" value="{{ old('CreateColorName') }}">
+                            <input class="form-control max-w-[425px] text-box single-line" id="name"
+                                name="name" type="color" value="{{ old('name') }}">
                             <span class="error">
-                                @error('CreateColorName')
+                                @error('name')
                                     <span class="text-red-400">{{ $message }}</span>
                                 @enderror
                             </span>
@@ -176,7 +176,7 @@
                 $(this).find(".btnBox2").hide()
             })
         })
-
+        
         const editColor = () => {
             const row = $(event.target).closest('.table-light')
             const colorRegex = /#([a-fA-F0-9]{6})\b/;
@@ -190,7 +190,6 @@
 
         const closeColor = () => {
             const row = $(event.target).closest('.table-light')
-
             row.find("input[name='edit-name']").hide()
             row.find(".btnBox2").hide()
             row.find("td>span").show()
@@ -241,7 +240,7 @@
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",
-                    name: name,
+                    name,
                 },
                 success: function(res) {
                     row.find("input[name='edit-name']").hide()
@@ -264,7 +263,7 @@
                 },
                 error: function(res) {
                     Toastify({
-                        text: res.error,
+                        text: res.responseJSON.message,
                         duration: 3000,
                         close: true,
                         gravity: "top",

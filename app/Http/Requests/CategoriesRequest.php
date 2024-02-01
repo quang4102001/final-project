@@ -22,24 +22,24 @@ class CategoriesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'CreateCategoryName' => 'required|min:3|max:255|unique:categories,name',
+            'name' => 'required|min:3|max:255|unique:categories,name,' . $this->id . ',id,deleted_at,NULL',
         ];
     }
 
     public function messages()
     {
         return [
-            'CreateCategoryName.required' => 'Bắt buộc phải nhập trường "attributes.',
-            'CreateCategoryName.min' => 'Nhập ít nhất :min kí tự.',
-            'CreateCategoryName.max' => 'Nhập nhiều nhất :max kí tự.',
-            'CreateCategoryName.unique' => 'Trùng "attributes.',
+            'name.required' => 'Bắt buộc phải nhập trường :attribute.',
+            'name.min' => 'Nhập ít nhất :min kí tự.',
+            'name.max' => 'Nhập nhiều nhất :max kí tự.',
+            'name.unique' => 'Trùng :attribute.',
         ];
     }
 
     public function attributes()
     {
         return [
-            'CreateCategoryName' => 'tên danh mục',
+            'name' => 'tên danh mục',
         ];
     }
 }

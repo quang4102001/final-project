@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ColorsRequest;
+use App\Http\Requests\ColorUpdateRequest;
 use App\Models\Color;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -32,7 +33,7 @@ class ColorsController extends Controller
         try {
             Color::create([
                 'id' => Str::uuid(),
-                'name' => $request->CreateColorName
+                'name' => $request->name
             ]);
 
             return redirect()->route('colors.index')->with('success', 'Add color successfully.');

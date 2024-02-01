@@ -1,7 +1,8 @@
 @extends('index')
 
 @section('body')
-    <a href="{{ route('home') }}" class="bg-gradient-to-r from-sky-500 to-indigo-500 fixed top-5 left-5 p-4 rounded-lg shadow-md text-white transform hover:translate-x-1 hover:translate-y-[1px] hover:scale-[1.01]  hover:shadow-lg fw-bold">
+    <a href="{{ route('home') }}"
+        class="bg-gradient-to-r from-sky-500 to-indigo-500 fixed top-5 left-5 p-4 rounded-lg shadow-md text-white transform hover:translate-x-1 hover:translate-y-[1px] hover:scale-[1.01]  hover:shadow-lg fw-bold">
         <i class="fa-solid fa-store text-inherit mr-3"></i> Shopping now
     </a>
 

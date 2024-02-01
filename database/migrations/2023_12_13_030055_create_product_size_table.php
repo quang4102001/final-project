@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::create('product_size', function (Blueprint $table) {
             $table->id();
-            $table->uuid('product_id');
-            $table->uuid('size_id');
+            $table->uuid('product_id')->index();
+            $table->uuid('size_id')->index();
             $table->softDeletes();
             $table->timestamps();
 
