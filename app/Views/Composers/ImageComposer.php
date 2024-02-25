@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\Composers;
+namespace App\Views\Composers;
 
 use App\Models\Image;
 use Illuminate\View\View;

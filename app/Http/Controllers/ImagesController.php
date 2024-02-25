@@ -54,14 +54,14 @@ class ImagesController extends Controller
             $imageName = time() . '.' . $imageFile->extension();
             $id = Str::uuid();
 
+            // Lưu hình ảnh vào thư mục storage
+            $imageFile->storeAs('public/images');
+
             // Lưu đường dẫn vào cơ sở dữ liệu
             $image = Image::create([
-                'id' => $id,
+                'id' => $id,    
                 'path' => '/storage/images/' . $imageName,
             ]);
-
-            // Lưu hình ảnh vào thư mục storage
-            $imageFile->storeAs('public/images', $imageName);
 
             return response()->json([
                 'id' => $image->id,

@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Config;
 use Webpatser\Uuid\Uuid;
 
 class Image extends Model
@@ -20,4 +22,10 @@ class Image extends Model
     public function products() {
         return $this->belongsToMany(Product::class,'product_image');
     }
+
+    // public function path ():Attribute {
+    //     return Attribute::make(
+    //         get: fn(string $value) => Config::get('app.url') . $value,
+    //     );
+    // }
 }

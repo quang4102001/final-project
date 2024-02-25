@@ -1,0 +1,179 @@
+1.  Laravel: là một trong những Framework PHP phổ biến nhất theo mô hình MVC,
+    rất hữu ích trong việc tạo ra phần mềm web được cá nhân hóa một cách nhanh chóng và hiệu quả
+
+2.  Vòng đời: public/index.php -> app/Http/Kernel.php -> config/app.php -> router (-> middleware) -> controller -> view
+
+3.  Cách cài đặt Laravel: composer create-project laravel/laravel name-app
+
+4.  Config: Config::get(name.key)
+    env: env('Key')
+
+5. Cấu trúc:
+    App: chứa mã lõi của ứng dụng
+    Config: chứa tất cả các tệp cấu hình ứng dụng
+    Database: chứa quản lý cơ sở dữ liệu, nhà máy mô hình và hạt giống của bạn
+    Resources: chứa các view cũng như các nội dung thô, chưa được biên dịch của bạn như CSS hoặc JavaScript
+    Route: chứa các đường dẫn ứng dụng
+    Storage: lưu trữ bất kỳ tệp, log
+    Public: là điểm đầu vào cho tất cả các yêu cầu vào ứng dụng; chứa hình ảnh, JS và CSS
+
+6. Route: đường dẫn (GET, POST, PUT, DELETE)
+    Route group: Route::group()
+    Route prefix: Route::prefix()
+
+7. Middleware: cung cấp một cơ chế thuận tiện để kiểm tra và lọc các yêu cầu HTTP vào ứng dụng
+    Global middleware: mọi yêu cầu HTTP tới ứng dụng
+    Route middleware: cho các tuyến cụ thể
+    Group middleware: nhóm một số phần mềm trung gian dưới một khóa duy nhất
+
+8. CSRF-Token: được tạo ra và được liên kết với phiên làm việc của người dùng.
+    Từ đó đảm bảo rằng chỉ những yêu cầu được gửi từ cùng một trang web có thể được xác minh và chấp nhận
+
+9. Controller
+
+10. Request: Yêu cầu
+    Lấy file: $request->file('name')
+    Lấy coockie: $request->cookie('name')
+    Lấy header: $request->header('name)
+
+11. Response: Phản hồi
+    * Thêm header vào response
+        return response($content)
+            ->header('Content-Type', $type)
+            ->header('X-Header-One', 'Header Value')
+            ->header('X-Header-Two', 'Header Value');
+
+        return response($content)
+            ->withHeaders([
+                'Content-Type' => $type,
+                'X-Header-One' => 'Header Value',
+                'X-Header-Two' => 'Header Value',
+            ]);
+
+    * Thêm cookie vào response
+        return response($content)->cookie($cookie);
+
+    * Redirect tới 1 link bất kì
+        redirect()
+        redirect()->with()
+
+    * Response trả về json
+        return response()->json([
+            'name' => 'Abigail',
+            'state' => 'CA',
+        ]);
+
+    * Response trả vê file download
+        response()->download($pathToFile);
+
+12. Validator
+    * Tạo 1 FormRequest: php artisan make:request StorePostRequest
+
+13. View
+
+14. Blade: là một template engine đơn giản nhưng mạnh mẽ,  không giới hạn trong việc sử dụng mã PHP đơn giản trong View
+    @section: dùng để xác định một phần nội dung
+    @yield: dùng để hiển thị nội dung của một phần đã được xác định
+    @extends: kế thừa toàn bộ nội dung
+    @include: liên kết một blade view với một view khác
+
+    Tạo components: php artisan make:component name-component
+
+15. Session
+    - Cách lấy dữ liệu: Session::put('key')
+    - Cách lưu dữ liệu: Session::put('key', 'value')
+    - Cách xóa dữ liệu: Session::forget('key');
+    - Session flash: lưu trữ thông điệp ngắn hạn giữa các request và response
+    - Cách tạo lại: Session::reflash();
+
+16. Migration: là một tính năng cho phép bạn thay đổi cả cấu trúc và dữ liệu trong database
+    Cách tạo Table
+    Sửa tên bảng: Schema::rename('name_old', 'name_new');
+    Xóa bảng:  Schema::dropIfExists('name');
+
+    Cách tạo cột
+    Đổi tên cột: $table->renameColumn('name_old', 'name_new');
+    Xóa cột: $table->renameColumn('name_old', 'name_new');
+
+17. Query Builder: là một class trong laravel, cung cấp các phương thức truy cập SQL
+    DB::table('users')
+    ->join('contacts', 'users.id', '=', 'contacts.user_id')
+    ->select('name')
+    ->distinct()
+    ->where('status', '<>', 1)
+    ->groupBy('status')
+    ->orderBy('name', 'desc')
+    ->get();
+
+    *Subquery
+    * increment: tăng giá trị cột
+    * decrement: giảm giá trị cột
+
+    * Chuck: để phân chia các truy vấn lớn thành các phần truy vấn nhỏ hơn khi xử lý với một cơ sở dữ liệu lớn
+
+18. Eloquent ORM
+    * Eloquent: một trình ánh xạ quan hệ đối tượng giúp tương tác với cơ sở dữ liệu
+    * ORM: viết tắt của "Object-Relational Mapping" (Ánh xạ Đối tượng-Quan hệ)
+
+    * Định nghĩa tên bảng: protected $table = 'name'
+    * Định nghĩa khóa chính: protected $primaryKey  = 'column'
+    * Bật tắt Timestamps: public $timestamps = false;
+    * Kết nối CSDL: protected $connection = 'name'
+    * Giá trị mặc định : protected $attributes = ['status' => true];
+
+    * Chuck: gọi hàm callback cho mỗi chunk để xử lý bản ghi
+    * Cursor: duyệt qua dữ liệu từng bản ghi một và giải phóng bộ nhớ sau khi mỗi bản ghi được xử lý,
+    giúp giảm áp lực lên bộ nhớ khi làm việc với các tập dữ liệu lớn.
+
+    * Scope cho phép bạn định nghĩa các phần của câu truy vấn mà bạn có thể sử dụng lại trong nhiều nơi mà không cần lặp lại mã
+    * Event: để giám sát và phản ứng khi các sự kiện quan trọng xảy ra trong quá trình thao tác với cơ sở dữ liệu
+
+19. Relatioship Model
+
+    * Polymorphic (đa hình): able_id , able_type
+
+    * Lazy Loading: dữ liệu từ cơ sở dữ liệu không được tải ngay lập tức khi truy cập mối quan hệ, mà dữ liệu sẽ được tải chỉ khi gọi
+    * Eager Loading: là một kỹ thuật tối ưu hóa truy vấn cơ sở dữ liệu trong Laravel, giúp giảm số lượng truy vấn cần thực hiện để lấy dữ liệu từ cơ sở dữ liệu khi làm việc với mối quan hệ
+    * with và load là hai phương thức khác nhau được sử dụng để eager load mối quan hệ khi làm việc với Eloquent ORM
+    * with: tải dữ liệu mối quan hệ cùng với kết quả truy vấn chính
+    * load: tải dữ liệu mối quan hệ sau khi đối tượng hoặc collection đã được trả về
+
+20. Collection
+
+21. * Accessors chuyển đổi giá trị thuộc tính khi bạn đọc nó từ model
+    * Mutators chuyển đổi giá trị thuộc tính khi bạn ghi nó vào csdl
+    * Casts chuyển đổi kiểu dữ liệu các thuộc tính
+
+22. Authentication
+    * Guard là một thành phần quan trọng của hệ thống xác thực, được sử dụng để quản lý quá trình xác thực người dùng
+
+23. Authorization (Ủy quyền): định nghĩa cho phép/từ chối thực hiện một hành động cụ thể nào đó hay không của một user
+    * Gate: thường gắn với một controller
+    * Policy: thường gắn với một model cụ thể
+    * Khai báo tại AuthServiceProvider
+
+24. Artisan là giao diện dòng lệnh đi kèm với Laravel
+    * Laravel Tinker là một REPL mạnh mẽ dành cho framework Laravel
+
+25. FileSystem
+    * Storage::disk('local')->put('example.txt', 'Contents');
+    * php artisan stograte:link
+    * Kiểm tra: Storage::disk('local')->exists('example.txt');
+    * Lấy url: Storage::url('example.txt');
+    * Lấy file: Storage::get('example.txt');
+
+26. Event: cho phép bạn đăng ký và lắng nghe các sự kiện khác nhau xảy ra trong ứng dụng.
+    * Tạo event:
+        php artisan make:event PodcastProcessed
+    * Tạo listener
+        php artisan make:listener SendPodcastNotification --event=PodcastProcessed
+    * Đăng ký event và listener tại EventServiceProvider.php
+
+27. Notification: hỗ trợ gửi thông báo qua nhiều kênh gửi khác nhau, bao gồm email, SMS
+
+28. Queue:  là một cách để xử lý công việc mà không ảnh hưởng đến thời gian xử lý của HTTP request
+    * Queue Sync: công việc được thực hiện ngay lập tức trong quá trình xử lý
+    * Queue Database: các công việc được lưu trữ trong cơ sở dữ liệu cho đến khi chúng được xử lý
+
+
+32. Mix: giúp chúng ta tối ưu các file như css, javascript, image

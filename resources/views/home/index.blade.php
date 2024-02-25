@@ -21,7 +21,7 @@
                     @include('home.data')
                 </div>
                 <div class="flex justify-center mb-5">
-                    @include('admin.products.vendor.pagination')
+                    @include('home.vendor.pagination')
                 </div>
             </div>
             <footer class="credit text-center">Author: shipra - Distributed By:

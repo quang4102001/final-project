@@ -532,6 +532,17 @@ p1. GET vs POST
             });
         - class:
             tạo class xong đó sử dụng ở trong AppServiceProvider
+                // trong file app/Http/View/Composer/CategoryColorSizeComposer.php:
+                class CategoryColorSizeComposer {
+                    public function compose (View $view) {
+                        $categories = Category::all();
+                        $colors = Color::all();
+                        $sizes = Size::all();
+
+                        $view->compact('categories', 'colors', 'sizes');
+                    }
+                }
+                // trong file appServiceProvider.php:
                 class AppServiceProvider extends ServiceProvider
                 {
                     public function boot()
@@ -671,5 +682,1163 @@ p1. GET vs POST
                 ->select('users.id', 'users.username', DB::raw('MAX(posts.created_at) as latest_post_date'))
                 ->groupBy('users.id', 'users.username')
                 ->get();
-    - Increment và Decrement: 
+    - Increment và Decrement: tăng hoặc giảm giá trị của một cột
+        - DB::table('users')->where('id', 1)->increment('points')
+        - DB::table('users')->increment('votes', 1, ['id' => 1]);
+        - DB::table('users')->incrementEach([
+                'votes' => 5,
+                'balance' => 100,
+            ]);
+        - DB::table('users')->where('id', 1)->decrement('points', 5)
+    - Find
+        - DB::table('users')->find(1)           -> tìm theo primary key
+    - First
+        - DB::table('users')->where('name', 'Quang')->first();              -> lấy ra thằng đầu tiên trong
+    - Get
+        - DB::table('user')->where('role', 'user')->get()               -> lấy ra các dòng thỏa mãn yêu cầu
+    - all
+        - DB::table('users')->all()                 -> lấy ra tất cả
+    - chunk: được sử dụng để xử lý dữ liệu lớn bản ghi, tách chúng thành các phần nhỏ
+        - DB::table('users')->chunk(200, function ($users){                 -> chia thành 200 dòng 1 rồi xử lý
+            foreach ($users as $user){
+                \\Xử lý 
+            }
+        })
+    - count: trả về số lượng bản ghi
+        - DB::table('users')->where('role', 'user')->count()
+    - sum:
+        - DB::table('users')->sum('points')
+    - Lấy câu lệnh SQL
+        $query = DB::table('users')->where('role', 'user')
+        $sql = $query->toSql()                  -> $sql là câu lệnh SQL
+        $query->get()
 
+20. Eloquent: là một hệ thống đối tượng ánh xạ quan hệ - (Object - Relational Mapping) - (ORM)
+    - ORM là kỹ thuật lập trình cho phép biểu diễn dữ liệu từ cơ sở theo cách tự nhiên nhất thông qua đối tượng trong code
+    - Định nghĩa table name cho Model (tên model khác tên bảng)
+        protected $table = 'user_profiles';             -> định nghĩa thuộc tính table trong model
+    - Định nghĩa khóa chính cho Model (khóa chính ko phải là id)
+        protected $primaryKey = 'primary_key'              -> định nghĩa thuộc tính primaryKey trong model
+    - Cách sử dụng Timestamps
+        - mặc Định: mặc định timestamps đã được bật
+        - tắt timestamps:
+            public $timestamps = false                      -> xét thuộc tính timestamps thành false, mặc định nó là true
+        - điều chỉnh tên cột timestamp
+            const CREATE_AT='date_created'
+            const UPDATE_AT='date_updated'                  -> xét các thuộc tính CREATE_AT, UPDATE_AT
+    - Cách tạo Default Attribute
+        - sử dụng thuộc tính $attributes
+            protected $attributes = [
+                'is_active' => true
+            ]
+        - sử dụng phương thức getDefault
+            public fucntion getDefault (){
+                return [
+                    'is_active' => true
+                ]
+            }
+    - sử dụng chunk: chia dữ liệu lớn thành nhiều mảng nhỏ. Ở ví dụ,  lấy 200 bản ghi mỗi lần và truyền 
+                        chúng vào hàm callback để xử lý.Sau khi xử lý mỗi phần, Laravel sẽ tự động giải 
+                        phóng bộ nhớ, giúp tránh tình trạng tiêu tốn nhiều bộ nhớ khi xử lý nhiều dữ liệu.
+        User::chunk(200, function ($users) {
+            foreach ($users as $user) {
+                // Xử lý bản ghi $user
+            }
+        });                     -> Sử dụng chunk nếu bạn muốn xử lý dữ liệu theo các phần có kích thước xác định.
+    - sử dụng cursor: sử dụng con trỏ để lấy từng bản ghi một và chỉ giữ một lượng nhỏ dữ liệu trong bộ nhớ,
+                        giúp giảm tải bộ nhớ
+        foreach (User::cursor() as $user) {
+            // Xử lý bản ghi $user
+        }                       -> Sử dụng cursor nếu bạn muốn xử lý dữ liệu một cách lười biếng và giảm thiểu 
+                                    việc lưu trữ dữ liệu trong bộ nhớ.
+    - Scope: là cách đóng gói điều kiện truy vấn phổ biến vào một phương thức hoặc một class
+        - Global scope: đóng gói điều kiện truy vấn vào class, mang đi sử dụng ở nhiều model khác nhau, 
+                        áp dụng lên mọi truy vấn hoặc một phần của model đó
+            - khai báo:
+                class AgeScope implements Scope
+                {
+                    public function apply(Builder $builder, Model $model)
+                    {
+                        $builder->where('age', '>', 18);
+                    }
+                }
+            - sử dụng: sử dụng trong phương thức booted của model, nó sẽ áp dụng lên tất cả truy vấn của model
+                protected static function booted()
+                {
+                    static::addGlobalScope(new AncientScope);
+                }
+        - Cũng là global scope nhưng dùng hàm ẩn danh
+            - khai báo và sử dụng luôn: sử dụng trong phương thức booted của model muốn áp dụng, "ancient" sẽ là tên
+                                        của scope luôn.
+                protected static function booted()
+                {
+                    static::addGlobalScope('ancient', function (Builder $builder) {
+                        $builder->where('created_at', '<', now()->subYears(2000));
+                    });
+                }
+        - Bỏ global scope trong 1 câu truy vấn: khi mà áp dụng scope vào model. Nếu bạn muốn thực hiện 1 truy vấn không có 
+                                                ảnh hưởng của scope thì
+            - sử dụng: withoutGlobalScope()
+                User::withoutGlobalScope(AncientScope::class)->get();
+                User::withoutGlobalScope('ancient')->get();
+                User::withoutGlobalScopes([
+                    FirstScope::class, SecondScope::class
+                ])->get();
+        - Local scope: khai báo, sử dụng chỉ ở trong model, ảnh hưởng đến truy vấn nào sử dụng nó mà thôi.
+            - khai báo: ngay trong model
+                public function scopeActive($query)
+                {
+                    $query->where('active', 1);
+                }
+            - sử dụng: khi sử dụng sẽ bỏ chữ scope ở tên phương thức, viết thường phần tên còn lại scopeActive -> active
+                User::active()->get()
+                $users = User::popular()->orWhere(function (Builder $query) {
+                    $query->active();
+                })->get();                  -> hoặc có thể viết ngắn gọn hơn
+                $users = App\Models\User::popular()->orWhere->active()->get();
+        - local scope có thể nhận tham số:
+            - khai báo: khai báo trong model
+                public function scopeDynamicType ($query, $type){
+                    return $query->where('type', $type)
+                }
+            - sử dụng:
+                User::dynamicType('good')->get()
+    - Các Event của Eloquent , sử dụng Observers để xử lý Event
+        - các sự kiện khi xảy ra của model là event, để xử lý các sự kiện ta dùng Observers, cái này là các lớp chứa các phương thức được
+            gắn kết với các sự kiện Eloquent
+        - các event:
+            - creating/ created: trước và sau khi tạo một bản ghi
+            - updating/ updated: trước và sau khi sửa một bản ghi
+            - deleting/ deleted: trước và sau khi xóa một bản ghi
+            - saving/ saved: trước và sau khi tạo hoặc cập nhật một bản ghi
+            - retrieved: Khi một bản ghi được lấy ra từ cơ sở dữ liệu
+        - tạo Observers:
+            - chạy lệnh terminal: php artisan make:observer UserObserver (có thể thêm --moddel=Tên model để nó cho sẵn mấy cái phương thức)
+        - khai báo:
+            class UserObserver
+            {
+                public function created(User $user): void
+                {
+                }
+                public function updated(User $user): void
+                {
+                }
+                public function deleted(User $user): void
+                {
+                }
+                public function restored(User $user): void
+                {
+                }
+                public function forceDeleted(User $user): void
+                {
+                }
+            }
+        - Đăng kí Observer trong App\Provicders\EventServiceProvider
+            - cách 1: trong phương thức boot
+                public function boot(): void
+                {
+                    User::observe(UserObserver::class);
+                }
+            - cách 2: trong thuộc tính $observer
+                protected $observers = [
+                    User::class => [UserObserver::class],
+                ];
+        - Observer và DB transaction:
+            class UserObserver implements ShouldHandleEventsAfterCommit             -> các truy vấn trong transaction commit thì 
+                                                                                        observer mới chạy
+
+21. Relatioship Model
+    - các relationship:
+        - ở trong database thì viết mối quan hệ trong migrate(nó chính là cái khóa ngoại, viết ở bảng có khóa ngoại thôi):
+            - $table->foreign('foreign_key_name')->reference('key_name_in_ortherTable')->on('table_orther_name')
+        - ở trong model thì viết nó thành phương thức của model, ở cả 2 bảng có liên kết luôn:
+            - one to one:
+                // trong model User             -> là bảng không chứa khóa ngoại
+                public function avatar(){
+                    return $this->hasOne(Avatar::class,'foreign_key', 'primary_key');
+                }                               -> tham số 2,3 là khóa ngoại của bảng kia, khóa chính, có thể bỏ qua
+                // trong model Avatar           -> là bảng có khóa ngoại (user_id)
+                public function user(){
+                    return $this->belongsTo(User::class,'foreign_key', 'primary_key');
+                }                               -> tham số 2,3 là khóa ngoại, khóa chính của bảng kia, có thể bỏ qua
+            - one to many:
+                // trong model User             -> là bảng không chưa khóa ngoại
+                public function posts(){
+                    return $this->hasMany(Post::class,'foreign_key', 'primary_key')
+                }                               -> tham số 2, 3 là khóa ngoại của bảng kia, khóa chính, có thể bỏ qua
+                // trong model Post             -> là bảng có khóa ngoại (user_id)
+                public function user(){
+                    return $this->belongsTo(User::class)
+                }                               -> tham số 2,3 là khóa ngoại, khóa chính của bảng kia, có thể bỏ qua
+            - BelongsTo: là mối quan hệ thuộc về, trong bảng có khóa ngoại
+                // trong model Post             -> là bảng chưa khóa ngoại (user_id)
+                public function user(){
+                    return $this->belongsTo(User::class,'foreign_key','primary_key')
+                }                               -> tham số 2,3 là khóa ngoại, khóa chính của bảng kia, có thể bỏ qua
+            - hasManyThrought: cho phép bạn truy cập các bản ghi trên bảng thông qua một bảng trung gian
+                                thích hợp cho trường hợp bảng trung gian có quan hệ một nhiều với bảng đích
+                // Ví dụ: 'User' ở trong 1 'Country' nào đó, có các 'Post' nào đó. Vậy ta có thể từ 'Country' tìm đến 'Post'
+                    thông qua 'User'.
+                // trong model Country
+                public function posts(){
+                    return $this->hasManyThrought(
+                        Post::class,
+                        User::class,
+                        'country_id',           -> khóa ngoại ở bảng trung gian (user)
+                        'user_id',              -> khóa ngoại ở bảng đích   (post)
+                        'id',                   -> khóa chính ở bảng bảng ban đầu   (country)
+                        'id',                   -> khóa chính của bảng trung gian (user)
+                    )
+                }                               -> tham số 3,4,5 có thể bỏ qua nếu nó được đặt tên theo chuẩn như ví dụ
+                - Nếu các cột được đặt tên theo chuẩn như ví dụ, và các mối quan hệ đã được xác định trong model thì ta có thể
+                    dùng 'string base syntax' và 'dynamic syntax'
+                // trong model Country          -> string base syntax
+                public function posts(){
+                    return $this->throught('users')->has('posts')
+                }
+                -> 'users', 'posts' là tên relationship, là tên phương thức quan hệ giữa các bảng các bảng
+                //trong model Country
+                public function users(){
+                    return $this->hasMany(User::class);
+                }
+                // trong model User
+                public fucntion posts(){
+                    return $this->hasMany(Post::class);
+                }
+
+                // trong model Country          -> dynamic syntax
+                public function posts(){
+                    return $this->throughtUsers()->hasPosts()
+                }                               -> throughtUsers, hasPosts là các phương thức mà laravel sẽ tự có khi bạn đã xác định mối quan hệ
+                                                    giữa các bảng, các phương thức như trên
+    - Polymorphic Relationships: là tính năng cho phép 1 model có thể liên kết với nhiều model khác nhau trên cùng một quan hệ
+        - one to one: User và Post đều có quan hệ 1 1 với Image (trong bảng images có 1 khóa ngoại: imageable_id và 1 cột image_type)
+            - tạo bảng:
+                Schema::create('images', function (Blueprint $table) {
+                    $table->id();
+                    $table->string('path');
+                    $table->unsignedBigInteger('imageable_id');         
+                    $table->string('imageable_type');                   -> cột này không cần quan tâm, laravel sẽ tự quản lý nó
+                    $table->timestamps();
+                });
+            - định nghĩa phương thức relationship trong các model model:
+                // trong model Image
+                public function imageable(): MorphTo {
+                    return $this->morphTo()                             -> có thể nhận 3 tham số, 1 là __FUNCTION__ là tên function hiện tại
+                                                                        2 là imageable_type, 3 là imageable_id.
+                }                                                       -> trả về đối tượng sử dụng ảnh này tương ứng
+                // trong model User
+                public function image(): MorphTo {
+                    return $this->morphTo(Image::class, 'imageable');   -> tham số đầu tiên là tên model, tham số thứ 2 là tên morph, từ tên
+                                                                        morph laravel sẽ tìm đến cột _type, _id trong bảng có liên kết 
+                }
+                // trong model Post
+                public fucntion image():MorphTo {
+                    return $this->morphTo(Image::class, 'imageable');
+                }
+            - Sử dụng:
+                - truy cập:
+                    $post = Post::find(1)
+                    $image = $post->image
+                    // hoặc là
+                    $user = User::find(1)
+                    $image = $user->image
+                - tạo và lưu:
+                    $post = Post::find(1);
+                    $image = new Image(['path' => 'url_something_something']);
+                    $post->image()->save($image);
+                - lấy ra đối tượng tương ứng đang liên kết với bản ghi 
+                    $image = Image::find(1)
+                    $imageable = $image->imageable
+        - one to many: Product và Post đều có quan hệ 1 nhiều với Image(bảng images sẽ có khóa ngoại imageable_id và 1 cột imageable_type)
+            - tạo bảng:
+                tạo bảng tương tự như trường hợp one to one
+            - định nghĩa các phương thức relationship trong các model:
+                // tromg model Image:
+                public function imageable(): MorphTo {
+                    return $this->morphTo()
+                }
+                // trong model Product:
+                public function images(){
+                    return $this->morphMany(Image::class, 'imageable');
+                }
+                // trong model Post:
+                public function images(){
+                    return $this->morphMany(Image::class, 'imageable');
+                }
+            - sử dụng
+                - truy cập:
+                    $post = Post::find(1);
+                    $images = $post->images
+                    foreach($images as $image){
+                        ...
+                    }
+                - tạo và lưu:
+                    $post = Post::find(1);
+                    $image = new Image(['path' => 'url_something_something']);
+                    $post->images()->save($image);
+                - lấy ra đối tượng tương ứng đang liên kết với bản ghi
+                    $image = Image::find(1)
+                    $imageable = $image->imageable
+        - one of many: nó vẫn ở trương hợp của one to many nhưng mà là sẽ lấy ra 1 bản ghi mà mong muốn như lastOfMany() (mới nhất)
+                        hoặc oldestOfMany() (cũ nhất), hoặc ofMany('column_name', 'value') (truy vấn như kiểu image_name == 'test1')
+            - định nghĩa ở trong các model Product hoặc Post:
+                // trong model Product:
+                public function lastImage(){
+                    return $this->morphMany(Image::class, 'imageable')->lastOfMany();
+                }
+                public function oldestImage(){
+                    return $this->morphMany(Image::class, 'imageable')->oldestOfMany();
+                }
+                public function testImage(){
+                    return $this->morphMany(Image::class, 'imageable')->ofMany('name', 'test');
+                }
+        - many to many: Video và Post đều có quan hệ nhiều nhiều với Tag, thì sẽ có bảng taggable(
+                        có tagg_id, taggable_id, taggable_type)
+            - tạo bảng:
+                Schema::create('taggables', function (Blueprint $table) {
+                    $table->id();
+                    $table->unsignedBigInteger('tag_id');
+                    $table->unsignedBigInteger('taggable_id');
+                    $table->string('taggable_type');
+                    $table->timestamps();
+
+                    $table->index(['tag_id', 'taggable_id', 'taggable_type']);
+                });
+            - định nghĩa các phương thức relationship trong các model:
+                //trong model Tag:
+                public function videos(): MorphToMany
+                {
+                    return $this->morphedByMany(Video::class, 'taggable');
+                }
+                public function posts(): MorphToMany
+                {
+                    return $this->morphedByMany(Post::class, 'taggable');
+                }
+                //trong model Video:
+                public function tags(): MorphToMany
+                {
+                    return $this->morphToMany(Tag::class, 'taggable');
+                }
+                //trong model Post:
+                public function tags(): MorphToMany
+                {
+                    return $this->morphToMany(Tag::class, 'taggable');
+                }
+            - sử dụng:
+                - truy cập:
+                    $post = Post::find(1);
+                    foreach($post->tags as $tag){
+                        ...
+                    }
+                - tạo và lưu:
+                    $post = Post::find(1);
+                    $tag = Tag::firstOrCreate(['name', 'Laravel']);
+                    $post->tags->save($tag);
+    - Eager loading: là chủ động tải các mối quan hệ ngay tại truy vấn gốc, tránh tình trạng sinh ra thêm truy vấn
+        - ví dụ: 
+            // khi không dùng Eager loading:
+            $books = Book::all();
+            foreach($books as $book){
+                echo $book->author->name;           -> lúc này nó sẽ sinh ra thêm 1 truy vấn nữa
+            }                                       -> nếu có 25 quyển sách, thì tổng t phải chạy 26 truy vấn
+            // dùng eager loading:
+            $books = Book::with('author')->get();
+            foreach($books as $book){
+                echo $book->author->name;
+            }                                       -> chỉ có 1 truy vấn
+        - with: dùng with để chủ động tải các quan hệ 
+            $books = Book::with('author')->get()                    -> tải thêm quan hệ với tác giả
+            $books = Book::with('author:name,age,book_id')->get()   -> tải thêm quan hệ với tác giả nhưng chỉ gồm các cột đã liệt kê         
+            $books = Book::with('author.contacts')->get()            -> tải thêm quan hệ với tác giả, liên hệ của tác giả
+            $books = Book::with(['author', 'publisher'])->get()     -> tải thêm các quan hệ khác nhau
+            $books = Book::with(['author' => ['contacts', 'publisher'],])->get()
+            $users = User::with(['posts' => function (Builder $query) {
+                $query->where('title', 'like', '%code%');
+            }])->get();
+        - load: dùng để chủ động tải, vẫn sinh ra truy vấn
+            $books = Book::all();
+            foreach($books as $book){
+                if($book->name == 'PHP'){
+                    $book->load('author')
+                }
+            }
+            $author->load(['books' => function (Builder $query) {
+                $query->orderBy('published_date', 'asc');
+            }]);
+    - Lazy loading: là tự động tải các mối quan hệ khi mà chúng ta cần dùng đến các quan hệ đó, sinh ra thêm truy vấn
+        - ví dụ
+            $book = Book::find(1)
+            $book->author->name                     -> không dùng đến with, load nhưng vẫn lấy được dữ liệu của tác giả, đó là lazy loading
+        - chặn lazy loading: dùng phương thức preventLaztLoading(true)      -> tham số truyền vào trả về boolean
+            sử dụng ở trong AppServiceProvider ở phương thức boot
+            // trong AppServiceProvider:
+            public function boot(){
+                Model::preventLaztLoading(! this->app->isProduction())      -> nếu là môi trường Production thì không chặn lazy loading
+            }
+    - has: lấy các bản ghi có ít nhất một mối quan hệ:
+        $users = User::has('posts')->get();
+    - whereHas: lấy các bản ghi có mối quan hệ thỏa mãn điều kiện cụ thể
+        $users = User::whereHas('posts', function ($query){
+            $query->where('title', 'PHP');                              -> lấy ra người dùng có bài viết có title là PHP
+        })->get();
+    - wherePivot: lọc truy vấn qua bảng trung gian
+        public function roles(){
+            return $this->belongsToMany(Role::class)
+                        ->wherePivot('approved', 1)                     -> lấy ra các roles đã được phê chuẩn
+        }
+        public function roles(){
+            return $this->belongsToMany(Role::class)
+                        ->wherePivotIn('priority', [1,2])                     -> lấy ra các roles có quyền là 1 hoặc 2
+        }
+        public function roles(){
+            return $this->belongsToMany(Role::class)
+                        ->wherePivotNotIn('priority', [1,2])                     -> lấy ra các roles có quyền khác 1 và 2
+        }
+    - Count:
+        - $count = User::find(1)->posts->count();             -> lấy số lượng bài viết
+        - withCount: đếm số lượng quan hệ mà không thực sự tải quan hệ, trả về một cặp key-value cùng với kết quả có dạng "relation_count"
+            $users = User::withCount('posts')->get();           -> lấy ra các users và mỗi user có thêm 1 key posts_count với giá trị 
+                                                                là đếm số bài viết tương ứng
+            $users = User::withCount('posts' => function ($request){
+                $request->where('title', 'LIKE', '%PHP%');
+            })->get();                                          -> tương tự như trên nhưng là thêm điều kiện 
+            $users = User::withCount([
+                'posts',
+                'posts as pending_posts_count' => function ($request){
+                $request->where('title', 'LIKE', '%PHP%');
+            }
+            ])->get();                                          -> lần này là đếm 2 lần, cái thứ 2 là được gán với tên là pending_posts_count
+            $posts = Post::select(['title', 'body'])
+                ->withCount('comments')
+                ->get();                                        -> withCount() phải để sau select()
+        - loadCount: tải số lượng quan hệ sau khi truy vấn
+            $book = Book::first();
+            $book->loadCount('genres')                          -> đếm số thể loại
+    - Sum:
+        - withSum: tương tự như withCount như là tổng của cột trogn bảng quan hệ và trả về  key có dạng "relation_sum_column"
+            $products = Product::withSum('orders', 'quantity')->get()        -> lấy ra các order và mỗi product có thêm "orders_sum_quantity" 
+            $products = Product::withSum('orders as total_quantity', 'quantity')->get()          -> lấy ra các order và mỗi product có 
+                                                                                            thêm "total_quantity"
+                                                                                            đổi tên mặc định của hàm withSum 
+        - loadSum: tải tổng giá trị của một cột quan hệ sau khi truy vấn
+            $products = Product::all();
+            $products->loadSum('orders', 'quantity');                        -> thêm cột tổng vào mỗi bản ghi product
+    - tạo dữ liệu bảng Relationship:  
+        - one to one:
+            - tạo dữ liệu mới:
+                $user = new User([name => 'Quang']);
+                $profile = new Profile(["high_school" => "My Duc C"]);
+                $user->profile()->save($profile)
+                //hoặc
+                $user->post()->create(['title' => "PHP"]);                  -> dùng phương thức create cũng được
+                //hoặc
+                $user->post()->createQuietly([
+                    'title' => 'Post title.',
+                ]);                                                         -> dùng phương thức createQuietly sẽ không gây ra sự kiện
+            - cập nhật thông tin:
+                $user = User::find(1);
+                $user->profile()->update(["high_school" => "My Duc A"]);
+                //hoặc
+                $user->profile["high_school"] = "My Duc A";
+                $user->push();                                              -> dùng push() để lưu thay đổi cho cả đối tượng và các relation
+                // hoặc
+                $post->pushQuietly();                                       -> lưu thay dổi cho đối tượng và các relation mà không gây ra
+                                                                                bất kì sự kiện
+        - one to many:
+            - tạo dữ liệu mới:
+                $user = new User(["name" => "Quang"]);
+                $posts = [
+                    new Post(['title' => "PHP"]),
+                    new Post(['title' => "Laravel"]),
+                ];
+                $user->posts()->saveMany($posts);                           -> tạo user mới và kết nối với nhiều post mới
+                //hoặc
+                $user->posts()->createMany([
+                    ['title' => "PHP"],
+                    ['title' => "Laravel"],
+                ]);                                                         -> có thể sử dụng createMany
+                //hoặc
+                $user->posts()->createManyQuietly([
+                    ['title' => 'First post.'],
+                    ['title' => 'Second post.'],
+                ]);                                                         -> dùng createManyQuietly không gây ra sự kiện
+            - cập nhật thông tin:
+                $user=User::find(1);
+                $user->profile()->update(["is_published" => "true"]);       -> cập nhật tất cả bài viết của user id=1 chuyển is_published = true
+                //hoặc
+                $user->profile[0]->high_school = "My Duc A";
+                $user->push();                                              -> dùng push() để lưu thay đổi cho cả đối tượng và các relation
+            - xóa dữ liệu:
+                $user = User::find(1);
+                $user->posts()->delete();                                   -> tìm user có id=1 và xóa tất cả các post của nó
+            - thêm mới và không xóa các bài viết cũ:
+                $user = User::find(1);
+                $user->posts()->syncWithoutDetaching([3]);                  -> thêm bài viết có id là 3 và không xóa các bài viết cũ
+            - thêm mới và xóa các bài viết cũ:
+                $user = User::find(1);
+                $user->posts()->sync([1,2]);                                -> thêm mới bài viết có id 1, 2 và xóa các bài viết cũ khỏi liên kết
+        - many to many:
+            - attach: thêm liên kết một hoặc nhiều bản ghi mới với mô hình chủ trong mối quan hệ nhiều nhiều
+                $product = Product::find(1);
+                $product->colors()->attach([1,2]);                          -> sản phẩm được thêm các liên kết mới với color có id là 1, 2
+            - detach: xóa liên kết 1 hoặc nhiều bản ghi với mô hình chủ trong mối quan hệ nhiều nhiều
+                $product = Product::find(1);
+                $product->colors()->detach([1,2]);                          -> sản phẩm xóa các liên kết với color có id là 1, 2
+            - sync: phương thức này đồng bộ hóa các liên kết, xóa các liên kết cũ, thêm liên kết mới
+                $product = Product::find(1);
+                $product->colors()->sync([1,2]);                            -> sản phẩm thêm liên kết color có id là 1, 2 còn các liên kết 
+                                                                                color khác thì xóa hết
+            - syncWithoutDetaching: giữ nguyên các liên kết hiện tại và thêm các liên kết không tồn tại
+                $product = Product::find(1);
+                $product->colors()->syncWithoutDetaching([1,2]);            -> sản phẩm thêm liên kết color có id là 1, 2 và không xóa các
+                                                                                liên kết color cũ
+    - Pagination:
+        - $products = Product::paginate(15);                        -> trả về các đường dẫn từng trang, tổng số trang, ...
+        - $products = Product::simplePaginate(15);                  -> trả về 15 bản ghi mỗi trang, không tạo liên kết các trang, chỉ có 
+                                                                        liên kết trang trước trang sau. có hiệu suất tốt hơn "paginate"
+                                                                        Vì nó chỉ cần thêm 1 giới hạn, còn "paginate" phải đếm toàn bộ bản
+                                                                        ghi.
+        - trong trường hợp bạn cần phân trang 2 cái trong 1 màn hình, query string trên url của nó sẽ bị trùng nhàu là "page",
+            Vậy nên, ta có thể truyền tham số vào paginate, simplePaginate, cursorPaginate
+            $products = Product::paginate(15, ['*'], 'products')    -> tham số 1 là số bản ghi mỗi trang, tham số thứ 2 là mảng các cột sẽ
+                                                                        lấy ( '*' là lấy tất cả ), tham số thứ 3 là tên của pageName, nó sẽ
+                                                                        thay thế "page" trên url thành "products"
+        - $products = Product::cursorPaginate(15);                  -> sử dụng cơ chế tải con trỏ, chỉ tải 1 phần nhỏ dữ liệu tại 1 thời điểm
+                                                                        giảm áp lực lên bộ nhớ, thay vì tải toàn bộ dữ liệu 1 phát
+                                                                        và nó trả về 15 bản ghi, không tạo liên kết các trang, chỉ có liên 
+                                                                        kết trước, sau.
+                                                                        -> Phù hợp cho trang cuộn vô hạn.
+
+22. Collection: là đối tượng được thế kế để làm việc với dữ liệu, cung cấp các phương thức: map, each, sortBy, filter, pluck, count, ...
+    Có thể chứa mọi loại dữ liệu mảng, đối tượng Eloqunet. Có thể dùng các hàm lặp, lặp nó như là mảng PHP
+    - chunk: chia collection thành các phần nhỏ có kichs thước là tham số đã truyền vào và trả về một mảng chưa các collection con
+        $numbers = $collect([1,2,3,4,5,6,7,8,9,10]);
+        $result = $numbers->chunk(3);
+        echo $result;                       -> trả về [[1,2,3],[4,5,6],[7,8,9],[10]]
+    - pluck: lấy một cột duy nhất từ mảng hoặc đối tượng trong collection.
+        $users = collect([
+            ["id" => "1","name" => "Quang0"],
+            ["id" => "2","name" => "Quang1"],
+            ["id" => "3","name" => "Quang2"],
+            ["id" => "4","name" => "Quang3"],
+            ["id" => "5","name" => "Quang4"],
+        ]);
+        $names = $users->pluck("name");
+        $names->toArray();                      -> ["Quang0","Quang1","Quang2","Quang3","Quang4"]
+    - flatMap: duyệt qua mỗi phần tử và gộp kết quả thành 1 collection bao gồm cả các phần tử cũ và các phần tử mới
+        gồm xen kẽ các phàn tử cũ và các phần tử mới, nếu trong xử lý function của flatMap có return về là mảng thì flatMap sẽ làm phẳng
+        mỗi phần tử            
+        VD: $collection = collect(['a', 'b', 'c']);
+            $flatMap = $collection->flatMap(function($item) {
+                return [$item, strtoupper($item)];
+            });
+            $flatMap->toArray();                -> ['a', 'A', 'b', 'B', 'c', 'C']
+    - map: ánh xạ qua mỗi phần tử, áp dụng một hàm xử lý, trả về 1 collection mới với kết quả của mỗi phần tử sau khi được xử lý
+        , nếu xử lý trong functopn của map return về mảng thì map sẽ không làm phẳng phần tử như flatMap
+        Vd: $collection = collect([1, 2, 3]);
+            $map = $collection->map(function($item) {
+                return $item * 2;
+            });
+            $map->all();                -> [2, 4, 6]
+            // hoặc
+            $collection = collect([1, 2, 3]);
+            $map = $collection->map(function($item) {
+                return [$item, $item * 2];
+            });
+            $map->toArray();                -> [[1, 2], [2, 4], [3, 6]]
+    - flatten:phẳng hóa một collection lồng nhau thành một collection 1 chiều
+        VD: $collection = ['name' => 'John', 'languages' => ['PHP', 'Laravel']];
+            $flatten = $collection->flatten();
+            $flatten->all();                    -> ['John', 'PHP', 'Laravel']
+            // hoặc 
+            $collection = collect([1, [2, 3]]);
+            $flatten = $collection->flatten();
+            $flatten->all();                    -> [1, 2, 3]
+    - each: lặp qua từng phần tử trong collection, thực thi 1 hàm callback trên phần tử đó
+        VD: $collection = collect([1, 2, 3]);
+            $collection->each(function($item) {
+                echo $item;
+            });
+    - transform: sử dụng để thay collection gốc bằng cách thực hiện một hàm xử lý trên mỗi phần tử của collection và ghi đè lên giá trị của
+        phần tử đó
+        VD: $collection = collect([1, 2, 3]);
+            $collection->transform(function($item){
+                return $item * 2;
+            });
+            $collection->all();                 -> [2, 4, 6]
+
+23. Tìm hiểu về Model - Eloquent: Mutators & Casting:
+    - được sử dụng để thao tác dữ liệu trước, sau khi nó được truy xuất hoặc gán cho các thuộc tính model.
+    - Accessor: biến đổi giá trị của thuộc tính model khi nó được truy cập (model->attribute). Để định nghĩa Accessor, cần tạo phương
+    thức trong model và đặt tên theo quy định của một thuộc tính trước khi nó trả về từ phương thức truy xuất 
+    (attibute: first_name, fucntion: firstName).
+    VD: // trong model Product
+        public function price (): Attribute{
+            return Attribute::make(
+                get: fn (string $value) => '$' . $value;               -> khi gọi đến price, nó sẽ trả về chuỗi có 4 trước, rồi đến giá
+            );
+        }
+
+        echo 'Giá: ' . $product->price;                                   -> Giá: $14
+        - Xây dựng value object: lúc này bao đóng get sẽ nhận thêm 1 đối số thứ 2 là $attribues, là mảng các thuộc tính hiện tại của mô hình
+        VD: use App\Support\Address;
+            use Illuminate\Database\Eloquent\Casts\Attribute;
+            protected function address(): Attribute
+            {
+                return Attribute::make(
+                    get: fn (mixed $value, array $attributes) => new Address(
+                        $attributes['address_line_one'],
+                        $attributes['address_line_two'],
+                    ),
+                );
+            }
+    // hoặc:
+    VD: public function getPriceAttribute($value) {
+        return '$' . $value;
+    }
+    - Mutator: chuyển đổi giá trị của một thuộc tính trước khi nó bị gán (model->attribute = 'new value').
+    VD: public function setPasswordAttribute ($value) {
+        $this->attributes['password'] = bcrypt($value);                 -> mã hóa mật khẩu trước khi lưu
+    }
+    // hoặc:
+    VD: public fucntion price ($value):Attribute {
+        return Attribure::make(
+            get: fn(string $value) => '$' . $value,                     -> thêm '$' vào trước giá khi get
+            set: fn(string $value) => trim($value),                     -> bỏ khoảng trắng ở đầu cuối khi set
+        );
+    }
+    // hoặc:
+    VD: protected function address(): Attribute
+        {
+            return Attribute::make(
+                get: fn (mixed $value, array $attributes) => new Address(
+                    $attributes['address_line_one'],
+                    $attributes['address_line_two'],
+                ),
+                set: fn (Address $value) => [
+                    'address_line_one' => $value->lineOne,
+                    'address_line_two' => $value->lineTwo,
+                ],
+            );
+        }
+    - Attribute Cast:chuyển đổi kiểu dữ liệu của thuộc tính
+        - array:
+            VD: protected casts = [
+                    'attribute' => 'array',
+                ]
+        - json:
+            VD: protected casts = [
+                    'attribute' => 'json',
+                ]
+        - datetime: chuyển thành đối tượng DateTime.
+            VD: protected casts = [
+                    'attribute' => 'datetime',
+                ]
+
+24. Authentication: 
+    - kiểm tra đăng nhập: để kiểm tra xem người dùng đã đăng nhập hay chưa, t dùng:
+        - Auth::check()                     -> true là đăng nhập, false là chưa đăng nhập
+        - auth()->check()
+        - Các cái trên là dùng với guard mặc định, nếu là guard tự tạo mới thì:
+            - Auth::guard('admin')->check()
+            - auth()->guard('admin')->check()
+    - lấy thông tin người dùng: để lấy thông tin người dùng, t dùng:
+        - Auth::user()                      -> trả về 1 collection có bao gồm các thông tin của người dùng: name, email, address, ...
+        - auth()->user()
+        - nếu guard tự tạo mới thì:
+            - Auth::guard('admin')->user()
+            - auth()->guard('admin')->user()
+    - guard: được sử dụng để quản lý việc xác định người dùng nào có quyền truy cập vào ứng dụng và họ là ai.
+    - tạo guard:
+        - cấu hình guard mới trong config/auht.php:
+            'guards' => [
+                'admin' => [
+                    'driver' => 'session',
+                    'provider' => 'admins',
+                ],
+            ],
+        - cấu hình Provider cho guard trng config/auth.php:
+            'providers' => [
+                'admins' => [
+                    'drivers' => 'eloquent',
+                    'model' => App\Model\Admin::class,
+                ]
+            ],
+    - middleware:
+        - middleware auth: yêu cầu người dùng phải đăng nhập rồi mới được thông qua middleware.
+        - middleware guard: yêu cầu người dùng có guard đúng yêu cầu đã đăng nhập mới được thông qua. 
+            VD: Route::middleware('auth:admin')->get('/admin/dashboard', AdminController::class, 'index')->name('admin.index')
+                        -> phải đã đăng nhập và có guard là là admin thì mới có thể thông qua middeware để vào admin dashboard
+    - cách login:
+        VD: $credentials = $request->only('email', 'password');                     -> lấy email và mật khẩu
+            if(Auth::attempt($credentials)) {                                       -> kiểm tra email và mật khẩu
+                return redirect()->route('home.index')                              -> chuyển hướng đến trang đích nếu email, mật khẩu đúng
+            }    
+    - logout: 
+        VD: Auth::logout();
+            // hoặc
+            auth()->logout();
+
+25. Authorization: là quá trình xác định xem người dùng có quyền truy cập vào một tài nguyên cụ thể hay không.
+    - middleware: như là đầu lọc kiểm tra các diều kiện thì mới cho request thông qua.  
+    - Policies: kiểm tra quyền truy cập vào các model, xác định các quy tắc liên quan đến việc truy cập vào một model cụ thể. Có thể định
+        nghĩa các phương thức trong policy để kiểm tra xem một người dùng có thể thực hiện các hành động cụ thể trên model đó hay không.
+        VD: //kiểm tra người dùng có quyền xem bài viết hay không
+            // trong command line:
+            php artisan make:policy PostPolicy --model=Post
+            -> tạo policy có tên là PostPlocy và có kết nối model Post
+            // trong file PostPolicy.php:
+            - gồm các phương thức view, create, update, delete, ... và return về true hoặc false
+            public function view (User $user, Post $post) {
+                return true;
+            }
+            public function create (User $user) {
+                return $user !== null;                          -> người dùng phải đăng nhập
+            }
+            public function update (User $user, Post $post) {
+                return $user->id === $post->user_id;            -> người dùng phải có id trùng với user_id
+            }
+            public function delete(User $user, Post $post) {
+                return $user->role === 'admin' || $user->id === $post->user_id;         -> người dùng là admin hoặc có id trùng user_id
+            }
+            // Đăng kí Policy trong AuthServiceProvider.php: đăng kí cho model Post
+            protected $policies = [
+                Post::class => PostPolicy::class,
+            ];
+    - Gates:  là cơ ché cho phép bạn định nghĩa các điều kiện kiểm tra quyền truy cập của một tìa nguyên. Có thể định nghĩa các gate để 
+        kiểm tra xem một người dùng có thể thực hiện một hành động cụ thể hay không. Các gate có thể được sử dụng ở views, controllers
+        VD: //kiểm tra xem người dùng có quyền xuất bản bài viết hay không (thay đổi status)
+            // trong AuthServiceProvider.php
+            public function boot() {
+                $this->registerPolicies();
+
+                Gate::define('publish', function ($user, Post $post) {
+                    return in_array($user->role, ['author', 'editor', 'admin']);
+                });
+            }
+            // trong controller
+            public fucntion publish(Post $post) {
+                if(Gate::allow('publish', $post)) {
+                    $post->update([status => 'published']);
+                    return redirect()->route('posts.index', $post);
+                }else{
+                    abort(403, 'Unauthenticated action');
+                }
+            }
+            // trong view
+            @can('publish', $post)
+                <form action="{{ route('posts.publish', $post) }}" method="POST">
+                    @csrf
+                    <button type="submit">Publish</button>
+                </form>
+            @endcan
+
+26. Artisan Console: là công cụ mạnh mẽ để thực hiện các dòng lệnh command line, cung cấp 1 số lượng lớn các lệnh có sẵn
+    - php artisan ...
+        -make:...                                       -> lệnh tự động tạo 
+            - controller                                -> file controller
+            - model                                     -> file model
+            - migration                                 -> file migration
+            - middleware                                -> file middleware
+            - make:command                              -> command mới
+        - migrate:...                                   -> chạy các migrate
+        - rollback                                      -> roll back migration lần cuối đã chạy
+        - refresh                                       ->reset và chạy lại tất cả các migration
+        - schedule:...
+            - run                                       -> chạy tất cả các nhiệm vụ trong lịch trình
+            - list                                      -> liệt kê tát cả các nhiệm vụ đã được định nghĩa trong lịch trình.
+        - db:seed                                       -> chạy các seed
+        - route:list                                    -> liệt kê các route đã định nghĩa trong ứng dụng
+        - queue:...
+            - work                                      -> bắt đầu xử lý các job từ hàng đợi
+            - listen                                    -> lắng nghe và xử lý các công việc từ hàng đợi
+    - tinker: là công cụ mạnh mẽ được tích hợp sẵn giúp tương tác với ứng dụng thông qua command-line interface, cung cấp nhanh chóng
+        và tiện lợi để thử nghiệm và thực hiện các thao tác trên dữ liệu mà không cần phải tạo các tập lệnh hoặc chạy ứng dụng web.
+        - Khi chạy Tinker, t có thể truy cập và thao tác với các model, service và các thành phần khác của ứng dụng trực tiếp từ dòng lệnh.
+        - Để chạy lệnh tinker: php artisan tinker
+    - Tạo một command tính số lượng bản ghi trong bảng users và in ra
+        - file được tạo ra và lưu ở app/Console/Commands/
+        // lệnh trên command:
+        php artisan make:command CountUsers
+        -> lệnh này sẽ tạo ra một class command mới có tên là CountUsers trong app/Console/Commands
+        // trong file CountUsers.php:
+        protected $signature = "count:users";          -> $signature là biến chứa câu lệnh trên command, nghĩa là php artisan count:users
+        protected $description = "Đếm số bản ghi trong bảng users";         -> là mô tả ngắn gọn của command, giúp t hiểu mục đích của nó
+        public function __construct (){
+            parent::__construct();
+        }                                               -> hàm __construct này không có vấn đề gì quan trọng cả
+        public function handle (){
+            $count = User::count();
+            $this->info("Số người dùng là: $count");
+        }                                               -> hàm handle() là hàm chứa logic của command
+
+27. File system: là thành phần quan trọng, dùng để quản lý tệp và thư mục trên hệ thống tệp của máy chủ.
+    - Local Driver: quản lý tệp trên hệ thông tệp cục bộ của máy chủ của t. Cho phép lưu trữ, truy cập các tệp trên cùng một máy chủ 
+        mà ứng dụng đang chạy.
+        - Cấu hình:cấu hình local Driver trong tệp config/filesystem.php. Có thể xác định các đường dẫn tệp cụ thể để lưu trữ dữ liệu 
+            hoặc sử dụng đường dẫn tương đối đối với thư mục gốc của ứng dụng.
+            // trong file config/filesystem.php:
+            'default' => env('FILESYSTEM_DISK', 'local'),               -> lấy biến ở file .env, nếu không có thì mặc định là local
+            'disks' => [                                            -> đây là mảng chứa các cấu hình các loại quản lý tệp
+                'local' => [
+                    'driver' => 'local',                            -> local driver đấy
+                    'root' => storage_path('app'),                  -> nơi lưu là storage/app 
+                    'throw' => false,                               -> có ném ra lỗi khi hoạt động tệp không thành công không 
+                ],        
+
+                'public' => [
+                    'driver' => 'local',                            -> local driver đấy
+                    'root' => storage_path('app/public'),           -> nơi lưu là storage/app/public
+                    'url' => env('APP_URL').'/storage',             -> đường dẫn của tệp khi người dùng truy cập
+                    'visibility' => 'public',                       -> xác định các tệp có thể truy cập công cộng
+                    'throw' => false,                               -> có ném ra lỗi khi hoạt động tệp không thành công không
+                ],                                                  
+            ]
+            - lưu ý, khi dùng đến disk public thì cần chạy lệnh command php artisan storage:link để tạo liên kết từ storage public đến
+                thư mục public
+        - Thao tác với tệp: Local Driver cung cấp các phương thức để lưu trữ, lấy và xóa các tệp từ hệ thống tệp cục bộ
+            // lưu tệp:
+                Storage:disks('local')->put('file.txt', Nội dung của tệp);
+                $image = $request->image;
+                Storage:disks('public')->put('images', $image);                     ->Storage::disk()->put() có thể dùng cho mọi loại driver
+                                                                                        đã được cấu hình,
+                                                                                        tham số 1 là đường dẫn bắt đầu từ cho cấu hình đường dẫn
+                                                                                        nếu muốn đặt tên cho file thì viết tên file hoặc
+                                                                                        biến là tên file. Nếu bỏ không cho tên file vào thì nó
+                                                                                        sẽ tự render ra tên file linh tinh
+                                                                                        tham số 2 là file
+                // hoặc:
+                $image->storeAs('public/images', 'image_name.jpg')                  -> storeAs chỉ dùng được cho local driver đã được cấu hình
+                                                                                        và phải định nghĩa tên cho file.
+                                                                                        Tham số 1 là đường dẫn bắt đầu từ chỗ cấu hình đường dẫn
+                                                                                        tham số thứ 2 là tên file
+        - Tính linh hoạt: có thể lưu nhiều kiểu tệp, video, hình ảnh, tệp văn bản, ...
+        - Đồng bộ và bất động bộ: có thể gọi đồng bộ hoặc bật đồng bộ đều được, tùy vào yêu cầu của ứng dụng.
+            - đồng bộ: 
+                Storage::disk('local')->get('file.txt');
+            - bất đồng bộ:
+                Storage::disk('local')->get('file.txt', function ($content) {
+                    echo $content;
+                })
+                //Xử lý công việc khác 1
+                //Xử lý công việc khác 2
+                --> vậy là các công việc khác không đợi hàm get() chạy xong mà chạy luôn, khi nào get() chạy xong thì nó in ra $content
+                Kêt quả:
+                    Công việc khác 1
+                    Công việc khác 2
+                    In ra $content....
+        - Di chuyển tệp: có thể di chuyển các tệp giữa các vị trí trong hệ thống tệp cục bộ.
+    - Kiểm tra tồn tại:
+        Storage::exists('file.txt');                -> kiểm tra xem tệp có tồn tại hay không trả về true hoặc false
+    - Lấy nội dung file:
+        Storage::disk('local')->get('file.txt');                -> trả về nội dung của file file
+    - Lấy url của file:
+        Storage::disk('public')->url('file.txt')                -> trả về đường dẫn công cộng đến file 
+        Storage::url('file.txt')                                -> trả về đường dẫn trong dự án
+    - Lưu tệp:
+        Storage::disk('local')->putFile('uploads', $file);
+        - dùng put() thì có thể truyền tên file vào, trùng tên thì nó sẽ thay thế, nếu không truyền vào thì nó sẽ tự tạo tên duy nhất
+        - dùng putFile() thì không cần truyền tên vào, nó sẽ tự tạo tên duy nhất, cũng có thể truyền tên vào
+        - dùng $file->storeAs() thì bắt buộc phải nhập tên vào, không nhập tên vào thì nó sẽ lỗi
+
+28. Event: là một cơ chế cho phép triển khai mô hình lập trình theo sự kiện. phát hiện và xử lsy sự kiện xảy ra trong ứng dụng của mình.
+    - Các thành phần:
+        - Event classes: là các lớp đại diện choc các sự kiện cụ thể trong ứng dụng, mỗi sự kiện thường sẽ có một lớp tương ứng kế thừa 
+            từ Dispatcher
+        - Event Listeners: là các lớp chứa phương thức để xử lý các sự kiện khi chúng xảy ra. Listener liên kết với một hoặc nhiều sự kiện
+            và thực hiện hành động tương ứng khi sự kiện được kích hoạt.
+        - Event Dispatcher: là trung tâm điều hành cho việc phát ra và xử lý các sự kiện. Sử dụng Dispatcher để đăng kí các sự kiện và
+            các listener, sau đó sửu dụng nó để phát ra sự kiện ở bất kì nơi nào trong ứng dụng.
+    - Cách dùng:
+        - Định nghĩa Event: Tạo một lớp event mới hoặc sử dụng lớp event có sẵn trong ứng dụng.
+            // chạy lệnh command: 
+                php artisan make:event OrderShipped
+            // trong file app/Events/OrderShipped.php:
+                public $order;
+                public function __construct ($order) {
+                    $this->order = $order;
+                }
+        - Định nghĩa Listener: tạo một lớp listener 
+            // chạy lệnh command:   
+                php artisan make:listener SendShipmentNotification
+            // trong file app/Listeners/SendShipmentNotification.php
+                public function handle (OrderShipped $event) {
+                    // Code xử lý
+                }
+        - Đăng kí listener: đăng kí các listener với các event tương ứng, được thực hiện trong file EventServiceProvider.php
+            //trong file EventServiceProvider.php:
+                protected $listen = [
+                    OrderShipped::class => [
+                        SendShipmentNotification::class,
+                    ],
+                ];
+        - Sử dụng:
+            event(new OrderShipped($order));
+    - cách listener 1 event:
+        - tạo 1 class listener. Trong hàm handle nhận $event, ta có thể xử lý, thực hiện các công việc trong thân hàm 
+        - đăng kí trong mảng $listen trong file EventServiceProvider.php
+    - cách trigger 1 event:
+        - tạo 1 class event. Trong __construct() sẽ nhận các giá trị truyền vào, t sẽ gán các giá trị đó vào thuộc tính của class để sau
+            listener có thể dùng đến.
+        - sử dụng event đó: event(new EventName($var1,$var2));
+    
+29. Notification: là tính năng giúp gửi thông báo từ ứng dụng đến người dùng thông qua nhiều phương tiện: email, SMS, thông báo trình duyệt
+    - thêm Notifiable vào trong model:
+        - Sử dụng Notifiable trait: là sử dụng trait, và use Notifiable trong model mà bạn muốn thông báo.
+            // trong model User:
+                use Notifiable;
+        - Sử dụng Notification Facade thì không cần sờ đến model.
+    - Tạo nội dung thông báo bằng 1 class:
+        // chạy lệnh command:
+            php artisan make:notification InvoicePaid
+        // trong file app/Notifications/InvoicePaid.php
+            class InvoicePaid extends Notification implement ShouldQueue {          -> kế thừa lớp Notification và xếp hàng đợi 
+                use Queueable;                                                      -> dùng trait xếp hàng đợi
+                protected $invoice;
+                public function __construct ($invoice){
+                    $this->invoice = $invoice;
+                }
+                public fucntion via ($notifiable){                                  -> xác định kênh thông báo, trong đây là email
+                    return ['mail'];
+                }
+                public function toMail ($notifiable){                               -> nội dung của mail
+                    return (new MailMessage)                                        -> định nghĩa một MailMessage với tiêu đề subject 
+                                ->subject('Hóa đơn đã được thanh toán')             
+                                ->line('Hóa đơn #'.$this->invoice->id.' đã được thanh toán thành công')
+                                ->action('Xem hóa đơn', url('/invoice/'.$this->invoice->id));   
+                }
+            }   
+    - sử dụng:
+        $invoice = Invoice::find(1);                        -> hóa đơn có id là 1
+        -Sử dụng Notifiable trait:
+            $user = User::find(1);
+            $user->notify(new InvoicePaid($invoice))            -> gửi thông báo đã thanh toán hóa đơn thành công đến mail người dùng
+        - Sử dụng Notification Facade: phù hợp với gửi nhiều người dùng trong 1 câu lệnh
+            $users = User::where('age', '>=', 18)->get();
+            Notification::send($users, new InvoicePaid($invoice))   -> gửi thông báo cho nhiều người dùng
+            //hoặc
+            Notification::sendNow($users, new InvoicePaid($invoice))   -> gửi thông báo ngay lập tức, kể cả thông báo implement 
+                                                                                ShouldQueue.
+    - Notification trong database: khi lưu thông tin các thông báo vào trong database thì ta cần chú ý đến phương thức toArray, databaseType
+        trong class listener.
+        // trong file app/Notifications/InvoicePaid.php:
+            public function toArray (object $notifiable){                           
+                return {
+                    'invoice_id' => $this->invoice->id;
+                    'amount' => $this->invoice->amount;
+                }
+            }                       -> nếu mà class này nhận biến nào, có thuộc tính nào thì sẽ lấy những cái cần từ thuộc tính đó ra, và 
+                                        cái này trả về cái gì thì nó sẽ lưu vào cột data trong CSDL
+            public function databaseType (object $notifiable){
+                return 'invoice-paid';
+            }                       -> nếu không có phương thức này thì database sẽ lưu type là tên class, nếu có thì nó sẽ 
+                                        lưu theo tên mà phương thức trả về
+        - truy cập vào thông báo của người dùng:
+            // lặp qua tất cả thông báo của người dùng:
+                foreach ($user->notifications as $notification){
+                    echo $notification->type;
+                }
+            // lặp qua các thông báo chưa đọc của người dùng:
+                foreach ($user->unreadNotifications as $notification){
+                    echo $notification->type;
+                }
+        - Đánh dấu thông báo là đã đọc:
+            // đánh dấu từng thông báo là đã đọc:
+                foreach ($user->unreadNotifications as $notification){
+                    echo $notification->markAsRead();
+                }
+            //hoặc đánh dấu tất cả là đã đọc
+                $user->$unreadNotifications->markAsRead();
+            // hoặc có thể truy vấn cập nhật hàng loạt để đánh dấu tất cả là đã đọc mà không cần truy xuất từ CSDL:
+                $user->unreadNotifications()->update(['read-at' => now()]);
+            // Có thể xóa tất cả thông báo khỏi bảng (xóa vĩnh viễn luôn, vì làm đ gì có softDelete):
+                $user->notifications()->delete();
+
+30. Queue: là công cụ để xử lý các tác vụ (jobs) trong nền (background jobs), cho phép ứng dụng xử lý các tác vụ có thời gian xử lý lâu, mà
+    không làm chậm quá trình xử lý yêu cầu người dùng.
+    - Các thành phần:
+        - Job: Một tác vụ cần được xử lý bởi hệ thông queue, chứa các công việc phức tạp hoặc tốn nhiều thời gian.
+        - Queue: một hàng đợi chứa các tác vụ đang chờ được xử lý.
+        - Worker: một tiến trình hoặc một nhóm các tiến trình chịu trách nhiệm lấy các tác vụ từ hàng đợi và thực hiện chúng.
+        - Connection và Queue Driver: Connection là cách kết nối tới các dịch vụ hàng đợi như Redis, Beanstalkd, một database. Queue Driver
+            quy định cách Laravel giao tiếp với connection này 
+    - Cách dùng:
+        - tạo bảng queue trong database:
+            // trong command line, tạo migrate: 
+                php artisan queue:table
+                php artisan migrate
+        - cấu hình kết nối trong file .env:
+            QUEUE_CONNECTION = database                 -> các công việc hàng đợi được lưu trong CSDL cho đến khi chúng được lấy và xử lý
+                                                            bởi worker
+                                                            Ưu điểm: đơn giảm, dễ triển khai, không cần cấu hình dịch vụ ngoài
+                                                            Nhược điểm: Hiệu suất không bằng các dịch vụ ngoài, có thể gây tăng tải cho CSDL
+                                                            nếu sử dụng không cẩn thận
+            // hoặc:
+            QUEUE_CONNECTION = sync                     -> các công việc được xử lý ngay lập tức trong quá trình xử lý yêu cầu ứng dụng.
+                                                            Thích hợp cho các tác vụ nhỏ
+                                                            Ưu điểm: đơn giản, dễ triển khai, không cần cấu hình dịch vụ ngoài
+                                                            Nhược điểm: Không thích hợp cho các tác vụ năng, công việc kéo dài
+        - Tạo class job nào đó:
+            // trong command line:
+                php artisan make:job SendOrderConfirmEmail
+            // trong file app/Jobs/SendOrderConfirmEmail.php:
+                class SendOrderConfirmEmail implements ShouldQueue {
+                    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+                    protected $order;
+                    public fucntion __construct (Order $order) {
+                        $this->order = $order;
+                    }
+                    public function handle () {             -> hàm handle() dùng để xử lý công việc
+                        $content = "Xin chào ".$this->order->name.",\n";
+                        $content .= "Đơn hàng của bạn đã được nhận và đang được xử lý.\n";
+                        $content .= "Chi tiết đơn hàng:\n";
+                        $content .= "Sản phẩm: " . $this->order->product->name . "\n";
+                        $content .= "Tổng giá trị: $" . $this->order->total_amount . "\n";
+
+                        Mail::raw($content, fucntion (message){
+                            $message->to($this->order->email)->subject("Xác nhận đơn hàng");
+                        });
+                    }
+                }
+        - Sử dụng: 
+            SendOrderConfirmEmail::dispatch($order);
+        - chạy worker:
+            // trong commmad line:
+                php artisan queue:work                      -> để bắt đầu một worker
+            // hoặc:
+                có thể dùng các công cụ Supervisor để chạy các worker trong môi trường sản phẩm
+
+31. Scheduling là tính năng cho phép bạn định lịch thực hiện các tác vụ tự động theo thời gian nhất định, như chạy các lệnh artisan, gửi     
+    email hàng ngày, xóa dữ liệu hết hạn, chạy function nào đó, ... 
+    - Kernel file: sửu dụng app/Console/Kernel.php để định nghĩa các tác vụ mà t muốn định lịch. 
+        - thuộc tính $command để đăng kí các command artisan
+        - phương thức schedule để định lịch các tác vụ
+    - Định lịch các tác vụ: 
+        protected function schedule (Schedule $schedule){
+            $schedule->command(emails:send)->daily();
+            $schedule->command(log:clean)->daily();
+            $schedule->command(backup:run)->daily()->at('02:00');
+            $schedule->call(function (){                            -> có thẻ thực hiện function
+                DB::table("recent_users")->delete();
+            })->daily()->;
+            $schedule->call(new ObjectInvoke)->daily();             -> có thể thực hiện 1 class có hàm __invoke ở trong
+        }
+        //class invoke:
+            class ObjectInvoke {
+                public function __invoke (){
+                    //xử lý ...
+                }
+            }
+    - các phương thức xác định tần xuất:
+        - daily(): hàng ngày
+        - hourly(): hàng giờ
+        - everyMinute(): hàng phút
+        - weekly(): hàng tuần
+        - monthly(): hàng tháng
+        - yearly(): hàng năm
+        - dailyAt(): hàng ngày cụ thể
+        - weeklyOn(): hàng tuần cụ thể
+        - monthlyOn(): hàng tháng cụ thể
+    - Task output: khi mỗi schedule làm việc xong, ta có thể dùng task output để cho nó gửi thông báo đến cho mình để kiểm tra
+        - sendOutputTo(): xác định 1 tệp hoặc stream để lưu trữ kết quả, rồi ta tự mở nó ra xem thủ công.
+            $schedule->command('backup:run')->daily()->at('02:00')->sendOutputTo('backup.log');
+            // đây là nó sẽ lưu kết quả vào trong backu.log này
+        - emailOutputTo(): cho phép gửi kết quả về email. Có thể nhận thông báo tự động.
+            $schedule->command('bakup:run')->daily()->at('02:00')->emailOutputTo('admin@example.com')
+            // gửi kết quả về email của admin
+    - Chạy task scheduling: 
+        - trên máy chủ: cần cài 1 cron job trỏ đến lệnh schedule:run của artisan. Câu lệnh này sẽ kiểm tra xem có tác vụ nào 
+        cần thực thi trong thời gian đó hay không và thực thi nếu chúng cần.
+        - trên local: 
+            //chạy lệnh trên command:
+                php artisan schedule:work
+                -> nó sẽ gọi đến schedule:run mỗi phút để kiểm tra xem có cái nào đã đến lúc chạy chưa thì chạy
+    - Task background và task bình thường khác gì nhau:
+        -  task bình thường:
+            - thực hiện trực tiếp quá trình xử lý yêu cầu HTTP
+            - là các tác vụ truy vấn, xử lý dữ liệu, phản hồi HTTP cho người dùng
+            - thời gian hoàn thành có thể ảnh hưởng đến thời gian phản hồi của HTTP
+        - task background:
+            - thực hiện không ảnh hưởng đến quá trình xử lý HTTP hiện tại
+            - thường là các việc tốn thời gian
+            - thường là gửi mail, xử lý hàng loạt dữ liệu, cập nhật thông tin từ bên ngoài, ...
+            - thường được thực hiện bằng các hàm đợi Queue, xử lý bất đồng bộ
+    
+32. Helper: là đề cập đến các hàm tiện ích được cung cấp sẵn để hỗ trợ phát triển ứng dụng, cung cấp cách tiếp cận thuận tiện đến các 
+    chức năng thường xuyên sử dụng:
+    - dd(): hiển thị và dừng lại để debug thông tin của biến, đối tượng
+    - config(): sử dụng để truy cập các giá trị trong tệp cấu hình của ứng dụng
+    - route(): trả về url cho tuyến đường đã được đặt tên
+    - asset(): tạo url cho tài nguyên tĩnh như hình ảnh, css, js
+    - env(): sử dụng để truy cập các biến môi trường trong tệp .env
+    - url(): tạo url tới các tài nguyên trong ứng dụng
+    - redirect(): chuyển hướng người dùng đến url khác
+    - session(): thao tác với dữ liệu phiên
+    - view(): trả về một view từ controller hoặc route
+
+33. Localization: là quá trình làm cho ứng dunngj hỗ trợ nhiều ngôn ngữ khác nhau. Cho phép dịch các chuỗi văn bản, thông báo, nhãn, các
+    thành phần khác nhau của ứng dụng sang nhiều ngôn ngữ khác nhau mà khong cần phải sửa đổi mã nguồn gốc
+    - thêm thư mục lang:
+        // chạy lệnh trên command:
+            php artisan lang:publish
+            -> sẽ thêm thư mục lang vào project, có sẵn thư mục file tiếng anh
+    - cấu hình đa ngôn ngữ:
+        - trong file config/app.php:
+            'locale' => 'en',                       -> ngôn ngữ english
+        - tạo file ngôn ngữ:
+            - tạo các thư mục có tên tương ứng với ngôn ngữ, trong mỗi thư mục tạo các file php:
+                // ví dụ đây là file header.php:
+                    <?php
+                        return [
+                            "header_title" => "Shopping mall of Quang",
+                            "nav_item_1" => "Home",
+                            "nav_item_2" => "About",
+                        ];
+                -> trong các file php này sẽ định nghĩa các chuỗi cần dịch
+        - Sử dụng: dịch các chuỗi văn bản
+            - echo trans("header.header_title")                     -> Shopping mall of Quang
+            - echo __("header.header_title")                        -> Shopping mall of Quang
+        - Chọn ngôn ngữ: có thể cho phép người dùng chọn ngôn ngữ thông qua giao diện, lưu trữ ngôn ngữ được chọn 
+            trong session hoặc cookies
+            - tạo route để xử lý việc thay đổi ngôn ngữ
+            - tạo controller để viết code xử lý (LanguageController)
+            - trong giao diện thì tạo form chọn ngôn ngữ
+            - thêm middleware để thiết lập ngôn ngữ từ session và cookie:                   -> (có thể có hoặc không)
+                // tạo middleware trong command line:
+                    php artisan make:middleware SetLanguage
+                // trong file app/Http/Middleware/SetLangueage.php:
+                    class SetLanguage {
+                        public function handle ($request, Closure $next) {
+                            $locale = Session::get('locale', config('app.locale'));         -> lấy locale từ session, nếu không có thì lấy
+                                                                                                giá trị của locale trong file config/app.php
+                            App::setLocale($locale);                                        -> xét locale là ngôn ngữ lấy từ session
+
+                            return $next($request);                                         -> cho request đi tiếp
+                        }
+                    }
+            - sử dụng trong view:
+                <h1>{{ __('header.header_title') }}</h1>
+                <h2>{{ __('message.welcome') }}</h2>
+            VD: 
+                // trong file message:
+                    return [
+                        'greeting' => 'Hello :name',
+                    ];
+                // trong file blade:
+                    <h3>{{ __('message.greeting', ['name' => 'Đinh Văn Quang']) }}</h3>
+                // Phần blade để lựa chọn ngôn ngữ:
+                    <form action="{{ route('change.language') }}" method="post">
+                        @csrf
+                        <select name="locale" onchange="this.form.submit()">
+                            <option value="en" {{ session('locale') == 'en' ? 'selected' : '' }}>English</option>
+                            <option value="fr" {{ session('locale') == 'fr' ? 'selected' : '' }}>French</option>
+                            <option value="vn" {{ session('locale') == 'vn' ? 'selected' : '' }}>Việt Nam</option>
+                        </select>
+                    </form>
+                    -> trong controller xử lý kiểu: 
+                        - xét biến locale trong session thành option mà t chọn
+                        - App::locale($request->locale);
+
+34. Laravel Mix: công cụ giúp quản lý trình biên dịch và xây dựng tài nguyên front-end, được xây dựng trên webpack và cung cấp một cách 
+    dễ dàng 

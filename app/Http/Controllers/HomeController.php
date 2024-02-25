@@ -31,6 +31,7 @@ class HomeController extends Controller
         }
 
         $products = $products->where('status', 1)->paginate(12)->appends($request->all());
+
         return view('home.index', compact('products'));
     }
 

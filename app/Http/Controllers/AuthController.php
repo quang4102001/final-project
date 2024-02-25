@@ -103,7 +103,7 @@ class AuthController extends Controller
         try {
             $token = Str::random(length: 64);
 
-            ResetPassword::create([
+            DB::table('reset_password')->create([
                 'id' => Str::uuid(),
                 'email' => $request->email,
                 'token' => $token

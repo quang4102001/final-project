@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Providers\Composers;
+namespace App\Views\Composers;
 
 use App\Models\Category;
 use Illuminate\View\View;

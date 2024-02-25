@@ -2,12 +2,9 @@
 
 namespace App\Providers;
 
-use App\Models\Category;
-use App\Models\Color;
-use App\Models\Size;
-use App\Providers\Composers\CategoryComposer;
-use App\Providers\Composers\ColorComposer;
-use App\Providers\Composers\SizeComposer;
+use App\Views\Composers\CategoryComposer;
+use App\Views\Composers\ColorComposer;
+use App\Views\Composers\SizeComposer;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
