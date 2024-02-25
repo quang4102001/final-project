@@ -104,11 +104,11 @@ class AuthController extends Controller
         try {
             $token = Str::random(length: 64);
 
-            ResetPassword::queue(ResetPassword::create([
+            ResetPassword::create([
                 'id' => Str::uuid(),
                 'email' => $request->email,
                 'token' => $token
-            ]));
+            ]);
 
             Mail::send('home.emails.linkResetPassword', ['token' => $token], function ($message) use ($request) {
                 $message->to($request->email);
@@ -117,7 +117,9 @@ class AuthController extends Controller
 
             return redirect()->route('auth.login')->with('success', 'Have send an email to reset password');
         } catch (\Exception $e) {
-            return redirect()->back()
+            Log::info($e);
+            return redirect()
+                ->back()
                 ->withInput(request()->all())
                 ->with("error", 'Send email failed!');
         }
