@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Color;
 use App\Models\Image;
@@ -68,7 +69,6 @@ class AjaxController extends Controller
                         $color->cartDetails()->delete();
                         $color->products()->detach();
                     }
-
                     $colors->delete();
                 });
             }
@@ -89,7 +89,6 @@ class AjaxController extends Controller
                     foreach ($sizes as $size) {
                         $size->products()->detach();
                     }
-
                     $sizes->delete();
                 });
             }
@@ -107,7 +106,7 @@ class AjaxController extends Controller
             if ($request->ids) {
                 $images = Image::whereIn('id', $request->ids);
 
-                DB::transaction(function () use ($request, $images) {
+                DB::transaction(function () use ($images) {
                     foreach ($images as $image) {
                         $image->products()->detach();
                         $url = str_replace('/storage', 'public', $image->path);

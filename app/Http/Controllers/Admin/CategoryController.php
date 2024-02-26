@@ -1,19 +1,16 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\CategoriesRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryRequest;
 use App\Models\Category;
-use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class CategoriesController extends Controller
+class CategoryController extends Controller
 {
-    const PAGINATION = 50;
-
     public function index(Request $request)
     {
         $categories = Category::query();
@@ -22,17 +19,17 @@ class CategoriesController extends Controller
             $categories->where('name', 'LIKE', '%' . $request->SearchCategoryName . '%');
         }
 
-        $categories = $categories->paginate($request->pagination ?? static::PAGINATION)->appends($request->all());
+        $categories = $categories->paginate($request->pagination ?? config('admin.pagination', 50))->appends($request->all());
 
         return view("admin.categories.index", compact('categories'));
     }
 
-    public function store(CategoriesRequest $request)
+    public function store(CategoryRequest $request)
     {
         try {
             Category::create([
                 'id' => Str::uuid(),
-                'name' => $request->name
+                'name' => $request->safe()->name
             ]);
 
             return redirect()->route('categories.index')->with('success', 'Add category successfully.');
@@ -40,19 +37,19 @@ class CategoriesController extends Controller
             Log::info($e);
             return redirect()
                 ->back()
-                ->withInput(request()->all)
+                ->withInput($request->validated())
                 ->with('error', 'Add category failed.');
         }
     }
 
-    public function update(CategoriesRequest $request, string $id)
+    public function update(CategoryRequest $request, string $id)
     {
         try {
             Category::find($id)->update([
-                'name' => $request->name
+                'name' => $request->safe()->name
             ]);
 
-            return response()->json(['success' => 'Update category successfully.', 'name' => $request->name]);
+            return response()->json(['success' => 'Update category successfully.', 'name' => $request->safe()->name]);
         } catch (\Exception $e) {
             Log::info($e);
             return response()->json(['error' => 'Update category failed.']);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ExistsMailInAdminOrUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ForgotPasswordRequest extends FormRequest
@@ -22,7 +23,7 @@ class ForgotPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email|exists:users,email',
+            'email' => ['required', 'email', new ExistsMailInAdminOrUser],
         ];
     }
 
@@ -31,7 +32,6 @@ class ForgotPasswordRequest extends FormRequest
         return [
             'email.required' => 'Bắt buộc phải nhập trường :attribute.',
             'email.email' => ':Attribute không đúng định dạng.',
-            'email.exists' => ':Attribute không tồn tại.',
         ];
     }
 

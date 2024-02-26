@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    const PAGINATION = 50;
+
     /**
      * Display a listing of the resource.
      */
@@ -38,7 +39,7 @@ class ProductController extends Controller
             $pagination = $request->pagination;
         }
 
-        $products = $products->paginate($pagination ?? static::PAGINATION)->appends($request->all());
+        $products = $products->paginate($pagination ?? config('admin.pagination', 50))->appends($request->all());
 
         return view('admin.products.index', compact('products'));
     }
@@ -57,15 +58,15 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)
     {
-        $params = $request->only(['name', 'sku', 'price', 'discounted_price', 'category_id']);
+        $params = $request->safe()->only(['name', 'sku', 'price', 'discounted_price', 'category_id']);
         $params = array_merge($params, ['status' => '1']);
 
         try {
             DB::transaction(function () use ($request, $params) {
                 $product = Product::create($params);
-                $product->colors()->attach($request->colors);
-                $product->images()->attach($request->images);
-                $product->sizes()->attach($request->sizes);
+                $product->colors()->attach($request->safe()->colors);
+                $product->images()->attach($request->safe()->images);
+                $product->sizes()->attach($request->safe()->sizes);
             });
 
             return redirect()->route('product.index')->with('success', 'Product created successfully');
@@ -73,7 +74,7 @@ class ProductController extends Controller
             Log::error($e);
             return redirect()
                 ->back()
-                ->withInput(request()->all())
+                ->withInput($request->validated())
                 ->with('error', 'Add product failed!');
         }
     }
@@ -87,21 +88,12 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        try {
-            $product = Product::find($id);
-            $images = Image::doesntHave('products')->get();
-            $productColorIds = $product->colors->pluck('id')->all();
-            $productSizeIds = $product->sizes->pluck('id')->all();
+        $product = Product::find($id);
+        $images = Image::doesntHave('products')->get();
+        $productColorIds = $product->colors->pluck('id')->all();
+        $productSizeIds = $product->sizes->pluck('id')->all();
 
-            return view('admin.products.edit', compact('id', 'product', 'images', 'productColorIds', 'productSizeIds'));
-        } catch (\Exception $e) {
-            Log::error($e);
-            return redirect()
-                ->back()
-                ->withInput(request()->all())
-                ->with('error', 'Error go to edit product: ' . $e->getMessage() . ' ' . $e->getLine());
-        }
-
+        return view('admin.products.edit', compact('id', 'product', 'images', 'productColorIds', 'productSizeIds'));
     }
 
     /**
@@ -115,17 +107,16 @@ class ProductController extends Controller
             $product = Product::find($id);
             DB::transaction(function () use ($request, $params, $product) {
                 $product->update($params);
-                $product->colors()->sync($request->input('colors', []));
-                $product->images()->sync($request->input('images', []));
-                $product->sizes()->sync($request->input('sizes', []));
+                $product->colors()->sync($request->safe()->colors);
+                $product->images()->sync($request->safe()->images);
+                $product->sizes()->sync($request->safe()->sizes);
             });
             return redirect()->route('product.index')->with('success', 'Product update successfully');
-
         } catch (\Exception $e) {
             Log::error($e);
             return redirect()
                 ->back()
-                ->withInput(request()->all())
+                ->withInput($request->validated())
                 ->with('error', 'Product update failed.');
         }
     }
@@ -154,7 +145,6 @@ class ProductController extends Controller
             Log::error($e);
             return redirect()
                 ->back()
-                ->withInput(request()->all())
                 ->with('error', 'Error delete product: ' . $e->getMessage() . ' ' . $e->getLine());
         }
     }
@@ -174,8 +164,8 @@ class ProductController extends Controller
 
                 return view('home.productDetail', compact('product', 'products'));
             }
-
         } catch (\Exception $e) {
+            Log::info($e);
             return redirect()->back()->with('error', "Something failed.");
         }
     }
@@ -193,5 +183,4 @@ class ProductController extends Controller
             return response()->json(['error' => 'Update status failed!']);
         }
     }
-
 }

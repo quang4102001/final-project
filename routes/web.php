@@ -1,17 +1,15 @@
 <?php
 
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\AjaxController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\AjaxController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ColorController;
+use App\Http\Controllers\Admin\ImageController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SizeController;
+use App\Http\Controllers\Home\CartController;
+use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CartsController;
-use App\Http\Controllers\CategoriesController;
-use App\Http\Controllers\ColorsController;
-use App\Http\Controllers\ImageController;
-use App\Http\Controllers\ImagesController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SizesController;
-use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -56,27 +54,27 @@ Route::middleware('auth.checkAdmin')->prefix("/admin")->group(function () {
         Route::post('/{id}/update_status', [ProductController::class, 'updateStatus'])->name('product.updateStatus');
     });
     Route::prefix('/categories')->group(function () {
-        Route::get('/', [CategoriesController::class, 'index'])->name('categories.index');
-        Route::post('/store', [CategoriesController::class, 'store'])->name('categories.store');
-        Route::post('/update/{id}', [CategoriesController::class, 'update'])->name('categories.update');
-        Route::post('/destroy/{id}', [CategoriesController::class, 'destroy'])->name('categories.destroy');
+        Route::get('/', [CategoryController::class, 'index'])->name('categories.index');
+        Route::post('/store', [CategoryController::class, 'store'])->name('categories.store');
+        Route::post('/update/{id}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::post('/destroy/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     });
     Route::prefix('/colors')->group(function () {
-        Route::get('/', [ColorsController::class, 'index'])->name('colors.index');
-        Route::post('/store', [ColorsController::class, 'store'])->name('colors.store');
-        Route::post('/update/{id}', [ColorsController::class, 'update'])->name('colors.update');
-        Route::post('/destroy/{id}', [ColorsController::class, 'destroy'])->name('colors.destroy');
+        Route::get('/', [ColorController::class, 'index'])->name('colors.index');
+        Route::post('/store', [ColorController::class, 'store'])->name('colors.store');
+        Route::post('/update/{id}', [ColorController::class, 'update'])->name('colors.update');
+        Route::post('/destroy/{id}', [ColorController::class, 'destroy'])->name('colors.destroy');
     });
     Route::prefix('/sizes')->group(function () {
-        Route::get('/', [SizesController::class, 'index'])->name('sizes.index');
-        Route::post('/store', [SizesController::class, 'store'])->name('sizes.store');
-        Route::post('/update/{id}', [SizesController::class, 'update'])->name('sizes.update');
-        Route::post('/destroy/{id}', [SizesController::class, 'destroy'])->name('sizes.destroy');
+        Route::get('/', [SizeController::class, 'index'])->name('sizes.index');
+        Route::post('/store', [SizeController::class, 'store'])->name('sizes.store');
+        Route::post('/update/{id}', [SizeController::class, 'update'])->name('sizes.update');
+        Route::post('/destroy/{id}', [SizeController::class, 'destroy'])->name('sizes.destroy');
     });
     Route::prefix('/images')->group(function () {
-        Route::get('/', [ImagesController::class, 'index'])->name('images.index');
-        Route::post('/upload', [ImagesController::class, 'upload'])->name('images.upload');
-        Route::post('/destroy/{id}', [ImagesController::class, 'destroy'])->name('images.destroy');
+        Route::get('/', [ImageController::class, 'index'])->name('images.index');
+        Route::post('/upload', [ImageController::class, 'upload'])->name('images.upload');
+        Route::post('/destroy/{id}', [ImageController::class, 'destroy'])->name('images.destroy');
     });
 });
 

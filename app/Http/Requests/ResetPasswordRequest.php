@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ExistsMailInAdminOrUser;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ResetPasswordRequest extends FormRequest
@@ -22,9 +23,9 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email|exists:users,email',
+            'email' => ['required', 'email', new ExistsMailInAdminOrUser],
             'password' => 'required|max:255|min:8',
-            'rePassword' => 'required|max:255|min:8|same:password',
+            're_password' => 'required|max:255|min:8|same:password',
         ];
     }
     public function messages(): array
@@ -32,14 +33,13 @@ class ResetPasswordRequest extends FormRequest
         return [
             'email.required' => 'Bắt buộc phải nhập trường :attribute.',
             'email.email' => ':Attribute không đúng định dạng.',
-            'email.exists' => ':Attribute không tồn tại.',
             'password.required' => 'Bắt buộc phải nhập trường :attribute.',
-            'rePassword.required' => 'Bắt buộc phải nhập trường :attribute.',
+            're_password.required' => 'Bắt buộc phải nhập trường :attribute.',
             'password.max' => 'Nhập tối đã :max kí tự.',
-            'rePassword.max' => 'Nhập tối đã :max kí tự.',
+            're_password.max' => 'Nhập tối đã :max kí tự.',
             'password.min' => 'Nhập ít nhất :min kí tự.',
-            'rePassword.min' => 'Nhập ít nhất :min kí tự.',
-            'rePassword.same' => ':Attribute không đúng.',
+            're_password.min' => 'Nhập ít nhất :min kí tự.',
+            're_password.same' => ':Attribute không đúng.',
         ];
     }
 
@@ -48,7 +48,7 @@ class ResetPasswordRequest extends FormRequest
         return [
             'email' => 'địa chỉ email',
             'password' => 'mật khẩu',
-            'rePassword' => 'mật khẩu nhập lại',
+            're_password' => 'mật khẩu nhập lại',
         ];
     }
 }

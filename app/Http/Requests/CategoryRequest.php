@@ -3,9 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Log;
 
-class ColorsRequest extends FormRequest
+class CategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,7 +22,7 @@ class ColorsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|unique:colors,name,' . $this->id . ',id,deleted_at,NULL',
+            'name' => 'required|min:3|max:255|unique:categories,name,' . $this->id . ',id,deleted_at,NULL',
         ];
     }
 
@@ -31,6 +30,8 @@ class ColorsRequest extends FormRequest
     {
         return [
             'name.required' => 'Bắt buộc phải nhập trường :attribute.',
+            'name.min' => 'Nhập ít nhất :min kí tự.',
+            'name.max' => 'Nhập nhiều nhất :max kí tự.',
             'name.unique' => 'Trùng :attribute.',
         ];
     }
@@ -38,7 +39,7 @@ class ColorsRequest extends FormRequest
     public function attributes()
     {
         return [
-            'name' => 'mã màu'
+            'name' => 'tên danh mục',
         ];
     }
 }

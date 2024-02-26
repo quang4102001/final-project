@@ -45,10 +45,10 @@
                     </div>
                     <div class="mb-3">
                         <label for="exampleInputRePassword" class="form-label">Password</label>
-                        <input name="rePassword" type="password" class="form-control" id="exampleInputRePassword"
+                        <input name="re_password" type="password" class="form-control" id="exampleInputRePassword"
                             placeholder="Re-enter password">
                         <span class="error">
-                            @error('rePassword')
+                            @error('re_password')
                                 <span class="text-red-400">{{ $message }}</span>
                             @enderror
                         </span>

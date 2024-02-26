@@ -1,19 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Http\Requests\SizesStoreRequest;
-use App\Http\Requests\SizesUpdateRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\SizeRequest;
 use App\Models\Size;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class SizesController extends Controller
+class SizeController extends Controller
 {
-    const PAGINATION = 50;
-
     public function index(Request $request)
     {
         $sizes = Size::query();
@@ -34,15 +32,15 @@ class SizesController extends Controller
             $sizes->where('maxWeight', $request->SearchMaxWeight);
         }
 
-        $sizes = $sizes->paginate($request->pagination ?? static::PAGINATION)->appends($request->all());
+        $sizes = $sizes->paginate($request->pagination ?? config('admin.pagination', 50))->appends($request->all());
 
         return view("admin.sizes.index", compact('sizes'));
     }
 
-    public function store(SizesStoreRequest $request)
+    public function store(SizeRequest $request)
     {
         try {
-            $params = $request->only(['name', 'minHeight', 'maxHeight', 'minWeight', 'maxWeight',]);
+            $params = $request->safe()->only(['name', 'minHeight', 'maxHeight', 'minWeight', 'maxWeight',]);
             $params = array_merge($params, ['id' => Str::uuid()]);
 
             Size::create($params);
@@ -52,15 +50,15 @@ class SizesController extends Controller
             Log::info($e);
             return redirect()
                 ->back()
-                ->withInput(request()->all)
+                ->withInput($request->validated())
                 ->with('error', 'Add size failed.');
         }
     }
 
-    public function update(SizesStoreRequest $request, string $id)
+    public function update(SizeRequest $request, string $id)
     {
         try {
-            $params = $request->only(['name', 'minHeight', 'maxHeight', 'minWeight', 'maxWeight',]);
+            $params = $request->safe()->only(['name', 'minHeight', 'maxHeight', 'minWeight', 'maxWeight',]);
 
             Size::find($id)->update($params);
 
@@ -75,6 +73,7 @@ class SizesController extends Controller
     {
         try {
             $size = Size::find($id);
+            
             DB::transaction(function () use ($size) {
                 $size->products()->detach();
                 $size->delete();

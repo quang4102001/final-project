@@ -16,7 +16,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
     }
 
     /**
@@ -24,11 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
         Paginator::useBootstrapFive();
-        // View::share('categories', Category::all());
-        // View::share('colors', Color::all());
-        // View::share('sizes', Size::all());
         View::composer(['home.index', 'admin.products.*'], CategoryComposer::class);
         View::composer(['home.index', 'admin.products.*'], SizeComposer::class);
         View::composer(['home.index', 'admin.products.*'], ColorComposer::class);

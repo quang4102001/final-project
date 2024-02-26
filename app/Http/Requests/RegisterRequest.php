@@ -25,7 +25,7 @@ class RegisterRequest extends FormRequest
             'username' => 'required|unique:users|unique:admins|min:8|max:30',
             'name' => 'required|max:255',
             'password'=> 'required|max:255|min:8',
-            'rePassword'=> 'required|max:255|min:8|same:password',
+            're_password'=> 'required|max:255|min:8|same:password',
             'email' => 'required|email|unique:users|unique:admins',
         ];
     }
@@ -38,16 +38,16 @@ class RegisterRequest extends FormRequest
             'username.max' => 'Nhập tối đã :max kí tự.',
             'name.required' => 'Bắt buộc phải nhập trường :attribute.',
             'password.required' => 'Bắt buộc phải nhập trường :attribute.',
-            'rePassword.required' => 'Bắt buộc phải nhập trường :attribute.',
+            're_password.required' => 'Bắt buộc phải nhập trường :attribute.',
             'email.required' => 'Bắt buộc phải nhập trường :attribute.',
             'email.unique' => ':Attribute đã tồn tại.',
             'email.email' => ':Attribute không đúng định dạng.',
             'name.max' => 'Nhập tối đã :max kí tự.',
             'password.max' => 'Nhập tối đã :max kí tự.',
-            'rePassword.max' => 'Nhập tối đã :max kí tự.',
+            're_password.max' => 'Nhập tối đã :max kí tự.',
             'password.min' => 'Nhập ít nhất :min kí tự.',
-            'rePassword.min' => 'Nhập ít nhất :min kí tự.',
-            'rePassword.same' => ':Attribute không đúng.',
+            're_password.min' => 'Nhập ít nhất :min kí tự.',
+            're_password.same' => ':Attribute không đúng.',
         ];
     }
 
@@ -56,7 +56,7 @@ class RegisterRequest extends FormRequest
             'username' => 'tên tài khoản',
             'name' => 'tên người dùng',
             'password' => 'mật khẩu',
-            'rePassword' => 'mật khẩu nhập lại',
+            're_password' => 'mật khẩu nhập lại',
             'email' => 'địa chỉ email',
         ];
     }

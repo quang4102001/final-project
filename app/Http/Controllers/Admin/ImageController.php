@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ImageRequest;
 use App\Models\Image;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-class ImagesController extends Controller
+class ImageController extends Controller
 {
-    const PAGINATION = 50;
+    
 
     public function index(Request $request)
     {
@@ -23,7 +23,7 @@ class ImagesController extends Controller
             $images->where('name', 'LIKE', '%' . $request->SearchImageName . '%');
         }
 
-        $images = $images->paginate($request->pagination ?? static::PAGINATION)->appends($request->except('_token'));
+        $images = $images->paginate($request->pagination ?? config('admin.pagination', 50))->appends($request->except('_token'));
 
         return view("admin.images.index", compact('images'));
     }
